@@ -194,26 +194,61 @@ Apply one or more of the following classes to get the desired effect
 			</br>
 			<div class="col-12">
 				<div class="card card-shadow">
-					<h5 class="card-header bg-green"><i class="fas fa-coins"></i> Pool Coins</h5>
+					<h5 class="card-header bg-teal" style="display: flex; justify-content: space-between;">
+						<span>
+							<i class="fa fa-user"></i> Miners: <span id="poolTotalMiners"></span> | 
+							<i class="fas fa-users"></i> Workers: <span id="poolTotalWorkers"></span>
+							<span id="loadingIndicator"></span> | <span class="filter-container"></span>
+							<span id="loadingIndicator"></span> | <span class="filterPayout-container"></span>
+						</span>
+					</h5>
 					<div class="card-body p-0">
 						<div class="table-responsive">
 							<table id="pool-coins" class="table table-striped table-hover ">
 								<thead class="bg-light text-center">
 									<tr class="border-0">
-										<th class="coin border-0">Pool coin</th>
-										<th class="symbol border-0">Symbol</th>
-										<th class="algo border-0">Algorithm</th>
-										<th class="fee border-0">Pool Fee</th>
-										<th class="minimum-payment border-0">Min Pay</th>
-										<th class="miners border-0">Miners</th>
-										<th class="pool-hash border-0">Hashrate</th>
-										<th class="net-share border-0">Network Dominance</th>
-										<th class="net-hash border-0">Network Hashrate</th>
-										<th class="net-diff border-0">Network Difficulty</th>
-										<th class="blockheight border-0">BlockHeight</th>
-										<th class="timeAgo border-0">Last Found</th>
-										<th class="col-hide border-0"></th>
-									</tr>
+										<th onclick="sortTable(0)" class="coin border-0" style="padding-left: 25px;" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'">Pool coin (<span id="poolTotalCoins"></span>)</th>
+										<th onclick="sortTable(1)" class="symbol border-0 text-center" onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'">Symbol</th>
+											<th onclick="sortTable(2)" class="algo border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">Algorithm
+											</th>
+											<th onclick="sortTable(3)" class="fee border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">Pool Fee
+											</th>
+											<th onclick="sortTable(4)" class="minimum-payment border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">
+												Min Pay</th>
+											<th onclick="sortTable(5)" class="miners border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">Miners
+											</th>
+											<th onclick="sortTable(6)" class="pool-hash border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">
+												Hashrate</th>
+											<th onclick="sortTable(7)" class="net-share border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">
+												Network Dominance</th>
+											<th onclick="sortTable(8)" class="net-hash border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">Network
+												Hashrate</th>
+											<th onclick="sortTable(9)" class="net-diff border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">Network
+												Difficulty</th>
+											<th onclick="sortTable(10)" class="blockheight border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">
+												BlockHeight</th>
+											<th onclick="sortTable(11)" class="timeAgo border-0 text-center"
+												onmouseover="this.style.cursor='pointer'"
+												onmouseout="this.style.cursor='default'">Last
+												Found</th>									</tr>
 								</thead>
 								<tbody class="pool-coin-table"></tbody>
 							</table>
