@@ -581,22 +581,21 @@ div.card-chart {
 }
 
 .card-header {
-  margin-top:  -20px;
+  margin-top:  5px;
   margin-bottom: 0px;
-  margin-left:  15px;
-  margin-right: 15px;
+  margin-left:  5px;
+  margin-right: 5px;
    
   border-radius: 3px;
 
-  padding-top: 15px;
-  padding-bottom: 15px;
-  padding-left: 15px;
-  padding-right: 15px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
 
   position: relative;
   
   background-color: #fff;
-
 }
 
 .card-title {
@@ -621,20 +620,20 @@ div.card-chart {
 }
 
 .card-body {
-  margin-top:  0px;
-  margin-bottom: 0px;
-  margin-left:  0px;
-  margin-right: 0px;
+  margin-top:  5px;
+  margin-bottom: 5px;
+  margin-left:  5px;
+  margin-right: 5px;
   
-  border-bottom: 1px;
+  border-bottom: 0px;
   border-radius: 0px;
 
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 20px;
-  padding-right: 20px; 
+  padding-top: 0px;
+  padding-bottom: 0px;
+  padding-left: 0px;
+  padding-right: 0px; 
 
-  font-size: 16px;  
+  font-size: 16px;   
 }
 
 .card-body .table { 
