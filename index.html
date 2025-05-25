@@ -1,1503 +1,1700 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html style="height: auto; min-height: 100%;"><head>
+  
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0a0e1a">
-  <title>1MINER.NET - Professional Mining Pool</title>
+  <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+  <meta http-equiv="Access-Control-Allow-Headers" content="X-Requested-With" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <meta name="msapplication-TileImage" content="img/favicon-32x32.png">
+  <link rel="icon" href="img/favicon.ico" sizes="96x96" type="image/x-icon"/>
   
-  <!-- Favicon -->
-  <link rel="icon" href="img/favicon.ico" type="image/x-icon"/>
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <title>1miner.net - Mining Pool</title>
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">  
+  <link rel="apple-touch-icon" sizes="76x76" href="img/apple-touch-icon.png">
   
-  <!-- External CSS -->
   <link rel="stylesheet" href="css/bootstrap.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="css/skins/skin-black.css">
+  <link rel="stylesheet" href="css/chartist.min.css">
+  <link rel="stylesheet" href="css/font-awesome-all.css">
+  <link rel="stylesheet" href="css/themify-icons.css">
+  <link rel="stylesheet" href="css/font-awesome-icons.css">
+  <link rel="stylesheet" href="css/miningcore.css">
+  <link rel="stylesheet" href="css/miningcore-colors.css">
+  <link rel="stylesheet" href="css/bootstrap-toggle.css">  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/css/bootstrap-notify.css">
   
-  <!-- Custom Styles -->
-  <style>
-    :root {
-      --primary-color: #00d4ff;
-      --secondary-color: #0099cc;
-      --accent-color: #00ffff;
-      --dark-bg: #0a0e1a;
-      --darker-bg: #060810;
-      --card-bg: #0f1420;
-      --card-border: #1a2234;
-      --text-primary: #ffffff;
-      --text-secondary: #8892a0;
-      --success-color: #00ff88;
-      --warning-color: #ffaa00;
-      --danger-color: #ff3366;
-      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-      --gradient-dark: linear-gradient(135deg, #0a0e1a 0%, #060810 100%);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--darker-bg);
-      color: var(--text-primary);
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Animated Background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(0, 153, 204, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(0, 255, 255, 0.05) 0%, transparent 50%);
-      animation: backgroundPulse 20s ease-in-out infinite;
-      z-index: -1;
-    }
-
-    @keyframes backgroundPulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: var(--darker-bg);
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: var(--primary-color);
-      border-radius: 4px;
-    }
-
-    /* Main Header */
-    .main-header {
-      background: rgba(10, 14, 26, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--card-border);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      transition: all 0.3s ease;
-    }
-    
-    /* Index Header */
-    .main-index-header {
-      background: rgba(10, 14, 26, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--card-border);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      transition: all 0.3s ease;
-    }
-    
-    .main-index-header .navbar {
-      padding: 1rem 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .header-text {
-      font-size: 1.5rem;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 1px;
-    }
-    
-    /* Index Footer */
-    .main-index-footer {
-      background: rgba(10, 14, 26, 0.95);
-      border-top: 1px solid var(--card-border);
-      padding: 2rem 0;
-      text-align: center;
-      color: var(--text-secondary);
-      margin-top: 4rem;
-    }
-    
-    .main-index-footer a {
-      color: var(--primary-color);
-      text-decoration: none;
-    }
-
-    .main-header.scrolled {
-      background: rgba(10, 14, 26, 0.98);
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-    }
-
-    .navbar {
-      padding: 1rem 0;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .logo-gif {
-      height: 50px;
-      width: auto;
-      filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
-    }
-
-    .logo-text {
-      font-size: 1.8rem;
-      font-weight: 800;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin: 0;
-      letter-spacing: 2px;
-    }
-
-    /* Hero Section */
-    .hero-section {
-      margin-top: 80px;
-      padding: 100px 0;
-      background: var(--gradient-dark);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2300d4ff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,138.7C672,128,768,128,864,133.3C960,139,1056,149,1152,144C1248,139,1344,117,1392,106.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat center;
-      animation: wave 20s linear infinite;
-      opacity: 0.3;
-    }
-
-    @keyframes wave {
-      0% { transform: translateX(0) translateY(0); }
-      100% { transform: translateX(-50%) translateY(10%); }
-    }
-
-    .hero-content {
-      text-align: center;
-      position: relative;
-      z-index: 2;
-    }
-
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: glow 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes glow {
-      from { filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5)); }
-      to { filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.8)); }
-    }
-
-    .hero-subtitle {
-      font-size: 1.25rem;
-      color: var(--text-secondary);
-      margin-bottom: 3rem;
-    }
-
-    /* Pool Cards */
-    .pool-coin-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      padding: 2rem 0;
-    }
-    
-    .pool-coin-card {
-      flex: 0 1 calc(25% - 1.5rem);
-      min-width: 350px;
-    }
-
-    .pool-card {
-      background: rgba(15, 20, 32, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    /* Override Bootstrap card styles for pool cards */
-    .pool-coin-card .card {
-      background: rgba(15, 20, 32, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      height: 100%;
-    }
-    
-    .pool-coin-card .card-header {
-      background: transparent;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1rem 1.5rem;
-    }
-    
-    .pool-coin-card .card-body {
-      padding: 1.5rem;
-    }
-    
-    .pool-coin-card .card-footer {
-      background: transparent;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1rem 1.5rem;
-    }
-    
-    .pool-coin-card .card:hover {
-      transform: translateY(-5px);
-      border-color: var(--primary-color);
-      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
-    }
-
-    .pool-card::before,
-    .pool-coin-card .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--gradient-primary);
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-
-    .pool-card:hover::before,
-    .pool-coin-card .card:hover::before {
-      transform: scaleX(1);
-    }
-    
-    /* Pool card specific elements */
-    .pool-coin-card .coinimg {
-      vertical-align: middle;
-      margin-right: 0.5rem;
-    }
-    
-    .pool-coin-card .row {
-      margin: 0.5rem 0;
-    }
-    
-    .pool-coin-card .card-title {
-      font-size: 0.875rem;
-      margin: 0;
-    }
-    
-    /* Progress bar in pool cards */
-    .pool-coin-card .progress {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    
-    .pool-coin-card .progress-bar {
-      background: var(--gradient-primary);
-      height: 100%;
-      transition: width 0.3s ease;
-    }
-    
-    .pool-coin-card .progress-bar.bg-green {
-      background: var(--success-color);
-    }
-    
-    /* Loading button style */
-    .btn-loading {
-      background: rgba(255, 170, 0, 0.2);
-      border: 1px solid var(--warning-color);
-      color: var(--warning-color);
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      cursor: not-allowed;
-    }
-    
-    /* Pool status styles */
-    .pool-coin-card .btn-primary {
-      background: var(--gradient-primary);
-      border: none;
-      padding: 0.5rem 1.5rem;
-      border-radius: 6px;
-      color: white;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    
-    .pool-coin-card .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
-    }
-
-    .pool-card-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .coin-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(0, 212, 255, 0.1);
-      padding: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .coin-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .coin-info h3 {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .coin-info p {
-      margin: 0;
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-
-    /* Stats */
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .stat-row:last-child {
-      border-bottom: none;
-    }
-
-    .stat-label {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-
-    .stat-value {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      text-align: right;
-    }
-
-    /* Progress Bars */
-    .progress-custom {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 0.5rem;
-    }
-
-    .progress-bar-custom {
-      height: 100%;
-      background: var(--gradient-primary);
-      border-radius: 4px;
-      transition: width 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .progress-bar-custom::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-      );
-      animation: shimmer 2s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-
-    /* Buttons */
-    .btn-primary-custom {
-      background: var(--gradient-primary);
-      border: none;
-      padding: 0.75rem 2rem;
-      font-weight: 600;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      color: white;
-      text-decoration: none;
-      display: inline-block;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary-custom::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-
-    .btn-primary-custom:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
-      color: white;
-    }
-
-    .btn-primary-custom:hover::before {
-      width: 300px;
-      height: 300px;
-    }
-
-    /* Algorithm Filters */
-    .filter-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-      margin-bottom: 3rem;
-    }
-
-    .filter-btn, .filter-btn.bg-gray {
-      padding: 0.5rem 1.5rem;
-      background: rgba(15, 20, 32, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 25px;
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 0.25rem;
-      display: inline-block;
-    }
-
-    .filter-btn:hover, .filter-btn.bg-gray:hover {
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-      transform: translateY(-2px);
-      background: rgba(0, 212, 255, 0.1);
-    }
-
-    .filter-btn.active, .filter-btn.bg-gray.active {
-      background: var(--gradient-primary);
-      border-color: transparent;
-      color: white;
-    }
-
-    /* Fix for algorithmFilters */
-    #algorithmFilters {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
-    }
-
-    /* Info Boxes */
-    .info-box-modern {
-      background: rgba(15, 20, 32, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .info-box-modern:hover {
-      transform: translateY(-3px);
-      border-color: var(--primary-color);
-    }
-
-    .info-box-icon {
-      width: 60px;
-      height: 60px;
-      background: var(--gradient-primary);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      color: white;
-      margin-bottom: 1rem;
-    }
-
-    .info-box-content h4 {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-    }
-
-    .info-box-content h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    /* Charts */
-    .chart-container {
-      background: rgba(15, 20, 32, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      height: 300px;
-      position: relative;
-    }
-
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .chart-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    /* Tables */
-    .table-modern {
-      background: rgba(15, 20, 32, 0.8);
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
-    }
-
-    .table-modern thead {
-      background: rgba(0, 212, 255, 0.1);
-    }
-
-    .table-modern th {
-      color: var(--primary-color);
-      font-weight: 600;
-      padding: 1rem;
-      border: none;
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .table-modern td {
-      color: var(--text-primary);
-      padding: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 0.875rem;
-    }
-
-    .table-modern tbody tr:hover {
-      background: rgba(0, 212, 255, 0.05);
-    }
-
-    /* Sidebar */
-    .main-sidebar, .sidebar {
-      position: fixed;
-      left: 0;
-      top: 80px;
-      bottom: 0;
-      width: 250px;
-      background: rgba(10, 14, 26, 0.95);
-      border-right: 1px solid var(--card-border);
-      padding: 2rem 0;
-      overflow-y: auto;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      z-index: 999;
-    }
-
-    .sidebar.active, .main-sidebar.active {
-      transform: translateX(0);
-    }
-
-    .sidebar-menu {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .sidebar-menu li {
-      margin-bottom: 0.5rem;
-    }
-
-    .sidebar-menu a, .sidebar-menu .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 1.5rem;
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .sidebar-menu a::before, .sidebar-menu .nav-link::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--gradient-primary);
-      transform: scaleY(0);
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-menu a:hover,
-    .sidebar-menu a.active,
-    .sidebar-menu li.active a {
-      color: var(--primary-color);
-      background: rgba(0, 212, 255, 0.1);
-    }
-
-    .sidebar-menu li.active a::before {
-      transform: scaleY(1);
-    }
-    
-    /* Sidebar logo */
-    .sidebar .logo {
-      padding: 0 1.5rem 2rem;
-      text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 1rem;
-    }
-    
-    .sidebar .logo img {
-      width: 32px;
-      height: 32px;
-      margin-right: 0.5rem;
-      vertical-align: middle;
-    }
-    
-    .sidebar .logo p {
-      margin: 0;
-      color: var(--text-primary);
-      font-size: 1.125rem;
-      font-weight: 600;
-    }
-
-    /* Content Area */
-    .content-wrapper {
-      margin-left: 0;
-      padding-top: 80px;
-      min-height: 100vh;
-      transition: margin-left 0.3s ease;
-    }
-
-    .content-wrapper.sidebar-active {
-      margin-left: 250px;
-    }
-
-    /* Loading Animation */
-    .loading-pulse {
-      display: inline-block;
-      width: 100%;
-      height: 20px;
-      background: linear-gradient(90deg, 
-        rgba(0, 212, 255, 0.1) 25%, 
-        rgba(0, 212, 255, 0.3) 50%, 
-        rgba(0, 212, 255, 0.1) 75%
-      );
-      background-size: 200% 100%;
-      animation: pulse 1.5s infinite;
-      border-radius: 4px;
-    }
-
-    @keyframes pulse {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2.5rem;
+  <script src="js/jquery.js"></script>
+  <script src="js/bootstrap.js"></script>
+  <script src="js/adminlte.min.js"></script>
+  <script src="js/bootstrap-toggle.js"></script>
+  <script src="js/chartist.min.js"></script>
+  <script src="js/miningcore.js"></script>
+
+    <!-- DARK MODERN THEME CSS - BLACK AND DARK BLUE -->
+    <style>
+      :root {
+        --bg-primary: #000000;          /* Pure black background */
+        --bg-secondary: #0a0a1a;        /* Very dark blue, almost black */
+        --bg-tertiary: #0f1633;         /* Dark blue */
+        --bg-card: #0a0f2e;             /* Dark blue for cards */
+        --accent-primary: #00a8ff;      /* Bright blue accent */
+        --accent-secondary: #0066cc;    /* Medium blue accent */
+        --text-primary: #ffffff;        /* White text */
+        --text-secondary: #a0b3d9;      /* Light blue-gray text */
+        --border-color: #1a2855;        /* Dark blue border */
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
       }
 
-      .pool-grid {
-        grid-template-columns: 1fr;
+      body {
+        background-color: var(--bg-primary) !important;
+        color: var(--text-primary) !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      /* Header Styling */
+      .main-header, .navbar {
+        background: linear-gradient(180deg, #000000 0%, var(--bg-tertiary) 100%) !important;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        min-height: 50px;
+      }
+
+      /* Sidebar Styling */
+      .main-sidebar {
+        background-color: var(--bg-secondary) !important;
+        border-right: 1px solid var(--border-color);
       }
 
       .sidebar {
-        width: 100%;
+        background-color: transparent !important;
       }
 
-      .content-wrapper.sidebar-active {
-        margin-left: 0;
+      .sidebar-menu > li > a {
+        color: var(--text-secondary) !important;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
       }
-    }
 
-    /* Animations */
-    .fade-in {
-      animation: fadeIn 0.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .slide-in {
-      animation: slideIn 0.5s ease-out;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateX(-50px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    /* Custom Scrollbar for Sidebar */
-    .sidebar::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .sidebar::-webkit-scrollbar-thumb {
-      background: var(--primary-color);
-      border-radius: 2px;
-    }
-
-    /* Toggle Button */
-    .sidebar-toggle {
-      position: fixed;
-      top: 90px;
-      left: 10px;
-      z-index: 1001;
-      background: var(--gradient-primary);
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .sidebar-toggle:hover {
-      transform: scale(1.1);
-      box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
-    }
-
-    /* Footer */
-    .main-footer {
-      background: rgba(10, 14, 26, 0.95);
-      border-top: 1px solid var(--card-border);
-      padding: 2rem 0;
-      text-align: center;
-      color: var(--text-secondary);
-      margin-top: 4rem;
-    }
-
-    .main-footer a {
-      color: var(--primary-color);
-      text-decoration: none;
-    }
-
-    .main-footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Status Badges */
-    .status-badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 15px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .status-online {
-      background: rgba(0, 255, 136, 0.2);
-      color: var(--success-color);
-    }
-
-    .status-offline {
-      background: rgba(255, 51, 102, 0.2);
-      color: var(--danger-color);
-    }
-
-    /* Pages - Hide by default */
-    .page {
-      display: none;
-    }
-    
-    /* Show pages when needed */
-    .page-index {
-      display: block;
-    }
-    
-    /* Wrapper */
-    .wrapper {
-      min-height: 100vh;
-      position: relative;
-    }
-    
-    /* Main sections */
-    .main-index {
-      display: block;
-    }
-    
-    .main-pool {
-      display: none;
-    }
-    
-    /* Sidebar toggle */
-    .sidebar-toggle {
-      background: transparent;
-      border: none;
-      color: var(--primary-color);
-      font-size: 1.25rem;
-      cursor: pointer;
-      padding: 0.5rem;
-      transition: all 0.3s ease;
-    }
-    
-    .sidebar-toggle:hover {
-      color: var(--accent-color);
-      transform: scale(1.1);
-    }
-
-    /* Dashboard Wallet Input */
-    .wallet-input-container {
-      background: rgba(15, 20, 32, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .wallet-input-group {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .wallet-input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      color: var(--text-primary);
-      font-size: 0.875rem;
-    }
-
-    .wallet-input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
-    }
-
-    /* Bootstrap 3 compatibility for pool cards */
-    .col-lg-6.col-sm-12.col-md-6.col-xl-3 {
-      padding: 0 15px;
-      margin-bottom: 30px;
-    }
-    
-    @media (min-width: 1200px) {
-      .col-xl-3 {
-        width: 25%;
-        float: left;
+      .sidebar-menu > li > a:hover,
+      .sidebar-menu > li.active > a {
+        background-color: var(--bg-tertiary) !important;
+        color: var(--accent-primary) !important;
+        border-left-color: var(--accent-primary);
       }
-    }
-    
-    @media (min-width: 992px) {
-      .col-lg-6 {
-        width: 50%;
-        float: left;
+
+      /* Card Styling */
+      .card {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5) !important;
+        margin-bottom: 20px;
       }
-    }
-    
-    @media (min-width: 768px) {
-      .col-md-6 {
-        width: 50%;
-        float: left;
+
+      .card-header {
+        background: linear-gradient(135deg, var(--bg-tertiary) 0%, #000000 100%) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        color: var(--text-primary) !important;
+        border-radius: 12px 12px 0 0 !important;
       }
-    }
-    
-    .col-sm-12 {
-      width: 100%;
-    }
-    
-    /* Clear floats */
-    .row:after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-    
-    /* Card shadow */
-    .card-shadow {
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    }
-    
-    /* Progress bar animations */
-    .progress-bar-striped {
-      background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
-      background-size: 1rem 1rem;
-    }
-    
-    .progress-bar-animated {
-      animation: progress-bar-stripes 1s linear infinite;
-    }
-    
-    @keyframes progress-bar-stripes {
-      from { background-position: 1rem 0; }
-      to { background-position: 0 0; }
-    }
-    
-    /* Bootstrap 3 Card Compatibility */
-    .card {
-      background: rgba(15, 20, 32, 0.8);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      margin-bottom: 1.5rem;
-    }
-    
-    .card-header {
-      background: transparent;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1rem 1.5rem;
-    }
-    
-    .card-body {
-      padding: 1.5rem;
-    }
-    
-    .card-footer {
-      background: transparent;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1rem 1.5rem;
-    }
-    
-    .card-title {
-      margin-bottom: 0.75rem;
-      font-weight: 600;
-    }
-    
-    /* Container adjustments */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 15px;
-    }
-    
-    .container-fluid {
-      padding: 0 15px;
-    }
-    
-    /* Text utilities */
-    .text-center { text-align: center !important; }
-    .text-primary { color: var(--primary-color) !important; }
-    .text-secondary { color: var(--text-secondary) !important; }
-    
-    /* Margin/Padding utilities */
-    .mb-4 { margin-bottom: 2rem !important; }
-    .py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
-    .py-4 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
-  </style>
+
+      .card-title {
+        color: var(--text-primary) !important;
+        font-weight: 600;
+      }
+
+      .card-body {
+        color: var(--text-primary) !important;
+      }
+
+      /* Info Box Styling */
+      .info-box {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+      }
+
+      .info-box-icon {
+        background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%) !important;
+        border-radius: 8px 0 0 8px !important;
+      }
+
+      .info-box-content {
+        color: var(--text-primary) !important;
+      }
+
+      .info-box-text {
+        color: var(--text-secondary) !important;
+      }
+
+      .info-box-number {
+        color: var(--text-primary) !important;
+        font-weight: 700;
+      }
+
+      /* Button Styling */
+      .btn {
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        transition: all 0.3s ease !important;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%) !important;
+        border: none !important;
+        color: white !important;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 168, 255, 0.4) !important;
+      }
+
+      .btn-info {
+        background-color: var(--accent-secondary) !important;
+        border: none !important;
+      }
+
+      /* Table Styling */
+      .table {
+        color: var(--text-primary) !important;
+        border-collapse: separate !important;
+        border-spacing: 0 8px !important;
+      }
+
+      .table thead th {
+        background-color: var(--bg-tertiary) !important;
+        color: var(--accent-primary) !important;
+        border: none !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        padding: 12px !important;
+      }
+
+      .table tbody tr {
+        background-color: var(--bg-secondary) !important;
+        transition: all 0.3s ease !important;
+      }
+
+      .table tbody tr:hover {
+        background-color: var(--bg-tertiary) !important;
+        transform: scale(1.02);
+      }
+
+      .table tbody td {
+        border: none !important;
+        padding: 12px !important;
+        vertical-align: middle !important;
+      }
+
+      /* Form Styling */
+      .form-control {
+        background-color: var(--bg-secondary) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-primary) !important;
+        border-radius: 8px !important;
+      }
+
+      .form-control:focus {
+        border-color: var(--accent-primary) !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 168, 255, 0.25) !important;
+      }
+
+      /* Progress Bar Styling */
+      .progress {
+        background-color: var(--bg-secondary) !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        background: linear-gradient(90deg, var(--accent-secondary) 0%, var(--accent-primary) 100%) !important;
+      }
+
+      /* Pool Coin Grid */
+      .pool-coin-card .card {
+        transition: all 0.3s ease !important;
+      }
+
+      .pool-coin-card .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 168, 255, 0.2) !important;
+        border-color: var(--accent-primary) !important;
+      }
+
+      /* Filter Buttons */
+      .filter-btn {
+        background-color: var(--bg-tertiary) !important;
+        color: var(--text-secondary) !important;
+        border: 1px solid var(--border-color) !important;
+        margin: 5px !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+      }
+
+      .filter-btn.active,
+      .filter-btn:hover {
+        background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%) !important;
+        color: white !important;
+        border-color: transparent !important;
+      }
+
+      /* Logo Section Styling */
+      .logo {
+        background-color: var(--bg-tertiary) !important;
+        padding: 15px !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        text-align: center;
+      }
+
+      .logo a {
+        color: var(--text-primary) !important;
+        text-decoration: none !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+      }
+
+      /* Footer Styling */
+      .main-footer, .main-index-footer {
+        background-color: #000000 !important;
+        border-top: 1px solid var(--border-color) !important;
+        color: var(--text-secondary) !important;
+        padding: 20px !important;
+      }
+
+      .main-footer a, .main-index-footer a {
+        color: var(--accent-primary) !important;
+        text-decoration: none !important;
+      }
+
+      /* Content Wrapper */
+      .content-wrapper {
+        background-color: var(--bg-primary) !important;
+      }
+
+      /* Stamps */
+      .stamp {
+        background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%) !important;
+        color: white !important;
+      }
+
+      /* Effort Classes */
+      .effort1 { color: var(--success) !important; }
+      .effort2 { color: var(--warning) !important; }
+      .effort3 { color: var(--danger) !important; }
+
+      /* Tab Styling */
+      .tablinks, .tablinks1 {
+        background-color: var(--bg-tertiary) !important;
+        color: var(--text-secondary) !important;
+        border: 1px solid var(--border-color) !important;
+        margin-right: 10px !important;
+        border-radius: 8px !important;
+      }
+
+      .tablinks.active, .tablinks1.active {
+        background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%) !important;
+        color: white !important;
+        border-color: transparent !important;
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--accent-secondary);
+        border-radius: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-primary);
+      }
+
+      /* Links */
+      a {
+        color: var(--accent-primary) !important;
+      }
+
+      a:hover {
+        color: var(--accent-secondary) !important;
+        text-decoration: none !important;
+      }
+
+      /* Container Calculators */
+      .container-calculators {
+        width: 90%;
+        margin: auto;
+        align-items: center;
+        vertical-align: calc(50%);
+      }
+
+      #servers {
+        display: flex;
+        justify-content: space-between;
+        list-style-type: none;
+        padding: 0;
+      }
+
+      #servers li {
+        flex-grow: 1;
+        margin-right: 10px;
+      }
+
+      #servers li button {
+        background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+      }
+
+      #servers li button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 168, 255, 0.4);
+      }
+
+      /* Alert Styling */
+      .alert {
+        border-radius: 8px !important;
+        border: none !important;
+      }
+
+      .alert-warning {
+        background-color: var(--bg-tertiary) !important;
+        color: var(--warning) !important;
+        border: 1px solid var(--warning) !important;
+      }
+
+      /* Logo Styling */
+      img[src*="logo.gif"] {
+        transition: all 0.3s ease;
+      }
+
+      img[src*="logo.gif"]:hover {
+        filter: drop-shadow(0 0 30px rgba(0, 168, 255, 0.7)) brightness(1.1) !important;
+        transform: scale(1.08);
+      }
+
+      /* Loading Animation */
+      .loading-dot {
+        animation: loadingDot 1.4s infinite ease-in-out both;
+      }
+
+      @keyframes loadingDot {
+        0%, 80%, 100% {
+          opacity: 0;
+        }
+        40% {
+          opacity: 1;
+        }
+      }
+
+      /* Special styling for the main welcome card */
+      .main-index .card-shadow {
+        background: linear-gradient(135deg, #000000 0%, var(--bg-card) 100%) !important;
+        border: 1px solid var(--accent-primary) !important;
+      }
+    </style>
 </head>
-<body>
 
-<!-- Main Header -->
-<header class="main-header" id="mainHeader">
-  <nav class="navbar">
-    <div class="container-fluid">
-      <div class="logo-container">
-        <img src="img/logo.gif" alt="1MINER.NET" class="logo-gif">
-        <h1 class="logo-text">1MINER.NET</h1>
-      </div>
-      <button class="sidebar-toggle" id="sidebarToggle">
-        <i class="fas fa-bars"></i>
-      </button>
-    </div>
-  </nav>
-</header>
-
-<!-- Main Index -->
-<div class="main-index" id="mainIndex">
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container">
-      <div class="hero-content animate__animated animate__fadeInUp">
-        <h1 class="hero-title">Professional Mining Pool</h1>
-        <p class="hero-subtitle">Low fees, high performance, and cutting-edge technology</p>
-        <div class="text-center">
-          <img src="img/mining-animation.gif" alt="Mining Animation" style="max-width: 300px; opacity: 0.8;">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Pool Selection -->
-  <section class="container py-5">
-    <h2 class="text-center mb-4">Select Your Mining Pool</h2>
-    <div class="filter-container" id="algorithmFilters">
-      <!-- Algorithm filters will be populated here -->
-    </div>
-    
-    <div class="row pool-coin-grid card-title">
-      <!-- Pool cards will be populated here -->
-    </div>
-  </section>
-</div>
-
-<!-- Main Pool -->
-<div class="main-pool" style="display: none;">
-  
-  <!-- Sidebar -->
-  <div id="main-sidebar" class="main-sidebar sidebar">
-    <section class="sidebar">
-      <div class="sidebar-wrapper"></div>
-    </section>
-  </div>
-
-  <!-- Pool Header -->
-  <header class="main-header">
-    <nav class="navbar navbar-static-top" role="navigation">
-      <a></a>
-      <a href="#"><img src="img/logo.png" style="height: 40px;"></a>
-      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button"><i class="fas fa-bars"></i></a>
-    </nav>
-  </header>
-
-  <!-- Content Wrapper -->
-  <div id="page-scroll-top" class="content-wrapper" style="min-height: 864px;">
-    
-    <!-- Stats Page -->
-    <div class="page page-stats" id="pageStats">
-      <div class="container py-4">
-        <h2 class="mb-4">Pool Statistics</h2>
-        
-        <!-- Stats Grid -->
-        <div class="row g-4 mb-4">
-          <div class="col-md-6">
-            <div class="chart-container">
-              <div class="chart-header">
-                <h3 class="chart-title">Pool Hashrate</h3>
-                <span id="poolHashRate" class="text-primary">Loading...</span>
-              </div>
-              <div id="chartStatsHashRatePool"></div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="chart-container">
-              <div class="chart-header">
-                <h3 class="chart-title">Connected Miners</h3>
-                <span id="poolMiners" class="text-primary">Loading...</span>
-              </div>
-              <div id="chartStatsMiners"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Info Boxes -->
-        <div class="row g-3">
-          <div class="col-lg-3 col-md-6">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-cubes"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Blockchain Height</h4>
-                <h3 id="blockchainHeight">-</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-network-wired"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Connected Peers</h4>
-                <h3 id="connectedPeers">-</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-percentage"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Pool Fee</h4>
-                <h3 id="poolFeePercent">-</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-bolt"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Pool Effort</h4>
-                <h3 id="poolEffort">-</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Network Stats -->
-        <div class="row g-4 mt-4">
-          <div class="col-md-6">
-            <div class="chart-container">
-              <div class="chart-header">
-                <h3 class="chart-title">Network Hashrate</h3>
-                <span id="networkHashRate" class="text-primary">Loading...</span>
-              </div>
-              <div id="chartStatsHashRate"></div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="chart-container">
-              <div class="chart-header">
-                <h3 class="chart-title">Network Difficulty</h3>
-                <span id="networkDifficulty" class="text-primary">Loading...</span>
-              </div>
-              <div id="chartStatsDiff"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard Page -->
-    <div class="page page-dashboard" id="pageDashboard">
-      <div class="container py-4">
-        <h2 class="mb-4">Miner Dashboard</h2>
-        
-        <div class="wallet-input-container">
-          <h3>Enter Your Wallet Address</h3>
-          <p class="text-secondary">Track your mining statistics and earnings</p>
-          <div class="wallet-input-group">
-            <input type="text" class="wallet-input" id="walletAddress" placeholder="Your wallet address">
-            <button class="btn-primary-custom" id="load-wallet" onclick="loadWallet(this.id)">
-              Load Stats
-            </button>
-          </div>
-        </div>
-
-        <!-- Dashboard content will be populated here -->
-        <div id="dashboardContent"></div>
-      </div>
-    </div>
-
-    <!-- Miners Page -->
-    <div class="page page-miners" id="pageMiners">
-      <div class="container py-4">
-        <h2 class="mb-4">Top Miners</h2>
-        <div class="table-modern">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Address</th>
-                <th>Hashrate</th>
-                <th>Share Rate</th>
-              </tr>
-            </thead>
-            <tbody id="minerList">
-              <!-- Miner list will be populated here -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Blocks Page -->
-    <div class="page page-blocks" id="pageBlocks">
-      <div class="container py-4">
-        <h2 class="mb-4">Blocks Found</h2>
-        
-        <!-- Block Stats -->
-        <div class="row g-3 mb-4">
-          <div class="col-md-3">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-cube"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Total Blocks</h4>
-                <h3 id="poolBlocks2">-</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-coins"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Total Paid</h4>
-                <h3 id="totalPaid2">-</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-dollar-sign"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Coin Value</h4>
-                <h3 id="coinvalue">-</h3>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="info-box-modern">
-              <div class="info-box-icon">
-                <i class="fas fa-gift"></i>
-              </div>
-              <div class="info-box-content">
-                <h4>Block Reward</h4>
-                <h3 id="blockreward">-</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Blocks Table -->
-        <div class="table-modern">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Height</th>
-                <th>Miner</th>
-                <th>Status</th>
-                <th>Reward</th>
-                <th>Effort</th>
-              </tr>
-            </thead>
-            <tbody id="blockList">
-              <!-- Block list will be populated here -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Payments Page -->
-    <div class="page page-payments" id="pagePayments">
-      <div class="container py-4">
-        <h2 class="mb-4">Recent Payments</h2>
-        <div class="table-modern">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Address</th>
-                <th>Amount</th>
-                <th>Transaction</th>
-              </tr>
-            </thead>
-            <tbody id="paymentList">
-              <!-- Payment list will be populated here -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Connect Page -->
-    <div class="page page-connect" id="pageConnect">
-      <div class="container py-4">
-        <h2 class="mb-4">Connect Your Miner</h2>
-        <div class="row">
-          <div class="col-lg-8">
-            <div class="table-modern mb-4">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Configuration</th>
-                    <th>Value</th>
-                  </tr>
-                </thead>
-                <tbody id="connectPoolConfig">
-                  <!-- Pool config will be populated here -->
-                </tbody>
-              </table>
-            </div>
-            <div id="miner-config">
-              <!-- Miner config will be populated here -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FAQ Page -->
-    <div class="page page-faq" id="pageFaq">
-      <div class="container py-4">
-        <h2 class="mb-4">Frequently Asked Questions</h2>
-        <div class="faq-content">
-          <!-- FAQ content here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Support Page -->
-    <div class="page page-support" id="pageSupport">
-      <div class="container py-4">
-        <h2 class="mb-4">Support</h2>
-        <div class="text-center">
-          <img src="img/discord.png" alt="Discord" style="max-width: 300px;">
-          <p class="mt-3">Join our Discord community for support and updates!</p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- Footer -->
-<footer class="main-footer">
-  <div class="container">
-    <p>&copy; <script>document.write(new Date().getFullYear())</script> 1MINER.NET - Professional Mining Pool</p>
-  </div>
-</footer>
-
-</div> <!-- end wrapper -->
+<body class="skin-black" style="height: auto; min-height: 100%;" onhashchange="loadIndex()">
+<!-- COIN TABLE TEMPLATE -->
+	<div class="index-coin-table-template" style="display:none;">
+		<div class="row">
+			<div class="col-12">
+        		<div class="card">
+                	<div class="card-header card-header-warning">
+                  		<h3 class="card-title "><p><i class="fas fa-users"></i> Pool Coins </p></h3>
+                  		<p class="card-category"> Top 20 contributors</p>
+                	</div>
+                	<div class="card-body table-hover">
+						<div class="table-responsive">
+							<table class="table">
+                      			<thead class=" text-primary">
+									<tr>
+										<th>Address</th>
+                          				<th>Hashrate</th>
+                           				<th>Share Rate</th>
+                        			</tr>
+								</thead>
+                      			<tbody id="CoinList"></tbody>
+                    		</table>
+                  		</div>
+                	</div>
+              	</div>
+			</div>
+		</div>
+	</div>
 
 <!-- SIDEBAR TEMPLATE -->	
-<div class="sidebar-template" style="display:none;">
-  <div class="logo">
-    <a href="#" class="simple-text logo-normal">
-      <p>{{ coinLogo }} {{ coinName }}</p>
-    </a>
+	<div class="sidebar-template" style="display:none;">
+		<div class="logo">
+			<a href="#" class="simple-text logo-normal">
+				<p>{{ coinLogo }} {{ coinName }}</p>
+			</a>
+        	</div>
+
+		<ul class="sidebar-menu tree" data-widget="tree">
+			<li class="divider"></li>
+			<li class="nav-home"><a class="nav-link" href="#"><i class="fas fa-home"></i><span>Home</span></a></li>
+		  <li class="nav-stats">
+            <a class="nav-link" href="#{{ coinId }}/stats">
+              <i class="fas fa-chart-line"></i><span>Stats</span>
+            </a>
+          </li>
+          <li class="nav-dashboard">
+            <a class="nav-link" href="#{{ coinId }}/dashboard">
+              <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-miners">
+            <a class="nav-link" href="#{{ coinId }}/miners">
+              <i class="fas fa-users"></i></i><span>Miners</span>
+            </a>
+          </li>
+          <li class="nav-blocks">
+            <a class="nav-link"  href="#{{ coinId }}/blocks">
+              <i class="fas fa-cubes"></i><span>Blocks</span>
+            </a>
+          </li>
+          <li class="nav-payments">
+			<a class="nav-link" href="#{{ coinId }}/payments">
+             <i class="fas fa-wallet"></i><span>Payments</span>
+            </a>
+          </li>
+          <li class="nav-connect">
+            <a class="nav-link" href="#{{ coinId }}/connect">
+              <i class="fas fa-plug"></i><span>Connect</span>
+            </a>
+          </li>
+          <li class="nav-faq">
+            <a class="nav-link" href="#{{ coinId }}/faq">
+              <i class="fas fa-comment-dots"></i><span>FAQ</span>
+            </a>
+          </li>
+          <li class="nav-support">
+            <a class="nav-link" href="#{{ coinId }}/support">
+              <i class="ti-headphone-alt"></i><span>Support</span>
+            </a>
+          </li>
+        </ul>
+	  </div>
+
+<div class="wrapper" style="height: auto; min-height: 100%;">
+
+<!-- MAIN INDEX -->
+  <div class="main-index" style="display:none;" >
+
+<!-- INDEX HEADER  -->
+<header class="main-index-header fixed">
+	<nav class="navbar navbar-static-top" role="navigation">
+		<a href="#" style="display: flex; align-items: center; text-decoration: none;">
+		</a>
+		<span class="header-text"><b>1MINER.NET</b> - Mining Made Easy </span>
+		<a></a>
+	</nav>
+</header>
+	
+<!-- INDEX HOME PAGE -->
+	<div class="page page-index">
+		<div class="content container-fluid " >	
+			<div class="col-12">
+				<div class="card card-shadow">
+					<div class="card-header" style="background: transparent; border: none;">
+						<div style="text-align: center; padding: 40px 0;">
+							<img id="animatedGif" src="img/logo.gif" alt="1miner.net" style="width: min(50vw, 600px); height: auto;">
+						</div>
+					</div>
+					<div class="card-body p-0">
+						</br>
+						<center>
+						<p style="color: var(--text-secondary); font-size: 1.1rem;">
+						Next-generation mining with real-time monitoring.</br>Connect your miner and stack your bag.
+						</p>
+						</center>
+						</br>
+					</div>
+					<div class="card-footer" style="background: transparent; border-top: 1px solid var(--border-color);">
+  						<div class="card-title text-center">
+   							 <a href="https://discord.gg/ZyG3YKDCQQ" target="_blank">
+     								 <img style="width:150px;" src="img/discord.png" alt="Discord">
+   								 </a>
+ 							 </div>
+						</div> 
+				</div>
+			</div>
+			</br>
+			<div class="col-12">
+				<div class="card">
+					<div class="card-header">
+						<div class="card-title text-center">
+							<h3 style="color: var(--accent-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Select Your Mining Algorithm</h3>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="card-title text-center" id="algorithmFilters"></div>
+						<div class="row pool-coin-grid card-title"></div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+	</div>	
+<br>
+<!-- INDEX FOOTER --> 
+    <footer class="main-index-footer">
+		<strong><a target="_blank" href="https://1miner.net">&copy; <script>document.write(new Date().getFullYear())</script> 1miner.net - Made By DankMiner</a></strong>
+    </footer>
+
   </div>
 
-  <ul class="sidebar-menu tree" data-widget="tree">
-    <li class="divider"></li>
-    <li class="nav-home"><a class="nav-link" href="#"><i class="fas fa-home"></i><span>Home</span></a></li>
-    <li class="nav-stats">
-      <a class="nav-link" href="#{{ coinId }}/stats">
-        <i class="fas fa-chart-line"></i><span>Stats</span>
-      </a>
-    </li>
-    <li class="nav-dashboard">
-      <a class="nav-link" href="#{{ coinId }}/dashboard">
-        <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
-      </a>
-    </li>
-    <li class="nav-miners">
-      <a class="nav-link" href="#{{ coinId }}/miners">
-        <i class="fas fa-users"></i><span>Miners</span>
-      </a>
-    </li>
-    <li class="nav-blocks">
-      <a class="nav-link"  href="#{{ coinId }}/blocks">
-        <i class="fas fa-cubes"></i><span>Blocks</span>
-      </a>
-    </li>
-    <li class="nav-payments">
-      <a class="nav-link" href="#{{ coinId }}/payments">
-        <i class="fas fa-wallet"></i><span>Payments</span>
-      </a>
-    </li>
-    <li class="nav-connect">
-      <a class="nav-link" href="#{{ coinId }}/connect">
-        <i class="fas fa-plug"></i><span>Connect</span>
-      </a>
-    </li>
-    <li class="nav-faq">
-      <a class="nav-link" href="#{{ coinId }}/faq">
-        <i class="fas fa-comment-dots"></i><span>FAQ</span>
-      </a>
-    </li>
-    <li class="nav-support">
-      <a class="nav-link" href="#{{ coinId }}/support">
-        <i class="fas fa-headphones"></i><span>Support</span>
-      </a>
-    </li>
-  </ul>
+
+
+<!-- MAIN POOL -->
+  <div class="main-pool" style="display:none;">
+  
+<!-- POOL SIDEBAR -->
+    <div id="main-sidebar" class="main-sidebar">
+      <!-- sidebar: style can be found in sidebar.less -->
+      <section class="sidebar">
+		<div class="sidebar-wrapper"></div>
+      </section>
+    </div>
+
+  
+
+<!-- POOL HEADER -->
+    <header class="main-header">
+		<nav class="navbar navbar-static-top" role="navigation">
+			<a></a>
+			<a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button"><i class="fas fa-bars"></i></a>
+		</nav>
+    </header>
+
+
+<div id="page-scroll-top" class="content-wrapper" style="min-height: 864px;">
+
+	<!-- POOL STATS PAGE -->
+	<div class="page page-stats" style="display:none;">
+		<div class="content container-fluid">
+			<div class="row">
+				<div class="col-lg-6 col-md-12">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title"><span class="stamp stamp-md mr-3"><i class="fas fa-wave-square"></i></span>Pool Hashrate</h>
+						</div>
+						<div class="card-body">
+							<div class="card-chart ">
+								<div class="ct-chart" id="chartStatsHashRatePool"></div>
+							</div>
+						</div>
+						<div class="card-footer">
+							<h3 class="card-title"><center><div id="poolHashRate"></div></center></h>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 col-md-12">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title"><span class="stamp stamp-md mr-3"><i class="fas fas fa-user"></i></span>Miners (Address)</h>
+						</div>
+						<div class="card-body">
+							<div class="card-chart ">
+								<div class="ct-chart" id="chartStatsMiners"></div>
+							</div>
+						</div>
+						<div class="card-footer">
+							<h3 class="card-title"><center><div id="poolMiners"></div></center></h>
+						</div>
+					</div>
+				</div>
+			</div>
+				
+			<div class="row">
+	
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-bars"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Blockchain Height</span>
+							<span class="info-box-number"><div id="blockchainHeight"></div></span>
+						</div>
+					</div>
+				</div>
+			
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-code-branch"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Connected Peers</span>
+							<span class="info-box-number"><div id="connectedPeers"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-percent"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Pool Fee</span>
+							<span class="info-box-number"><div id="poolFeePercent"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-hammer"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Pool Effort</span>
+							<span class="info-box-number"><div id="poolEffort"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-cube"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Pending Blocks</span>
+							<span class="info-box-number"><div id="text_BlocksPending"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-cubes"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Confirmed Blocks</span>
+							<span class="info-box-number"><div id="poolBlocks"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-hand-holding-usd"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Payment Threshold</span>
+							<span class="info-box-number"><div id="minimumPayment"></div></span>
+						</div>
+					</div>
+				</div>
+			
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-credit-card"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Total Paid</span>
+							<span class="info-box-number"><div id="totalPaid"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="far fa-money-bill-alt"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Current Values</span>
+							<span class="info-box-number"><div id="value"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-chart-pie"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Block Reward</span>
+							<span class="info-box-number"><div id="text_BlockReward"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Estimate Emissions (24H)</span>
+							<span class="info-box-number"><div id="Emissions"></div></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-clock"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">NETWORK (VS) POOL</span>
+							<span class="info-box-number"><div id="text_TTFBlocks"></div></span>
+						</div>
+					</div>
+				</div>
+
+			</div>		
+				
+			<div class="row">
+				<div class="col-lg-6 col-md-12">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title"><span class="stamp stamp-md mr-3"><i class="fas fa-wave-square"></i></span>Network Hashrate</h>
+						</div>
+						<div class="card-body">
+							<div class="card-chart">
+								<div class="ct-chart" id="chartStatsHashRate"></div>
+							</div>
+						</div>
+						<div class="card-footer">
+							<h3 class="card-title"><center><div id="networkHashRate"></div></center></h>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 col-md-12">
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title"><span class="stamp stamp-md mr-3"><i class="fas fa-hammer"></i></span>Network Difficulty</h>
+						</div>
+						<div class="card-body">
+							<div class="card-chart ">
+								<div class="ct-chart" id="chartStatsDiff"></div>
+							</div>
+						</div>
+						<div class="card-footer">
+							<h3 class="card-title"><center><div id="networkDifficulty"></div></center></h>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>			
+
+	</div>
+	
+	<!-- POOL DASHBOARD PAGE -->
+	<div class="page page-dashboard" style="display:none;">
+		<section class="content-header">
+		<h1>MINER<small>dashboard</small></h1>
+		</section>
+		<div class="content container-fluid">
+			<div class="row">
+				<div class="col-lg-12 col-md-12">
+					<div class="card">
+						<div class="card-header card-shadow">
+							<h3 class="card-title">Wallet Address</h3>
+							<p class="card-category">enter your coin wallet address</p>
+						</div>
+						<div class="card-body">
+							<form>
+								<div class="row">
+									<div class="col-md-12 col-sm-12 col-xs-12">
+										<div class="card-input input-group form-group bmd-form-group">
+											<input class="form-control" type="text" id="walletAddress" placeholder="Wallet Address">
+										</div>
+									</div>
+								</div>
+								<button id="load-wallet" onClick="loadWallet(this.id)" type="submit" class="btn btn-info btn-fill btn-wd">Load wallet stats</button>
+								<div class="clearfix"></div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 col-sm-12 col-xs-12">
+					<div class="card">
+						<div class="card-header">
+							<button class="btn tablinks" onclick="openCity(event, 'Overview')" id="defaultOpen">Overview</button>
+							<button class="btn tablinks" onclick="openCity(event, 'Workers')">Workers</button>
+							<button class="btn tablinks" onclick="openCity(event, 'BlocksMiner')">Blocks</button>
+							<button class="btn tablinks" onclick="openCity(event, 'Earnings')">Earnings</button>
+							<button class="btn tablinks" onclick="openCity(event, 'Payouts')">Payouts</button>
+							<button class="btn tablinks" onclick="openCity(event, 'Setting')">Setting</button>
+						</div>
+						<div class="card-body">
+							<div id="Overview" class="tabcontent">
+								<div class="card">
+									<div class="card-header card-shadow">
+										<h5 class="card-category">General information</h>
+									</div>
+									<div class="row">
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<div class="card">
+												<div class="card-header">
+													<h5 class="card-title"><span class="stamp stamp-md mr-3"><i class="fas fa-chart-area"></i></span>Miner's Hash Rate</h>
+												</div>
+												<div class="card-body">
+													<div class="card-chart ">
+														<div class="ct-chart" id="chartDashboardHashRate"></div>
+													</div>
+												</div>
+												<div class="card-footer">
+													<h3 class="card-title"><center><div id="minerHashRate"></div></center></h>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="card-body">
+										<div class="row">
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-receipt"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Pending Info:</span>
+														<span class="info-box-number"><div id="pendingBalance"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Confirmed Coins<br>(to be paid)</span>
+														<span class="info-box-number"><div id="pendingBalance2"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="far fa-money-bill-alt"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Total Miner Share</span>
+														<span class="info-box-number"><div id="MinersShare"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Paid Info:</span>
+														<span class="info-box-number"><div id="paidBalance"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-cubes"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Block Found Recent</span>
+														<span class="info-box-number"><div id="BlocksByMiner"><br></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fa fa-coins"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">24H Estimate</span>
+														<span class="info-box-number"><div id="MinersCoins"><br></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-wallet"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Last Payment</span>
+														<span class="info-box-number"><div id="lastPayment"><br></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fa fa-hand-holding-usd"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Payment Threshold</span>
+														<span class="info-box-number"><div id="minPayment"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-trophy"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Best Worker</span>
+														<span class="info-box-number"><div id="BestminerHashRate"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-clock"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Block Mining Time</span>
+														<span class="info-box-number"><div id="TTF_Blocks"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-receipt"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Last Payment Link</span>
+														<span class="info-box-number"><div id="lastPaymentLink"></div></span>
+													</div>
+												</div>
+											</div>
+											<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+												<div class="info-box">
+													<span class="info-box-icon"><i class="fas fa-tachometer-alt"></i></span>
+													<div class="info-box-content">
+														<span class="info-box-text">Avg. Blocktime</span>
+														<span class="info-box-number"><div id="Blocktime"></div></span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="Workers" class="tabcontent">
+								<div class="card">
+									<div class="card-header">
+										<h3 class="card-title "><p><i class="fas fa-users"></i> List of miners working for you</p></h3>
+									</div>
+									<div class="card-body table-hover">
+										<div class="table-responsive">
+											<table id="miner-workers" class="table miner-workers">
+												<thead class=" text-primary">
+													<tr class="miner-workers">
+														<th>No.</th>
+														<th>Name</th>
+														<th>Hashrate <br><font class='small'>Last Reported</font></th>
+														<th>Hashrate <br><font class='small'>Average Last 6 Hours</font></th>
+														<th>Hashrate <br><font class='small'>Average Last 12 Hours</font></th>
+														<th>Hashrate <br><font class='small'>Average Last 24 Hours</font></th>
+														<th>Share Rate</th>
+														<th>Estimated<br><font class='small'>Daily Earnings (6h avg)</font></th>
+													</tr>
+												</thead>
+												<tbody id="workerList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="Earnings" class="tabcontent">
+								<div class="card">
+									<div class="card-header card-shadow">
+										<h5 class="card-title"><i class="fas fa-balance-scale"></i> Last 30 Transactions</h>
+									</div>
+									<div class="card-body table-hover">
+										<div class="table-responsive">
+											<table id="payments" class="table payments">
+												<thead class=" text-primary">
+													<tr class="payments">
+														<th>Time</th>
+														<th>Transaction</th>
+														<th>Amount</th>
+													</tr>
+												</thead>
+												<tbody id="EarningsList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+								<div class="card">
+									<div class="card-header card-shadow">
+										<h5 class="card-title"><i class="fas fa-piggy-bank"></i> Daily Credit History</h>
+									</div>
+									<div class="card-body table-hover">
+										<div class="table-responsive">
+											<table id="payments" class="table payments">
+												<thead class=" text-primary">
+													<tr class="payments">
+														<th>Time</th>
+														<th>Amount</th>
+													</tr>
+												</thead>
+												<tbody id="minerCreditList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="Payouts" class="tabcontent">
+								<div class="card">
+									<div class="card-header card-shadow">
+										<h5 class="card-category">Payouts History</h>
+									</div>
+									<div class="card-body table-hover">
+										<div class="table-responsive">
+											<table id="payments" class="table payments">
+												<thead class=" text-primary">
+													<tr class="payments">
+														<th>Time</th>
+														<th>Address</th>
+														<th>Amount</th>
+														<th>TXID</th>
+													</tr>
+												</thead>
+												<tbody id="lastPaymentList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="BlocksMiner" class="tabcontent">
+						<div class="row">
+							<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+								<div class="info-box">
+									<span class="info-box-icon"><i class="fas fa-cube"></i></span>
+									<div class="info-box-content">
+										<span class="info-box-text">Your Effort</span>
+										<span class="info-box-number"><div id="MinerEffort"><br></div></span>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+								<div class="info-box">
+									<span class="info-box-icon"><i class="fas fa-cubes"></i></span>
+									<div class="info-box-content">
+										<span class="info-box-text">Pool Effort</span>
+										<span class="info-box-number"><div id="BlocksEffort"><br></div></span>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+								<div class="info-box">
+									<span class="info-box-icon"><i class="fas fa-cube"></i></span>
+									<div class="info-box-content">
+										<span class="info-box-text">Avg. Uncle Rate</span>
+										<span class="info-box-number"><div id="AvgUncleRate"><br></div></span>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+								<div class="info-box">
+									<span class="info-box-icon"><i class="fas fa-cubes"></i></span>
+									<div class="info-box-content">
+										<span class="info-box-text">Avg. Orphaned Rate</span>
+										<span class="info-box-number"><div id="AvgOrphanedRate"><br></div></span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="card">
+								<div class="card-header card-shadow">
+									<h5 class="card-title">Effort Your Blocks</h5>
+								</div>
+								<div class="card-body">
+									<div class="card-chart">
+										<div class="ct-chart" id="chartDashboardBlockEffort"></div>
+									</div>
+								</div>
+								<div class="card-footer">
+									<div class="card-title">
+										<center>
+											<font color="#7d4424">&boxh;&boxh; Blocks Effort average 10 Blocks</font>&emsp;
+											<font color="#d17905">&boxh;&boxh; Blocks Effort average 50 Blocks</font>&emsp;
+											<font color="#FECC00">&boxh;&boxh; Miner Effort average 10 Blocks</font>&emsp;
+											<font color="#e6e6e6">&boxh;&boxh; Miner Effort average 50 Blocks</font>&emsp;
+											<font color="#6fb33d">&boxh;&boxh; Target</font>
+										</center>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="card">
+								<div class="card-header card-shadow">
+									<h5 class="card-category">Blocks found by you</h>
+								</div>
+								<div class="card-body table-hover">
+									<div class="table-responsive">
+										<table id="blocks" class="table blocks">
+											<thead class=" text-primary">
+												<tr class="blocks">
+													<th>Time</th>
+													<th>Height</th>
+													<th>Pool Effort</th>
+													<th>Miner Effort</th>
+													<th>Reward</th>
+													<th>Type</th>
+													<th>Status</th>
+													<th>Confirmation</th>
+												</tr>
+											</thead>
+											<tbody id="DashboardBlockList"></tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+							<div id="Setting" class="tabcontent">
+								<div class="card">	
+									<div class="card-header card-shadow">	
+										<h5 class="card-title">Custom Minimun Payout</h3>
+										<p class="card-category">Must Be Greater Than Pool Minimum Payout</p>
+									</div>
+									<div class="card-body">
+										<form>
+											<div class="card-input input-group form-group bmd-form-group">
+												<div class="row">
+													<div class="col-md-6 col-sm-6 col-xs-6">
+														<input class="form-control" type="text" id="ipAddress" placeholder="Miner IP Address">
+													</div>
+													<div class="col-md-6 col-sm-6 col-xs-6">
+														<input class="form-control" type="text" id="minimumPayout" placeholder="New Payout">
+													</div>
+												</div>
+											</div>
+											<button id="submit-settings" onClick="submitSettings(this.id)" type="submit" class="btn btn-info btn-fill btn-wd">Save</button>	
+											<div class="clearfix"></div>
+											<div id="updateSuccess" class="alert alert-success" style="display: none;"> Minimum payout updated. </div>
+											<div id="updateFailed" class="alert alert-danger" style="display: none;"> Failed to update minimum payout. Is your ip address correct?</div>
+										</form>
+									</div>
+								</div>
+							</div>
+							<script>
+								function openCity(evt, cityName) 
+								{
+									var i, tabcontent, tablinks;
+									tabcontent = document.getElementsByClassName("tabcontent");
+									for (i = 0; i < tabcontent.length; i++) 
+									{
+										tabcontent[i].style.display = "none";
+									}
+									tablinks = document.getElementsByClassName("tablinks");
+									for (i = 0; i < tablinks.length; i++) 
+									{
+										tablinks[i].className = tablinks[i].className.replace(" active", "");
+									}
+									document.getElementById(cityName).style.display = "block";
+									evt.currentTarget.className += " active";
+								}
+								// Get the element with id="defaultOpen" and click on it
+								document.getElementById("defaultOpen").click();
+							</script>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>	
+
+<div class="page page-miners" style="display:none;">
+<section class="content-header">
+<h1>POOL<small>Top miners</small></h1>
+</section>
+<div class="content container-fluid">
+<div class="row">
+<div class="col-lg-12 col-md-12">
+<div class="card">
+<div class="card-header">
+<h3 class="card-title "><p><i class="fas fa-users"></i> Best Miners</p></h3>
+<p class="card-category"> Top 20 contributors</p>
+</div>
+<div class="card-body table-hover">
+<div class="table-responsive">
+<table id="miners" class="table miners">
+<thead class=" text-primary">
+<tr class="miners">
+<th>Address</th>
+<th>Hashrate</th>
+<th>Share Rate</th>
+</tr>
+</thead>
+<tbody id="minerList"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 
-<!-- Scripts -->
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/js/bootstrap-notify.min.js"></script>
-<script src="js/miningcore.js"></script>
+<!-- POOL BLOCKS PAGE -->
+    <div class="page page-blocks" style="display:none;">
+		<section class="content-header">
+			<h1>POOL<small>blocks found</small></h1>
+		</section>
+		<div class="content container-fluid"></br></br>
+			<div class="row">
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-cubes"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Total Blocks</span>
+							<span class="info-box-number"><div id="poolBlocks2"></div></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-credit-card"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Total Paid</span>
+							<span class="info-box-number"><div id="totalPaid2"></div></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="far fa-money-bill-alt"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Coin Value</span>
+							<span class="info-box-number"><div id="coinvalue"></div></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Block Reward</span>
+							<span class="info-box-number"><div id="blockreward"></div></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-cube"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Current Effort</span>
+							<span class="info-box-number"><div id="CurrentEffort"><br></div></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-cubes"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Average Effort</span>
+							<span class="info-box-number"><div id="AverageEffort"><br></div></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-cube"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Average Uncle Rate</span>
+							<span class="info-box-number"><div id="AverageUncleRate"><br></div></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+					<div class="info-box">
+						<span class="info-box-icon"><i class="fas fa-cubes"></i></span>
+						<div class="info-box-content">
+							<span class="info-box-text">Average Orphaned Rate</span>
+							<span class="info-box-number"><div id="AverageOrphanedRate"><br></div></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 col-sm-12 col-xs-12">
+					<div class="card">
+						<div class="card-header">
+							<button class="btn tablinks1" onclick="openCity1(event, 'Confirmed')" id="defaultOpen1"><span id="confirmedBlockCount"></span> Confirmed</button>
+							<button class="btn tablinks1" onclick="openCity1(event, 'Pending')"><span id="pendingBlockCount"></span> Pending</button>
+							<button class="btn tablinks1" onclick="openCity1(event, 'NewBlocks')"><span id="newBlockCount"></span> New</button>
+						</div>
+						<div class="card-body">
+							<div id="NewBlocks" class="tabcontent1">
+								<div class="card">
+									<div class="card-header">
+										<h3 class="card-title"><p><center>New Blocks</center></p></h3>
+									</div>
+									<div class="card-body table-hover">
+										<div class="table-responsive">
+											<table id="blocks" class="table blocks">
+												<thead class=" text-primary">
+													<tr class="blocks">
+														<th>Found Time</th>
+														<th>Finder</th>
+														<th>Height</th>
+														<th>Net Diff</th>
+														<th>Luck</th>
+														<th>Status</th>
+														<th>Reward</th>
+														<th>Type</th>
+														<th>Confirmation</th>
+													</tr>
+												</thead>
+												<tbody id="newBlockList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="Pending" class="tabcontent1">
+								<div class="card">
+									<div class="card-header">
+										<h3 class="card-title"><p><center>Pending Blocks</center></p></h3>
+									</div>
+									<div class="card-body table-hover">
+										<div class="table-responsive">
+											<table id="blocks" class="table blocks">
+												<thead class=" text-primary">
+													<tr class="blocks">
+														<th>Found Time</th>
+														<th>Finder</th>
+														<th>Height</th>
+														<th>Net Diff</th>
+														<th>Luck</th>
+														<th>Status</th>
+														<th>Reward</th>
+														<th>Type</th>
+														<th>Confirmation</th>
+													</tr>
+												</thead>
+												<tbody id="pendingBlockList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="Confirmed" class="tabcontent1">
+								<div class="card">
+									<div class="card-header">
+										<h3 class="card-title "><p><center>Confirmed Blocks</center></p></h3>
+									</div>
+									<div class="card-body table-hover">
+										<div class="table-responsive">
+											<table id="blocks" class="table blocks">
+												<thead class=" text-primary">
+													<tr class="blocks">
+														<th>Found Time</th>
+														<th>Finder</th>
+														<th>Height</th>
+														<th>Net Diff</th>
+														<th>Luck</th>
+														<th>Status</th>
+														<th>Reward</th>
+														<th>Type</th>
+														<th>Confirmation</th>
+													</tr>
+												</thead>
+												<tbody id="blockList"></tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<script>
+								function openCity1(evt, cityName) 
+								{
+									var i, tabcontent, tablinks;
+									tabcontent = document.getElementsByClassName("tabcontent1");
+									for (i = 0; i < tabcontent.length; i++) 
+									{
+										tabcontent[i].style.display = "none";
+									}
+									tablinks = document.getElementsByClassName("tablinks1");
+									for (i = 0; i < tablinks.length; i++) 
+									{
+										tablinks[i].className = tablinks[i].className.replace(" active", "");
+									}
+									document.getElementById(cityName).style.display = "block";
+									evt.currentTarget.className += " active";
+								}
+								// Get the element with id="defaultOpen" and click on it
+								document.getElementById("defaultOpen1").click();
+							</script>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+<!-- POOL PAYMENTS PAGE -->
+    <div class="page page-payments" style="display:none;">
+		<section class="content-header">
+			<h1>POOL<small>payments</small></h1>
+		</section>
+		<div class="content container-fluid">
+		
+		  <div class="row">
+			<div class="col-lg-12 col-md-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title "><p><i class="fas fa-wallet"></i> Payments Rewarded</p></h3>
+                  <p class="card-category"> Last 500 payments</p>
+                </div>
+                <div class="card-body table-hover">
+                  <div class="table-responsive">
+                    <table id="payments" class="table payments">
+                      <thead class=" text-primary">
+                        
+						<tr class="payments">
+							<th>Sent</th>
+                            <th>Address</th>
+                            <th>Amount</th>
+                            <th colspan="2">Confirmation</th>
+                        </tr>
+					  
+					  </thead>
+                      <tbody id="paymentList"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+			</div>
+		  </div>
+		</div>	
+	</div>
+		
+<!-- POOL CONNECT PAGE -->
+	<div class="page page-connect" style="display:none;">
+		<section class="content-header">
+			<h1>POOL<small>connection</small></h1>
+		</section>
+		<div class="content container-fluid">
+			<div class="row">
+				<div class="col-lg-12 col-md-12">
+					<div class="card">
+                		<div class="card-header">
+							<h3 class="card-title "><p><i class="fas fa-plug"></i> Pool Configuration</p></h3>
+							<p class="card-category"> All you need to connect your miners</p>
+						</div>
+						<div class="card-body table-hover">
+                  			<div class="table-responsive">
+                  				<table id="pool-config" class="table pool-config">
+                  					<thead class=" text-primary">
+										<tr class="pool-config">
+											<th>Item</th>
+                            				<th>Value</th>
+                        				</tr>
+									</thead>
+                      				<tbody id="connectPoolConfig"></tbody>
+                    			</table>
+                  			</div>
+                		</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12 col-md-12">
+					<div id="miner-config"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+<!-- POOL FAQ PAGE -->	  
+    <div class="page page-faq" style="display:none;">
+		<section class="content-header">
+			<h1>POOL<small>questions & answers</small></h1>
+		</section>
+		<div class="content container-fluid">
+		  <div class="row">
+                <div class="col-lg-12 col-sm-12">
+                  <div class="card">
+                    <div class="card-header">
+						<h4 class="card-title"><i class="fas fa-comment-dots"></i> FAQ</h4>
+						<p class="card-category">
+							How does the pool work?
+						</p>
+					</div>
+                    <div class="card-body table-responsive faq">
+                      <h4>Do I need to register an account to mine?</h4>
+                      <p>
+                        Registration is not required. Just configure your miner
+                        according to our instructions and start mining. Your
+                        first submitted share will automatically register you
+                        with our pool. Good Luck!
+                      </p>
+                      <h4>
+                        Why is my reported hashrate zero or different from what
+                        my miner reports?
+                      </h4>
+                      <p>
+                        Pool and miner hashrates are re-calculated every ten
+                        minutes. Therefore it can take a maximum of ten minutes
+                        for your hashrate to update depending on the submission
+                        time of your first valid share. The hashrate we display
+                        at the pool is a rough approximation of your hashrate
+                        based on your submitted shares and can therefore differ
+                        significantly from the hashrate displayed locally. When
+                        in doubt always consider the value displayed by your
+                        miner as the correct one.
+                      </p>
+                      <h4>How will I get paid?</h4>
+                      <p>
+                        All of our pools utilize the PPLNS payment system. PPLNS
+                        is short for "Pay Per Last N Shares". The image below
+                        illustrates the system. One round has an arbitrary
+                        number of shares which is solely based on sheer luck.
+                        Proportional reward systems only consider shares of one
+                        round when calculating rewards. PPLNS however, uses a
+                        quite constant number N of shares for calculating
+                        rewards. This number N changes only with the difficulty:
+                      </p>
+                      <img alt="PPLNS" src="img/shares_round.png" style="width:100%;max-width: 500px;">
+                      <p>&nbsp;</p>
 
-<script type="text/javascript">
-  $(document).ready(function() {
-    loadIndex();
-  });
-  
-  // Header scroll effect
-  window.addEventListener('scroll', function() {
-    const header = document.querySelectorAll('.main-header')[0];
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
-    }
-  });
-</script>
+                      <p>
+                        As you know the number of shares needed to solve a block
+                        within a round is different. Round one and three needed
+                        (difficulty * 2) shares to be solved. Round two and four
+                        are quite short rounds. There were less than (difficulty
+                        * 2) shares necessary to solve them. Round five however
+                        is a very long round which means the pool needed more
+                        than (difficulty * 2) shares to solve the block. From
+                        this follows that:
+                      </p>
+                      <ul>
+                        <li>
+                          Rounds one and three are like proportional rounds. All
+                          of your shares from the given round are considered for
+                          reward calculations
+                        </li>
+                        <li>
+                          For rounds two and four, shares from the previous
+                          rounds are considered for calculations as well (marked
+                          green). In other words: regardless of round boundaries
+                          we always consider the last
+                          <em>(difficulty * 2)</em> shares. Your portion of the
+                          amount of shares is used to calculate your reward.
+                        </li>
+                        <li>
+                          Round five however is very long. In this round your
+                          lowermost shares (within the marked red part) are
+                          silently dropped if they are not within the last
+                          <em>(difficulty * 2)</em> shares.
+                        </li>
+                      </ul>
+                      <p>
+                        <strong>PPLNS favors constant and/or occasional loyal pool
+                          members over pool hoppers.
+                        </strong>
+                        Pool hoppers are betting for a "quick win" (like round
+                        two above) with low shares per round. If the round
+                        exceeds a certain amount of shares they "hop" to another
+                        proportional pool which started a new round more
+                        recently. This assures better rewards for pool hoppers
+                        over occasional or constant miners which are loyal to
+                        their pool. Pool hopping however implies that pool
+                        hoppers need to know when a round is started and how
+                        much shares are considered for reward. This is very easy
+                        with proportional reward system. While using PPLNS, this
+                        is no longer true. On long rounds (like round five
+                        above) the pool hoppers shares won't be considered for
+                        reward calculations in favor of loyal miners. This is
+                        due to the fact that pool hoppers only mine on the
+                        beginning of rounds. On short and normal rounds pool
+                        hoppers won't lose their shares. Due to the fact that
+                        shares from previous rounds from loyal miners are
+                        considered twice (or even more often on extremely short
+                        rounds) the pool hopper won't get the same reward as
+                        from proportional reward system.
+                      </p>
+                      <p>
+                        Assuming blocks have been found, payouts are processed
+                        and send every 10 minutes. This process is fully automated.
+                      </p>
+                      <h4>When will I get paid?</h4>
+                      <p>
+                        You won't see any balance in your account until a block
+                        has been found by the pool and after the block has
+                        reached a mature status. This may take a couple hours,
+                        depending on the coin. As soon as a block can be
+                        considered 'mature' by the pool, your shares will be
+                        used to calculate your contribution towards finding the
+                        block. The more you've contributed, the higher your cut
+                        of the block reward will be. Your cut of the block
+                        reward will then be credited to your pending balance. If
+                        your balance reaches or exceeds the pool's minimum
+                        payout amount, the pool will transfer your
+                        <b>entire</b> balance to your wallet and
+                        <b>reset</b> your pending balance to zero. The minimum
+                        payout for each pool is listed in its 'Pool Stats' area.
+                      </p>
+                      <p>
+                        We are a small pool for the time being, and as such it
+                        may take some time to find a block. On larger pools you
+                        would see some balance earlier because they will find
+                        blocks faster, but you will get a smaller share of the
+                        reward than what you would in a smaller pool. Over time
+                        you will earn more or less the same amount when mining
+                        on a large pool or on a small one.
+                      </p>
+                      <p>
+                        In other words, the rewards you get on average are
+                        exactly proportional to your part in the total work done
+                        by the pool. If you mine in a pool
+                        <strong>twice as large</strong>, the pool will collect
+                        twice as much rewards but your share in them will be
+                        <strong>cut by half</strong>, meaning you get the same
+                        on average.
+                      </p>
+                      <p>
+                        Trustworthiness, reliability, support and low latency
+                        are the things you should consider when choosing a pool.
+                        By avoiding the largest pools you contribute to the
+                        network health by spreading the hash power.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+		</div>
+
+	</div>
+
+<!-- POOL SUPPORT PAGE -->	  
+    <div class="page page-support" style="display:none;">
+		<section class="content-header">
+			<h1>POOL<small>support</small></h1>
+		</section>
+		<div class="content container-fluid">
+		  <div class="row">
+            <div class="col-lg-12 col-sm-12">
+                <div class="card">
+                  <div class="content table-responsive table-full-width">
+ 			 <a href="https://discord.gg/ZyG3YKDCQQ" target="_blank">
+			    <img style="width:300px;" src="img/discord.png" alt="Discord">
+ 			 </a>
+			</div>
+                </div>
+            </div>
+          </div>
+		</div>
+	</div>
+				
+  </div> 
+
+  <footer class="main-footer">
+    	<strong><a target="_blank" href="https://1miner.net">&copy; <script>document.write(new Date().getFullYear())</script> 1miner.net - Made By DankMiner</a></strong>
+  </footer>
+ 
+  </div> <!-- end main-pool -->
+</div> <!-- end wrapper -->
+
+  <!-- Miningcore JS -->
+  <script type="text/javascript">
+    $(document).ready(function() {
+      loadIndex();
+    });
+  </script>
 
 </body>
-</html>
