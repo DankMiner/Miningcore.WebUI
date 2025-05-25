@@ -12,10 +12,11 @@
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   
   <!-- External CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/bootstrap.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/css/bootstrap-notify.css">
   
   <!-- Custom Styles -->
   <style>
@@ -97,6 +98,49 @@
       right: 0;
       z-index: 1000;
       transition: all 0.3s ease;
+    }
+    
+    /* Index Header */
+    .main-index-header {
+      background: rgba(10, 14, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .main-index-header .navbar {
+      padding: 1rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .header-text {
+      font-size: 1.5rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+    
+    /* Index Footer */
+    .main-index-footer {
+      background: rgba(10, 14, 26, 0.95);
+      border-top: 1px solid var(--card-border);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--text-secondary);
+      margin-top: 4rem;
+    }
+    
+    .main-index-footer a {
+      color: var(--primary-color);
+      text-decoration: none;
     }
 
     .main-header.scrolled {
@@ -184,11 +228,16 @@
     }
 
     /* Pool Cards */
-    .pool-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    .pool-coin-grid {
+      display: flex;
+      flex-wrap: wrap;
       gap: 2rem;
       padding: 2rem 0;
+    }
+    
+    .pool-coin-card {
+      flex: 0 1 calc(25% - 1.5rem);
+      min-width: 350px;
     }
 
     .pool-card {
@@ -200,8 +249,42 @@
       position: relative;
       overflow: hidden;
     }
+    
+    /* Override Bootstrap card styles for pool cards */
+    .pool-coin-card .card {
+      background: rgba(15, 20, 32, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+    
+    .pool-coin-card .card-header {
+      background: transparent;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem 1.5rem;
+    }
+    
+    .pool-coin-card .card-body {
+      padding: 1.5rem;
+    }
+    
+    .pool-coin-card .card-footer {
+      background: transparent;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem 1.5rem;
+    }
+    
+    .pool-coin-card .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary-color);
+      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+    }
 
-    .pool-card::before {
+    .pool-card::before,
+    .pool-coin-card .card::before {
       content: '';
       position: absolute;
       top: 0;
@@ -213,14 +296,71 @@
       transition: transform 0.3s ease;
     }
 
-    .pool-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--primary-color);
-      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
-    }
-
-    .pool-card:hover::before {
+    .pool-card:hover::before,
+    .pool-coin-card .card:hover::before {
       transform: scaleX(1);
+    }
+    
+    /* Pool card specific elements */
+    .pool-coin-card .coinimg {
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    
+    .pool-coin-card .row {
+      margin: 0.5rem 0;
+    }
+    
+    .pool-coin-card .card-title {
+      font-size: 0.875rem;
+      margin: 0;
+    }
+    
+    /* Progress bar in pool cards */
+    .pool-coin-card .progress {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .pool-coin-card .progress-bar {
+      background: var(--gradient-primary);
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    
+    .pool-coin-card .progress-bar.bg-green {
+      background: var(--success-color);
+    }
+    
+    /* Loading button style */
+    .btn-loading {
+      background: rgba(255, 170, 0, 0.2);
+      border: 1px solid var(--warning-color);
+      color: var(--warning-color);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      cursor: not-allowed;
+    }
+    
+    /* Pool status styles */
+    .pool-coin-card .btn-primary {
+      background: var(--gradient-primary);
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 6px;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .pool-coin-card .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
     }
 
     .pool-card-header {
@@ -374,7 +514,7 @@
       margin-bottom: 3rem;
     }
 
-    .filter-btn {
+    .filter-btn, .filter-btn.bg-gray {
       padding: 0.5rem 1.5rem;
       background: rgba(15, 20, 32, 0.8);
       border: 1px solid var(--card-border);
@@ -384,18 +524,30 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s ease;
+      margin: 0.25rem;
+      display: inline-block;
     }
 
-    .filter-btn:hover {
+    .filter-btn:hover, .filter-btn.bg-gray:hover {
       border-color: var(--primary-color);
       color: var(--primary-color);
       transform: translateY(-2px);
+      background: rgba(0, 212, 255, 0.1);
     }
 
-    .filter-btn.active {
+    .filter-btn.active, .filter-btn.bg-gray.active {
       background: var(--gradient-primary);
       border-color: transparent;
       color: white;
+    }
+
+    /* Fix for algorithmFilters */
+    #algorithmFilters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
     }
 
     /* Info Boxes */
@@ -497,7 +649,7 @@
     }
 
     /* Sidebar */
-    .sidebar {
+    .main-sidebar, .sidebar {
       position: fixed;
       left: 0;
       top: 80px;
@@ -512,7 +664,7 @@
       z-index: 999;
     }
 
-    .sidebar.active {
+    .sidebar.active, .main-sidebar.active {
       transform: translateX(0);
     }
 
@@ -526,7 +678,7 @@
       margin-bottom: 0.5rem;
     }
 
-    .sidebar-menu a {
+    .sidebar-menu a, .sidebar-menu .nav-link {
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -537,7 +689,7 @@
       position: relative;
     }
 
-    .sidebar-menu a::before {
+    .sidebar-menu a::before, .sidebar-menu .nav-link::before {
       content: '';
       position: absolute;
       left: 0;
@@ -550,13 +702,36 @@
     }
 
     .sidebar-menu a:hover,
-    .sidebar-menu a.active {
+    .sidebar-menu a.active,
+    .sidebar-menu li.active a {
       color: var(--primary-color);
       background: rgba(0, 212, 255, 0.1);
     }
 
-    .sidebar-menu a.active::before {
+    .sidebar-menu li.active a::before {
       transform: scaleY(1);
+    }
+    
+    /* Sidebar logo */
+    .sidebar .logo {
+      padding: 0 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 1rem;
+    }
+    
+    .sidebar .logo img {
+      width: 32px;
+      height: 32px;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    
+    .sidebar .logo p {
+      margin: 0;
+      color: var(--text-primary);
+      font-size: 1.125rem;
+      font-weight: 600;
     }
 
     /* Content Area */
@@ -702,14 +877,45 @@
       color: var(--danger-color);
     }
 
-    /* Page Sections */
+    /* Pages - Hide by default */
     .page {
       display: none;
-      animation: fadeIn 0.5s ease-in;
     }
-
-    .page.active {
+    
+    /* Show pages when needed */
+    .page-index {
       display: block;
+    }
+    
+    /* Wrapper */
+    .wrapper {
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Main sections */
+    .main-index {
+      display: block;
+    }
+    
+    .main-pool {
+      display: none;
+    }
+    
+    /* Sidebar toggle */
+    .sidebar-toggle {
+      background: transparent;
+      border: none;
+      color: var(--primary-color);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar-toggle:hover {
+      color: var(--accent-color);
+      transform: scale(1.1);
     }
 
     /* Dashboard Wallet Input */
@@ -743,24 +949,113 @@
       box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
     }
 
-    /* Notification Styles */
-    .notification {
-      position: fixed;
-      top: 100px;
-      right: 20px;
-      background: rgba(15, 20, 32, 0.95);
-      border: 1px solid var(--primary-color);
-      border-radius: 8px;
+    /* Bootstrap 3 compatibility for pool cards */
+    .col-lg-6.col-sm-12.col-md-6.col-xl-3 {
+      padding: 0 15px;
+      margin-bottom: 30px;
+    }
+    
+    @media (min-width: 1200px) {
+      .col-xl-3 {
+        width: 25%;
+        float: left;
+      }
+    }
+    
+    @media (min-width: 992px) {
+      .col-lg-6 {
+        width: 50%;
+        float: left;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .col-md-6 {
+        width: 50%;
+        float: left;
+      }
+    }
+    
+    .col-sm-12 {
+      width: 100%;
+    }
+    
+    /* Clear floats */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    
+    /* Card shadow */
+    .card-shadow {
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Progress bar animations */
+    .progress-bar-striped {
+      background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+      background-size: 1rem 1rem;
+    }
+    
+    .progress-bar-animated {
+      animation: progress-bar-stripes 1s linear infinite;
+    }
+    
+    @keyframes progress-bar-stripes {
+      from { background-position: 1rem 0; }
+      to { background-position: 0 0; }
+    }
+    
+    /* Bootstrap 3 Card Compatibility */
+    .card {
+      background: rgba(15, 20, 32, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding: 1rem 1.5rem;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-      z-index: 9999;
-      animation: slideInRight 0.3s ease-out;
     }
-
-    @keyframes slideInRight {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
+    
+    .card-body {
+      padding: 1.5rem;
     }
+    
+    .card-footer {
+      background: transparent;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem 1.5rem;
+    }
+    
+    .card-title {
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    
+    /* Container adjustments */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    .container-fluid {
+      padding: 0 15px;
+    }
+    
+    /* Text utilities */
+    .text-center { text-align: center !important; }
+    .text-primary { color: var(--primary-color) !important; }
+    .text-secondary { color: var(--text-secondary) !important; }
+    
+    /* Margin/Padding utilities */
+    .mb-4 { margin-bottom: 2rem !important; }
+    .py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+    .py-4 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
   </style>
 </head>
 <body>
@@ -802,23 +1097,33 @@
       <!-- Algorithm filters will be populated here -->
     </div>
     
-    <div class="pool-grid" id="poolGrid">
+    <div class="row pool-coin-grid card-title">
       <!-- Pool cards will be populated here -->
     </div>
   </section>
 </div>
 
 <!-- Main Pool -->
-<div class="main-pool" id="mainPool" style="display: none;">
+<div class="main-pool" style="display: none;">
+  
   <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-wrapper">
-      <!-- Sidebar content will be populated here -->
-    </div>
-  </aside>
+  <div id="main-sidebar" class="main-sidebar sidebar">
+    <section class="sidebar">
+      <div class="sidebar-wrapper"></div>
+    </section>
+  </div>
+
+  <!-- Pool Header -->
+  <header class="main-header">
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a></a>
+      <a href="#"><img src="img/logo.png" style="height: 40px;"></a>
+      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button"><i class="fas fa-bars"></i></a>
+    </nav>
+  </header>
 
   <!-- Content Wrapper -->
-  <div class="content-wrapper" id="contentWrapper">
+  <div id="page-scroll-top" class="content-wrapper" style="min-height: 864px;">
     
     <!-- Stats Page -->
     <div class="page page-stats" id="pageStats">
@@ -1115,69 +1420,83 @@
   </div>
 </footer>
 
+</div> <!-- end wrapper -->
+
+<!-- SIDEBAR TEMPLATE -->	
+<div class="sidebar-template" style="display:none;">
+  <div class="logo">
+    <a href="#" class="simple-text logo-normal">
+      <p>{{ coinLogo }} {{ coinName }}</p>
+    </a>
+  </div>
+
+  <ul class="sidebar-menu tree" data-widget="tree">
+    <li class="divider"></li>
+    <li class="nav-home"><a class="nav-link" href="#"><i class="fas fa-home"></i><span>Home</span></a></li>
+    <li class="nav-stats">
+      <a class="nav-link" href="#{{ coinId }}/stats">
+        <i class="fas fa-chart-line"></i><span>Stats</span>
+      </a>
+    </li>
+    <li class="nav-dashboard">
+      <a class="nav-link" href="#{{ coinId }}/dashboard">
+        <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-miners">
+      <a class="nav-link" href="#{{ coinId }}/miners">
+        <i class="fas fa-users"></i><span>Miners</span>
+      </a>
+    </li>
+    <li class="nav-blocks">
+      <a class="nav-link"  href="#{{ coinId }}/blocks">
+        <i class="fas fa-cubes"></i><span>Blocks</span>
+      </a>
+    </li>
+    <li class="nav-payments">
+      <a class="nav-link" href="#{{ coinId }}/payments">
+        <i class="fas fa-wallet"></i><span>Payments</span>
+      </a>
+    </li>
+    <li class="nav-connect">
+      <a class="nav-link" href="#{{ coinId }}/connect">
+        <i class="fas fa-plug"></i><span>Connect</span>
+      </a>
+    </li>
+    <li class="nav-faq">
+      <a class="nav-link" href="#{{ coinId }}/faq">
+        <i class="fas fa-comment-dots"></i><span>FAQ</span>
+      </a>
+    </li>
+    <li class="nav-support">
+      <a class="nav-link" href="#{{ coinId }}/support">
+        <i class="fas fa-headphones"></i><span>Support</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
 <!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="js/jquery.js"></script>
+<script src="js/bootstrap.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/js/bootstrap-notify.min.js"></script>
 <script src="js/miningcore.js"></script>
 
-<script>
-// Additional modern UI interactions
-document.addEventListener('DOMContentLoaded', function() {
+<script type="text/javascript">
+  $(document).ready(function() {
+    loadIndex();
+  });
+  
   // Header scroll effect
   window.addEventListener('scroll', function() {
-    const header = document.getElementById('mainHeader');
+    const header = document.querySelectorAll('.main-header')[0];
     if (window.scrollY > 50) {
       header.classList.add('scrolled');
     } else {
       header.classList.remove('scrolled');
     }
   });
-
-  // Sidebar toggle
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  const sidebar = document.getElementById('sidebar');
-  const contentWrapper = document.getElementById('contentWrapper');
-  
-  sidebarToggle.addEventListener('click', function() {
-    sidebar.classList.toggle('active');
-    contentWrapper.classList.toggle('sidebar-active');
-  });
-
-  // Smooth scroll for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    });
-  });
-
-  // Add ripple effect to buttons
-  document.querySelectorAll('.btn-primary-custom').forEach(button => {
-    button.addEventListener('click', function(e) {
-      const ripple = document.createElement('span');
-      const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-      
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.classList.add('ripple');
-      
-      this.appendChild(ripple);
-      
-      setTimeout(() => ripple.remove(), 600);
-    });
-  });
-});
 </script>
 
 </body>
