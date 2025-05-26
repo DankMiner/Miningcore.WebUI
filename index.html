@@ -9,7 +9,7 @@
   <meta name="msapplication-TileImage" content="img/favicon-32x32.png">
   <link rel="icon" href="img/favicon.ico" sizes="96x96" type="image/x-icon"/>
   
-  <title>1miner.net - Next Generation Mining Pool</title>
+  <title>1miner.net - Mining Pool</title>
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">  
   
   <!-- Core CSS -->
@@ -17,443 +17,441 @@
   <link rel="stylesheet" href="css/chartist.min.css">
   <link rel="stylesheet" href="css/font-awesome-all.css">
   <link rel="stylesheet" href="css/themify-icons.css">
-  <link rel="stylesheet" href="css/bootstrap-toggle.css">  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/css/bootstrap-notify.css">
   
   <!-- Core JS -->
   <script src="js/jquery.js"></script>
   <script src="js/bootstrap.js"></script>
-  <script src="js/bootstrap-toggle.js"></script>
   <script src="js/chartist.min.js"></script>
   <script src="js/miningcore.js"></script>
 
-  <!-- Modern Pool Theme -->
+  <!-- Open Overline Pool Style Theme -->
   <style>
-    /* Color Palette - Inspired by modern mining pools */
-    :root {
-      --bg-primary: #0a0e1a;
-      --bg-secondary: #0f1823;
-      --bg-tertiary: #141e2e;
-      --bg-card: #1a2332;
-      --bg-hover: #1f2937;
-      --accent-primary: #3b82f6;
-      --accent-secondary: #2563eb;
-      --accent-success: #10b981;
-      --accent-warning: #f59e0b;
-      --accent-danger: #ef4444;
-      --text-primary: #e5e7eb;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
-      --border-color: #374151;
-      --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      --gradient-dark: linear-gradient(180deg, #0a0e1a 0%, #141e2e 100%);
-    }
-
-    /* Global Styles */
+    /* Reset and Base Styles */
     * {
       box-sizing: border-box;
-    }
-
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
       margin: 0;
       padding: 0;
     }
 
-    /* Modern Pool Header */
-    .pool-header {
-      background: var(--gradient-dark);
-      border-bottom: 1px solid var(--border-color);
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Header Navigation */
+    .pool-nav-header {
+      background-color: #222;
+      padding: 0;
       position: fixed;
       top: 0;
       width: 100%;
       z-index: 1000;
-      backdrop-filter: blur(10px);
-      background-color: rgba(10, 14, 26, 0.8);
     }
 
-    .pool-header-content {
+    .pool-nav-container {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
-    .pool-logo {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    .pool-nav-brand {
+      color: #00d4ff;
+      font-size: 18px;
+      font-weight: 500;
+      padding: 15px 20px;
       text-decoration: none;
-      color: var(--text-primary);
     }
 
-    .pool-logo img {
-      width: 40px;
-      height: 40px;
+    .pool-nav-brand:hover {
+      color: #00d4ff;
+      text-decoration: none;
     }
 
-    .pool-logo h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* Navigation Tabs */
-    .pool-nav {
+    .pool-nav-menu {
       display: flex;
-      gap: 0.5rem;
+      margin-left: auto;
+      list-style: none;
+      margin-bottom: 0;
     }
 
     .pool-nav-item {
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
+      position: relative;
+    }
+
+    .pool-nav-link {
+      color: #fff;
+      padding: 15px 20px;
+      display: block;
       text-decoration: none;
-      color: var(--text-secondary);
-      transition: all 0.3s ease;
-      font-weight: 500;
+      transition: background-color 0.2s;
     }
 
-    .pool-nav-item:hover {
-      background-color: var(--bg-hover);
-      color: var(--text-primary);
+    .pool-nav-link:hover {
+      background-color: #333;
+      color: #fff;
+      text-decoration: none;
     }
 
-    .pool-nav-item.active {
-      background: var(--gradient-primary);
-      color: white;
+    .pool-nav-link.active {
+      background-color: #00d4ff;
+      color: #fff;
+    }
+
+    /* Notification Badge */
+    .nav-badge {
+      background-color: #28a745;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      margin-left: 5px;
+      font-weight: 600;
     }
 
     /* Main Container */
-    .pool-container {
-      max-width: 1400px;
-      margin: 80px auto 0;
-      padding: 2rem;
+    .main-container {
+      max-width: 1200px;
+      margin: 80px auto 20px;
+      padding: 0 20px;
     }
 
     /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
     }
 
-    .stat-card {
-      background-color: var(--bg-card);
-      border-radius: 12px;
-      padding: 1.5rem;
-      border: 1px solid var(--border-color);
-      transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      border-color: var(--accent-primary);
-    }
-
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--gradient-primary);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      color: white;
-      margin-bottom: 1rem;
+    .stat-item {
+      background-color: #fff;
+      padding: 15px 20px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
     .stat-label {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
+      color: #666;
+      font-size: 13px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stat-label i {
+      font-size: 12px;
+      opacity: 0.7;
     }
 
     .stat-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.2;
-    }
-
-    .stat-suffix {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    /* Charts Container */
-    .chart-container {
-      background-color: var(--bg-card);
-      border-radius: 12px;
-      padding: 1.5rem;
-      border: 1px solid var(--border-color);
-      margin-bottom: 2rem;
-    }
-
-    .chart-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-
-    .chart-title {
-      font-size: 1.25rem;
+      font-size: 18px;
       font-weight: 600;
-      color: var(--text-primary);
+      color: #333;
     }
 
-    /* Mining Info Cards */
-    .mining-card {
-      background-color: var(--bg-card);
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-      transition: all 0.3s ease;
+    .stat-value.green {
+      color: #28a745;
     }
 
-    .mining-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    .stat-value.blue {
+      color: #00d4ff;
     }
 
-    .mining-card-header {
-      background: var(--gradient-primary);
-      padding: 1rem 1.5rem;
-      color: white;
+    .stat-description {
+      font-size: 12px;
+      color: #999;
+      margin-top: 3px;
     }
 
-    .mining-card-body {
-      padding: 1.5rem;
-    }
-
-    /* Pool Selection Grid */
-    .pool-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .pool-item {
-      background-color: var(--bg-card);
-      border-radius: 12px;
-      padding: 1.5rem;
-      border: 1px solid var(--border-color);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .pool-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
-      border-color: var(--accent-primary);
-    }
-
-    .pool-item-header {
+    /* Tab Navigation */
+    .tab-nav {
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 20px;
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
+      gap: 20px;
     }
 
-    .pool-item-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .pool-item-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .pool-item-name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .pool-item-algo {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-
-    .pool-item-stats {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .pool-item-stat {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.875rem;
-    }
-
-    .pool-item-stat-label {
-      color: var(--text-secondary);
-    }
-
-    .pool-item-stat-value {
-      color: var(--text-primary);
+    .tab-link {
+      padding: 10px 0;
+      color: #666;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
       font-weight: 500;
     }
 
-    /* Progress Bars */
-    .progress-wrapper {
-      margin-top: 0.5rem;
+    .tab-link:hover {
+      color: #333;
+      text-decoration: none;
     }
 
+    .tab-link.active {
+      color: #00d4ff;
+      border-bottom-color: #00d4ff;
+    }
+
+    .tab-badge {
+      background-color: #dc3545;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      margin-left: 5px;
+      font-weight: 600;
+    }
+
+    /* Tables */
+    .data-table {
+      width: 100%;
+      background-color: #fff;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      background-color: #f8f9fa;
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .data-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f1f1f1;
+    }
+
+    .data-table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Info Box */
+    .info-box {
+      background-color: #e8f4fd;
+      border: 1px solid #bee5eb;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #004085;
+    }
+
+    .info-box p {
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .info-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Forms */
+    .form-control {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #495057;
+      background-color: #fff;
+      background-clip: padding-box;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-control:focus {
+      color: #495057;
+      background-color: #fff;
+      border-color: #00d4ff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0,212,255,0.25);
+    }
+
+    .btn {
+      display: inline-block;
+      font-weight: 400;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      user-select: none;
+      border: 1px solid transparent;
+      padding: 8px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      border-radius: 4px;
+      transition: all 0.15s ease-in-out;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background-color: #00d4ff;
+      border-color: #00d4ff;
+    }
+
+    .btn-primary:hover {
+      color: #fff;
+      background-color: #00b8e6;
+      border-color: #00a8d4;
+    }
+
+    /* Highlight Row */
+    .highlight-row {
+      background-color: #d4edda !important;
+    }
+
+    /* Progress Bar */
     .progress {
-      height: 8px;
-      background-color: var(--bg-secondary);
+      height: 20px;
+      background-color: #e9ecef;
       border-radius: 4px;
       overflow: hidden;
     }
 
     .progress-bar {
-      height: 100%;
-      background: var(--gradient-primary);
-      transition: width 0.3s ease;
+      background-color: #28a745;
+      color: #fff;
+      text-align: center;
+      line-height: 20px;
+      font-size: 12px;
+      font-weight: 600;
     }
 
-    /* Buttons */
-    .btn-primary {
-      background: var(--gradient-primary);
-      border: none;
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 600;
-      transition: all 0.3s ease;
+    /* Pool Selection Page */
+    .pool-selection {
+      margin-top: 60px;
+      text-align: center;
+    }
+
+    .pool-logo {
+      max-width: 400px;
+      margin: 40px auto;
+    }
+
+    .pool-tagline {
+      font-size: 24px;
+      color: #666;
+      margin-bottom: 40px;
+    }
+
+    .pool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .pool-card {
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
       text-decoration: none;
-      display: inline-block;
+      color: inherit;
     }
 
-    .btn-primary:hover {
+    .pool-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      text-decoration: none;
+      color: inherit;
     }
 
-    /* Tables */
-    .modern-table {
-      width: 100%;
-      background-color: var(--bg-card);
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-    }
-
-    .modern-table thead {
-      background-color: var(--bg-secondary);
-    }
-
-    .modern-table th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .modern-table td {
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
-      color: var(--text-primary);
-    }
-
-    .modern-table tbody tr {
-      transition: background-color 0.3s ease;
-    }
-
-    .modern-table tbody tr:hover {
-      background-color: var(--bg-hover);
-    }
-
-    /* Sidebar */
-    .pool-sidebar {
-      position: fixed;
-      left: 0;
-      top: 80px;
-      width: 250px;
-      height: calc(100vh - 80px);
-      background-color: var(--bg-secondary);
-      border-right: 1px solid var(--border-color);
-      padding: 1.5rem;
-      overflow-y: auto;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-menu {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .sidebar-menu-item {
-      margin-bottom: 0.5rem;
-    }
-
-    .sidebar-menu-link {
+    .pool-card-header {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      color: var(--text-secondary);
-      text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
+      gap: 15px;
+      margin-bottom: 15px;
     }
 
-    .sidebar-menu-link:hover {
-      background-color: var(--bg-hover);
-      color: var(--text-primary);
+    .pool-card-icon {
+      width: 48px;
+      height: 48px;
     }
 
-    .sidebar-menu-link.active {
-      background: var(--gradient-primary);
-      color: white;
+    .pool-card-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
-    /* Main Content with Sidebar */
-    .content-with-sidebar {
-      margin-left: 250px;
-      min-height: calc(100vh - 80px);
+    .pool-card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
     }
+
+    .pool-card-algo {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .pool-card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .pool-card-stat {
+      text-align: left;
+    }
+
+    .pool-card-stat-label {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .pool-card-stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Status Colors */
+    .text-success { color: #28a745; }
+    .text-warning { color: #ffc107; }
+    .text-danger { color: #dc3545; }
+    .text-info { color: #17a2b8; }
+    .text-muted { color: #6c757d; }
+
+    /* Hidden Elements */
+    .d-none { display: none !important; }
 
     /* Responsive */
     @media (max-width: 768px) {
-      .pool-sidebar {
-        transform: translateX(-100%);
+      .pool-nav-container {
+        flex-wrap: wrap;
       }
       
-      .content-with-sidebar {
+      .pool-nav-menu {
+        width: 100%;
         margin-left: 0;
+        flex-wrap: wrap;
       }
       
-      .pool-header-content {
-        padding: 1rem;
-      }
-      
-      .pool-container {
-        padding: 1rem;
+      .pool-nav-item {
+        flex: 1;
+        text-align: center;
       }
       
       .stats-grid {
@@ -461,736 +459,596 @@
       }
     }
 
-    /* Loading Animation */
-    .loading-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
     }
 
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: .5;
-      }
+    .loading i {
+      font-size: 48px;
+      color: #00d4ff;
+      animation: spin 1s linear infinite;
     }
 
-    /* Animations */
-    .fade-in {
-      animation: fadeIn 0.5s ease-in;
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* Sidebar for pool pages */
+    .pool-layout {
+      display: flex;
+      margin-top: 60px;
+    }
+
+    .pool-sidebar {
+      width: 200px;
+      background-color: #f8f9fa;
+      min-height: calc(100vh - 60px);
+      padding: 20px;
+      position: fixed;
+    }
+
+    .pool-content {
+      flex: 1;
+      margin-left: 200px;
+      padding: 20px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu-item {
+      margin-bottom: 5px;
+    }
+
+    .sidebar-menu-link {
+      display: block;
+      padding: 8px 12px;
+      color: #666;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .sidebar-menu-link:hover {
+      background-color: #e9ecef;
+      color: #333;
+    }
+
+    .sidebar-menu-link.active {
+      background-color: #00d4ff;
+      color: #fff;
+    }
+
+    .sidebar-menu-link i {
+      width: 20px;
+      margin-right: 8px;
     }
   </style>
 </head>
 
 <body onhashchange="loadIndex()">
 
-<!-- Main Header -->
-<header class="pool-header">
-  <div class="pool-header-content">
-    <a href="#" class="pool-logo">
-      <img src="img/logo.gif" alt="Logo">
-      <h1>1MINER.NET</h1>
-    </a>
-    <nav class="pool-nav" id="main-nav">
-      <!-- Navigation will be dynamically loaded -->
-    </nav>
+<!-- Navigation Header -->
+<nav class="pool-nav-header">
+  <div class="pool-nav-container">
+    <a href="#" class="pool-nav-brand">1MinerPool</a>
+    <ul class="pool-nav-menu" id="main-pool-nav" style="display:none;">
+      <li class="pool-nav-item">
+        <a href="#" class="pool-nav-link nav-home">
+          <i class="fas fa-home"></i> Home
+        </a>
+      </li>
+      <li class="pool-nav-item">
+        <a href="#" class="pool-nav-link nav-help">
+          <i class="fas fa-question-circle"></i> Help
+        </a>
+      </li>
+      <li class="pool-nav-item">
+        <a href="#" class="pool-nav-link nav-blocks">
+          <i class="fas fa-cubes"></i> Pool Blocks
+          <span class="nav-badge" id="nav-blocks-badge">0</span>
+        </a>
+      </li>
+      <li class="pool-nav-item">
+        <a href="#" class="pool-nav-link nav-payments">
+          <i class="fas fa-money-bill-wave"></i> Payments
+        </a>
+      </li>
+      <li class="pool-nav-item">
+        <a href="#" class="pool-nav-link nav-miners">
+          <i class="fas fa-users"></i> Miners
+        </a>
+      </li>
+      <li class="pool-nav-item">
+        <a href="#" class="pool-nav-link nav-about">
+          <i class="fas fa-info-circle"></i> About
+          <span class="nav-badge">?</span>
+        </a>
+      </li>
+    </ul>
   </div>
-</header>
+</nav>
 
 <!-- Main Pool Interface -->
 <div class="main-pool" style="display:none;">
-  <!-- Sidebar -->
-  <aside class="pool-sidebar" id="pool-sidebar">
-    <div class="sidebar-wrapper"></div>
-  </aside>
+  <div class="pool-layout">
+    <!-- Sidebar -->
+    <aside class="pool-sidebar" id="pool-sidebar">
+      <div class="sidebar-wrapper"></div>
+    </aside>
 
-  <!-- Main Content -->
-  <main class="content-with-sidebar">
-    <div class="pool-container">
+    <!-- Main Content -->
+    <main class="pool-content">
       
-      <!-- Stats Page -->
-      <div class="page page-stats" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Pool Statistics</h2>
-          
-          <!-- Stats Grid -->
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-server"></i>
-              </div>
-              <div class="stat-label">Pool Hashrate</div>
-              <div class="stat-value">
-                <span id="poolHashRate">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-users"></i>
-              </div>
-              <div class="stat-label">Active Miners</div>
-              <div class="stat-value">
-                <span id="poolMiners">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-cubes"></i>
-              </div>
-              <div class="stat-label">Blocks Found</div>
-              <div class="stat-value">
-                <span id="poolBlocks">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-percentage"></i>
-              </div>
-              <div class="stat-label">Pool Fee</div>
-              <div class="stat-value">
-                <span id="poolFeePercent">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-network-wired"></i>
-              </div>
-              <div class="stat-label">Network Hashrate</div>
-              <div class="stat-value">
-                <span id="networkHashRate">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-tachometer-alt"></i>
-              </div>
-              <div class="stat-label">Network Difficulty</div>
-              <div class="stat-value">
-                <span id="networkDifficulty">-</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Charts -->
-          <div class="chart-container">
-            <div class="chart-header">
-              <h3 class="chart-title">Pool Hashrate History</h3>
-            </div>
-            <div class="ct-chart" id="chartStatsHashRatePool"></div>
-          </div>
-          
-          <div class="chart-container">
-            <div class="chart-header">
-              <h3 class="chart-title">Network Statistics</h3>
-            </div>
-            <div class="ct-chart" id="chartStatsHashRate"></div>
-          </div>
-
-          <!-- Additional Stats -->
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-link"></i>
-              </div>
-              <div class="stat-label">Blockchain Height</div>
-              <div class="stat-value">
-                <span id="blockchainHeight">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-code-branch"></i>
-              </div>
-              <div class="stat-label">Connected Peers</div>
-              <div class="stat-value">
-                <span id="connectedPeers">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-hammer"></i>
-              </div>
-              <div class="stat-label">Pool Effort</div>
-              <div class="stat-value">
-                <span id="poolEffort">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-hand-holding-usd"></i>
-              </div>
-              <div class="stat-label">Min. Payment</div>
-              <div class="stat-value">
-                <span id="minimumPayment">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-credit-card"></i>
-              </div>
-              <div class="stat-label">Total Paid</div>
-              <div class="stat-value">
-                <span id="totalPaid">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-dollar-sign"></i>
-              </div>
-              <div class="stat-label">Current Value</div>
-              <div class="stat-value">
-                <span id="value">-</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dashboard Page -->
+      <!-- Dashboard Page (Main Stats) -->
       <div class="page page-dashboard" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Miner Dashboard</h2>
-          
-          <div class="mining-card">
-            <div class="mining-card-header">
-              <h3>Wallet Address</h3>
+        <!-- Wallet Input -->
+        <div style="margin-bottom: 30px;">
+          <form onsubmit="loadWallet(); return false;">
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="walletAddress" class="form-control" placeholder="Enter your wallet address" style="flex: 1;">
+              <button type="submit" class="btn btn-primary">Load Stats</button>
             </div>
-            <div class="mining-card-body">
-              <form onsubmit="loadWallet(); return false;">
-                <div class="form-group">
-                  <input type="text" id="walletAddress" class="form-control" placeholder="Enter your wallet address">
-                </div>
-                <button type="submit" class="btn-primary">Load Stats</button>
-              </form>
+          </form>
+        </div>
+
+        <!-- Main Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-hourglass-half"></i>
+              Immature Balance:
+              <span class="stat-value" id="pendingBalance">0.00000000</span>
+            </div>
+            <div class="stat-description">Preliminary balance awaiting blocks to mature.</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-clock"></i>
+              Last Share Submitted:
+              <span class="stat-value blue" id="lastShareSubmitted">never</span>
             </div>
           </div>
 
-          <!-- Tabs -->
-          <div class="tabs-container" style="margin-top: 2rem;">
-            <div class="pool-nav">
-              <button class="pool-nav-item active" onclick="openCity(event, 'Overview')" id="defaultOpen">Overview</button>
-              <button class="pool-nav-item" onclick="openCity(event, 'Workers')">Workers</button>
-              <button class="pool-nav-item" onclick="openCity(event, 'BlocksMiner')">Blocks</button>
-              <button class="pool-nav-item" onclick="openCity(event, 'Earnings')">Earnings</button>
-              <button class="pool-nav-item" onclick="openCity(event, 'Payouts')">Payouts</button>
-              <button class="pool-nav-item" onclick="openCity(event, 'Setting')">Settings</button>
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-cubes"></i>
+              Blocks Found:
+              <span class="stat-value" id="blocksFound">0</span>
             </div>
+          </div>
 
-            <!-- Tab Content -->
-            <div id="Overview" class="tabcontent" style="display:block;">
-              <div class="stats-grid" style="margin-top: 1rem;">
-                <div class="stat-card">
-                  <div class="stat-icon">
-                    <i class="fas fa-server"></i>
-                  </div>
-                  <div class="stat-label">Your Hashrate</div>
-                  <div class="stat-value">
-                    <span id="minerHashRate">-</span>
-                  </div>
-                </div>
-                
-                <div class="stat-card">
-                  <div class="stat-icon">
-                    <i class="fas fa-wallet"></i>
-                  </div>
-                  <div class="stat-label">Pending Balance</div>
-                  <div class="stat-value">
-                    <span id="pendingBalance2">-</span>
-                  </div>
-                </div>
-                
-                <div class="stat-card">
-                  <div class="stat-icon">
-                    <i class="fas fa-money-bill-wave"></i>
-                  </div>
-                  <div class="stat-label">Total Paid</div>
-                  <div class="stat-value">
-                    <span id="paidBalance">-</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="chart-container">
-                <div class="chart-header">
-                  <h3 class="chart-title">Hashrate History</h3>
-                </div>
-                <div class="ct-chart" id="chartDashboardHashRate"></div>
-              </div>
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-wallet"></i>
+              Pending Balance:
+              <span class="stat-value" id="pendingBalance2">0.00000000</span>
             </div>
+            <div class="stat-description">Credited coins awaiting payout.</div>
+          </div>
 
-            <div id="Workers" class="tabcontent" style="display:none;">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>No.</th>
-                      <th>Name</th>
-                      <th>Current Hashrate</th>
-                      <th>6h Average</th>
-                      <th>12h Average</th>
-                      <th>24h Average</th>
-                      <th>Share Rate</th>
-                      <th>Daily Earnings</th>
-                    </tr>
-                  </thead>
-                  <tbody id="workerList"></tbody>
-                </table>
-              </div>
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-users"></i>
+              Workers Online:
+              <span class="stat-value" id="workersOnline">0</span>
             </div>
+          </div>
 
-            <div id="BlocksMiner" class="tabcontent" style="display:none;">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Height</th>
-                      <th>Pool Effort</th>
-                      <th>Your Effort</th>
-                      <th>Reward</th>
-                      <th>Type</th>
-                      <th>Status</th>
-                      <th>Confirmation</th>
-                    </tr>
-                  </thead>
-                  <tbody id="DashboardBlockList"></tbody>
-                </table>
-              </div>
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-money-check-alt"></i>
+              Total Payments:
+              <span class="stat-value" id="totalPayments">0</span>
             </div>
+          </div>
 
-            <div id="Earnings" class="tabcontent" style="display:none;">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Transaction</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody id="EarningsList"></tbody>
-                </table>
-              </div>
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-dollar-sign"></i>
+              Total Paid:
+              <span class="stat-value" id="totalPaid">0.00000000</span>
             </div>
+          </div>
 
-            <div id="Payouts" class="tabcontent" style="display:none;">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Address</th>
-                      <th>Amount</th>
-                      <th>TXID</th>
-                    </tr>
-                  </thead>
-                  <tbody id="lastPaymentList"></tbody>
-                </table>
-              </div>
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-server"></i>
+              Hashrate (30m):
+              <span class="stat-value green" id="hashrate30m">0 H/s</span>
             </div>
+          </div>
 
-            <div id="Setting" class="tabcontent" style="display:none;">
-              <div class="mining-card">
-                <div class="mining-card-header">
-                  <h3>Settings</h3>
-                </div>
-                <div class="mining-card-body">
-                  <form onsubmit="submitSettings(); return false;">
-                    <div class="form-group">
-                      <label>IP Address</label>
-                      <input type="text" id="ipAddress" class="form-control" placeholder="Miner IP Address">
-                    </div>
-                    <div class="form-group">
-                      <label>Minimum Payout</label>
-                      <input type="text" id="minimumPayout" class="form-control" placeholder="New Payout Threshold">
-                    </div>
-                    <button type="submit" class="btn-primary">Save Settings</button>
-                  </form>
-                  <div id="updateSuccess" class="alert alert-success" style="display: none;">Settings updated successfully!</div>
-                  <div id="updateFailed" class="alert alert-danger" style="display: none;">Failed to update settings.</div>
-                </div>
-              </div>
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-percentage"></i>
+              Your Round Share:
+              <span class="stat-value" id="roundShare">0.000000%</span>
+            </div>
+            <div class="stat-description">Percent of your contribution to current round.</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-chart-line"></i>
+              Hashrate (3h):
+              <span class="stat-value green" id="hashrate3h">0 H/s</span>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-sync"></i>
+              Epoch Switch:
+              <span class="stat-value" id="epochSwitch">in 0 hours</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Miners Page -->
-      <div class="page page-miners" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Top Miners</h2>
-          <div class="modern-table">
+        <!-- Tabs -->
+        <div class="tab-nav">
+          <a href="#" class="tab-link active" onclick="switchTab(event, 'workers-tab')">
+            Workers
+            <span class="tab-badge" id="workers-badge">0</span>
+          </a>
+          <a href="#" class="tab-link" onclick="switchTab(event, 'payouts-tab')">
+            Payouts
+          </a>
+        </div>
+
+        <!-- Workers Tab -->
+        <div id="workers-tab" class="tab-content">
+          <h3>Your Workers</h3>
+          
+          <div class="data-table">
             <table>
               <thead>
                 <tr>
-                  <th>Address</th>
-                  <th>Hashrate</th>
-                  <th>Share Rate</th>
+                  <th>ID</th>
+                  <th>Hashrate (rough, short average)</th>
+                  <th>Hashrate (accurate, long average)</th>
+                  <th>Last Share</th>
                 </tr>
               </thead>
-              <tbody id="minerList"></tbody>
+              <tbody id="workerList">
+                <tr>
+                  <td colspan="4" class="text-center text-muted">No workers found</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="info-box" style="margin-top: 20px;">
+            <p>Your average hashrate will be smoothly adjusted until you have shares to fulfill estimation window.</p>
+            <p>There are two windows, long and short, first is equal to about 30 minutes and long window is usually equal to 3 hours.</p>
+            <p>Dead (sick) workers will be highlighted in a table of workers if they didn't submit a share for 1/2 of short window, so you can perform maintenance of your rigs.</p>
+          </div>
+        </div>
+
+        <!-- Payouts Tab -->
+        <div id="payouts-tab" class="tab-content" style="display:none;">
+          <h3>Your Payouts</h3>
+          
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Amount</th>
+                  <th>Address</th>
+                  <th>Tx ID</th>
+                </tr>
+              </thead>
+              <tbody id="payoutsList">
+                <tr>
+                  <td colspan="4" class="text-center text-muted">No payouts yet</td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>
       </div>
 
+      <!-- Stats Page -->
+      <div class="page page-stats" style="display:none;">
+        <h2>Pool Statistics</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">Pool Hashrate</div>
+            <div class="stat-value green" id="poolHashRate">-</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-label">Active Miners</div>
+            <div class="stat-value" id="poolMiners">-</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-label">Network Hashrate</div>
+            <div class="stat-value" id="networkHashRate">-</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-label">Network Difficulty</div>
+            <div class="stat-value" id="networkDifficulty">-</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-label">Blockchain Height</div>
+            <div class="stat-value" id="blockchainHeight">-</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-label">Pool Fee</div>
+            <div class="stat-value" id="poolFeePercent">-</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div style="background-color: #fff; padding: 20px; border-radius: 4px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <h3>Hashrate History</h3>
+          <div class="ct-chart" id="chartStatsHashRatePool" style="height: 300px;"></div>
+        </div>
+      </div>
+
+      <!-- Miners Page -->
+      <div class="page page-miners" style="display:none;">
+        <h2>Top Miners</h2>
+        
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Address</th>
+                <th>Hashrate</th>
+                <th>Share Rate</th>
+              </tr>
+            </thead>
+            <tbody id="minerList">
+              <tr>
+                <td colspan="3" class="text-center text-muted">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Blocks Page -->
       <div class="page page-blocks" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Blocks Found</h2>
-          
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-cubes"></i>
-              </div>
-              <div class="stat-label">Total Blocks</div>
-              <div class="stat-value">
-                <span id="poolBlocks2">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-credit-card"></i>
-              </div>
-              <div class="stat-label">Total Paid</div>
-              <div class="stat-value">
-                <span id="totalPaid2">-</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">
-                <i class="fas fa-dollar-sign"></i>
-              </div>
-              <div class="stat-label">Block Reward</div>
-              <div class="stat-value">
-                <span id="blockreward">-</span>
-              </div>
-            </div>
+        <h2>Blocks Found</h2>
+        
+        <div class="tab-nav">
+          <a href="#" class="tab-link active" onclick="switchBlockTab(event, 'confirmed-blocks')">
+            Confirmed
+            <span class="tab-badge" id="confirmedBlockCount">0</span>
+          </a>
+          <a href="#" class="tab-link" onclick="switchBlockTab(event, 'pending-blocks')">
+            Pending
+            <span class="tab-badge" id="pendingBlockCount">0</span>
+          </a>
+        </div>
+
+        <div id="confirmed-blocks" class="tab-content">
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Height</th>
+                  <th>Time Found</th>
+                  <th>Miner</th>
+                  <th>Reward</th>
+                  <th>Effort</th>
+                </tr>
+              </thead>
+              <tbody id="blockList">
+                <tr>
+                  <td colspan="5" class="text-center text-muted">No blocks found yet</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+        </div>
 
-          <div class="tabs-container" style="margin-top: 2rem;">
-            <div class="pool-nav">
-              <button class="pool-nav-item active" onclick="openCity1(event, 'Confirmed')" id="defaultOpen1">
-                <span id="confirmedBlockCount">0</span> Confirmed
-              </button>
-              <button class="pool-nav-item" onclick="openCity1(event, 'Pending')">
-                <span id="pendingBlockCount">0</span> Pending
-              </button>
-              <button class="pool-nav-item" onclick="openCity1(event, 'NewBlocks')">
-                <span id="newBlockCount">0</span> New
-              </button>
-            </div>
-
-            <div id="Confirmed" class="tabcontent1" style="display:block;">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Found Time</th>
-                      <th>Finder</th>
-                      <th>Height</th>
-                      <th>Difficulty</th>
-                      <th>Luck</th>
-                      <th>Status</th>
-                      <th>Reward</th>
-                      <th>Type</th>
-                      <th>Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody id="blockList"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div id="Pending" class="tabcontent1" style="display:none;">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Found Time</th>
-                      <th>Finder</th>
-                      <th>Height</th>
-                      <th>Difficulty</th>
-                      <th>Luck</th>
-                      <th>Status</th>
-                      <th>Reward</th>
-                      <th>Type</th>
-                      <th>Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody id="pendingBlockList"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div id="NewBlocks" class="tabcontent1" style="display:none;">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Found Time</th>
-                      <th>Finder</th>
-                      <th>Height</th>
-                      <th>Difficulty</th>
-                      <th>Luck</th>
-                      <th>Status</th>
-                      <th>Reward</th>
-                      <th>Type</th>
-                      <th>Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody id="newBlockList"></tbody>
-                </table>
-              </div>
-            </div>
+        <div id="pending-blocks" class="tab-content" style="display:none;">
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Height</th>
+                  <th>Time Found</th>
+                  <th>Miner</th>
+                  <th>Reward</th>
+                  <th>Confirmations</th>
+                </tr>
+              </thead>
+              <tbody id="pendingBlockList">
+                <tr>
+                  <td colspan="5" class="text-center text-muted">No pending blocks</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       <!-- Payments Page -->
       <div class="page page-payments" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Recent Payments</h2>
-          <div class="modern-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Sent</th>
-                  <th>Address</th>
-                  <th>Amount</th>
-                  <th colspan="2">Transaction</th>
-                </tr>
-              </thead>
-              <tbody id="paymentList"></tbody>
-            </table>
-          </div>
+        <h2>Recent Payments</h2>
+        
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Address</th>
+                <th>Amount</th>
+                <th>Transaction</th>
+              </tr>
+            </thead>
+            <tbody id="paymentList">
+              <tr>
+                <td colspan="4" class="text-center text-muted">No payments yet</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <!-- Connect Page -->
       <div class="page page-connect" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Pool Connection</h2>
-          
-          <div class="mining-card">
-            <div class="mining-card-header">
-              <h3>Pool Configuration</h3>
-            </div>
-            <div class="mining-card-body">
-              <div class="modern-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Setting</th>
-                      <th>Value</th>
-                    </tr>
-                  </thead>
-                  <tbody id="connectPoolConfig"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div id="miner-config" style="margin-top: 2rem;"></div>
+        <h2>How to Connect</h2>
+        
+        <div style="background-color: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <h3>Pool Configuration</h3>
+          <table class="data-table">
+            <tbody id="connectPoolConfig">
+              <tr>
+                <td>Loading configuration...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <div id="miner-config" style="margin-top: 20px;"></div>
       </div>
 
       <!-- FAQ Page -->
       <div class="page page-faq" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Frequently Asked Questions</h2>
+        <h2>Frequently Asked Questions</h2>
+        
+        <div style="background-color: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <h4>Do I need to register?</h4>
+          <p>No registration is required. Just configure your miner and start mining!</p>
           
-          <div class="mining-card">
-            <div class="mining-card-body">
-              <h4>Do I need to register an account to mine?</h4>
-              <p>Registration is not required. Just configure your miner according to our instructions and start mining. Your first submitted share will automatically register you with our pool. Good Luck!</p>
-              
-              <h4>Why is my reported hashrate zero or different from what my miner reports?</h4>
-              <p>Pool and miner hashrates are re-calculated every ten minutes. Therefore it can take a maximum of ten minutes for your hashrate to update depending on the submission time of your first valid share.</p>
-              
-              <h4>How will I get paid?</h4>
-              <p>All of our pools utilize the PPLNS payment system. PPLNS is short for "Pay Per Last N Shares".</p>
-              
-              <h4>When will I get paid?</h4>
-              <p>You won't see any balance in your account until a block has been found by the pool and after the block has reached a mature status.</p>
-            </div>
-          </div>
+          <h4>What is PPLNS?</h4>
+          <p>PPLNS stands for "Pay Per Last N Shares". This reward system pays miners based on the last N shares contributed when a block is found.</p>
+          
+          <h4>When do I get paid?</h4>
+          <p>Payments are processed automatically when your balance reaches the minimum payout threshold.</p>
         </div>
       </div>
 
       <!-- Support Page -->
       <div class="page page-support" style="display:none;">
-        <div class="fade-in">
-          <h2 class="page-title">Support</h2>
-          
-          <div class="mining-card">
-            <div class="mining-card-body" style="text-align: center;">
-              <a href="https://discord.gg/ZyG3YKDCQQ" target="_blank">
-                <img style="width:300px;" src="img/discord.png" alt="Discord">
-              </a>
-              <p style="margin-top: 1rem;">Join our Discord community for support and updates!</p>
-            </div>
-          </div>
+        <h2>Support</h2>
+        
+        <div style="background-color: #fff; padding: 40px; border-radius: 4px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <a href="https://discord.gg/ZyG3YKDCQQ" target="_blank">
+            <img style="width:200px;" src="img/discord.png" alt="Discord">
+          </a>
+          <p style="margin-top: 20px;">Join our Discord for support!</p>
         </div>
       </div>
 
-    </div>
-  </main>
+    </main>
+  </div>
 </div>
 
-<!-- Main Index -->
+<!-- Pool Selection Page -->
 <div class="main-index">
-  <div class="pool-container">
-    <div class="fade-in" style="text-align: center; padding: 4rem 0;">
-      <img src="img/logo.gif" alt="1miner.net" style="width: min(80vw, 500px); height: auto; margin-bottom: 2rem;">
-      <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem;">
-        Next Generation Mining Pool
-      </h1>
-      <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 3rem;">
-        Real-time monitoring. Professional infrastructure. Maximum profitability.
-      </p>
-      <a href="https://discord.gg/ZyG3YKDCQQ" target="_blank" class="btn-primary">
-        <i class="fab fa-discord"></i> Join Discord
-      </a>
-    </div>
-
-    <div class="mining-card">
-      <div class="mining-card-header">
-        <h3>Select Mining Algorithm</h3>
-      </div>
-      <div class="mining-card-body">
-        <div id="algorithmFilters" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;"></div>
-        <div class="pool-grid pool-coin-grid"></div>
-      </div>
+  <div class="main-container">
+    <div class="pool-selection">
+      <img src="img/logo.gif" alt="1miner.net" class="pool-logo">
+      <h1 class="pool-tagline">Select a coin to start mining</h1>
+      
+      <div id="algorithmFilters" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;"></div>
+      
+      <div class="pool-grid pool-coin-grid"></div>
     </div>
   </div>
 </div>
 
-<!-- Templates -->
+<!-- Sidebar Template -->
 <div class="sidebar-template" style="display:none;">
-  <div class="pool-coin-header" style="padding: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem;">
-    <div style="display: flex; align-items: center; gap: 0.75rem;">
-      {{ coinLogo }}
-      <div>
-        <div style="font-weight: 600; font-size: 1.125rem;">{{ coinName }}</div>
-        <div style="font-size: 0.875rem; color: var(--text-secondary);">Mining Pool</div>
-      </div>
-    </div>
-  </div>
-
   <ul class="sidebar-menu">
     <li class="sidebar-menu-item nav-home">
       <a class="sidebar-menu-link" href="#">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
+        <i class="fas fa-home"></i> Home
       </a>
     </li>
     <li class="sidebar-menu-item nav-stats">
       <a class="sidebar-menu-link" href="#{{ coinId }}/stats">
-        <i class="fas fa-chart-line"></i>
-        <span>Statistics</span>
+        <i class="fas fa-chart-line"></i> Stats
       </a>
     </li>
     <li class="sidebar-menu-item nav-dashboard">
       <a class="sidebar-menu-link" href="#{{ coinId }}/dashboard">
-        <i class="fas fa-tachometer-alt"></i>
-        <span>Dashboard</span>
+        <i class="fas fa-tachometer-alt"></i> Dashboard
       </a>
     </li>
     <li class="sidebar-menu-item nav-miners">
       <a class="sidebar-menu-link" href="#{{ coinId }}/miners">
-        <i class="fas fa-users"></i>
-        <span>Miners</span>
+        <i class="fas fa-users"></i> Miners
       </a>
     </li>
     <li class="sidebar-menu-item nav-blocks">
       <a class="sidebar-menu-link" href="#{{ coinId }}/blocks">
-        <i class="fas fa-cubes"></i>
-        <span>Blocks</span>
+        <i class="fas fa-cubes"></i> Blocks
       </a>
     </li>
     <li class="sidebar-menu-item nav-payments">
       <a class="sidebar-menu-link" href="#{{ coinId }}/payments">
-        <i class="fas fa-wallet"></i>
-        <span>Payments</span>
+        <i class="fas fa-wallet"></i> Payments
       </a>
     </li>
     <li class="sidebar-menu-item nav-connect">
       <a class="sidebar-menu-link" href="#{{ coinId }}/connect">
-        <i class="fas fa-plug"></i>
-        <span>Connect</span>
+        <i class="fas fa-plug"></i> Connect
       </a>
     </li>
     <li class="sidebar-menu-item nav-faq">
       <a class="sidebar-menu-link" href="#{{ coinId }}/faq">
-        <i class="fas fa-comment-dots"></i>
-        <span>FAQ</span>
+        <i class="fas fa-comment-dots"></i> FAQ
       </a>
     </li>
     <li class="sidebar-menu-item nav-support">
       <a class="sidebar-menu-link" href="#{{ coinId }}/support">
-        <i class="fas fa-headset"></i>
-        <span>Support</span>
+        <i class="fas fa-headset"></i> Support
       </a>
     </li>
   </ul>
 </div>
 
-<!-- Tab switching script -->
+<!-- Additional Scripts -->
 <script>
-function openCity(evt, cityName) {
+// Tab switching functions
+function switchTab(evt, tabName) {
   var i, tabcontent, tablinks;
-  tabcontent = document.getElementsByClassName("tabcontent");
+  
+  // Hide all tab content
+  tabcontent = document.getElementsByClassName("tab-content");
   for (i = 0; i < tabcontent.length; i++) {
     tabcontent[i].style.display = "none";
   }
-  tablinks = document.querySelectorAll(".tabs-container .pool-nav-item");
+  
+  // Remove active class from all tab links
+  tablinks = evt.currentTarget.parentElement.getElementsByClassName("tab-link");
   for (i = 0; i < tablinks.length; i++) {
     tablinks[i].classList.remove("active");
   }
-  document.getElementById(cityName).style.display = "block";
+  
+  // Show selected tab and mark as active
+  document.getElementById(tabName).style.display = "block";
   evt.currentTarget.classList.add("active");
 }
 
-function openCity1(evt, cityName) {
-  var i, tabcontent, tablinks;
-  tabcontent = document.getElementsByClassName("tabcontent1");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
-  tablinks = document.querySelectorAll(".tabs-container .pool-nav-item");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].classList.remove("active");
-  }
-  document.getElementById(cityName).style.display = "block";
-  evt.currentTarget.classList.add("active");
+function switchBlockTab(evt, tabName) {
+  switchTab(evt, tabName);
 }
 
-// Initialize
+// Override pool coin card template to match open-overline style
+$(document).on('DOMContentLoaded', function() {
+  // Custom pool card rendering can be added here
+});
+
+// Initialize page
 $(document).ready(function() {
   loadIndex();
 });
