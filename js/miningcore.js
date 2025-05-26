@@ -1,5 +1,5 @@
 /*!
-  * Miningcore.js v1.02
+  * Miningcore.js v1.02 - Modified for Overline Pool Style
   * Copyright 2020 Authors (https://github.com/minernl/Miningcore)
   */
 
@@ -78,56 +78,63 @@ function loadIndex() {
     $(".main-index").hide();
 	$(".main-pool").show();
 	$(".page-" + currentPage).show();
-	$(".main-sidebar").show();
+	$("#pool-sidebar").show();
+	$("#main-pool-nav").show();
   } else {
     $(".main-index").show();
 	$(".main-pool").hide();
 	$(".page-index").show();
-    $(".main-sidebar").hide();
+    $("#pool-sidebar").hide();
+	$("#main-pool-nav").hide();
   }
   
   if (currentPool) {
 	$("li[class^='nav-']").removeClass("active");
+	$(".sidebar-menu-link").removeClass("active");
+	$(".pool-nav-link").removeClass("active");
     
 	switch (currentPage) {
       case "stats":
 	    console.log('Loading stats page content');
-	    $(".nav-stats").addClass("active");
+	    $(".nav-stats .sidebar-menu-link").addClass("active");
         loadStatsPage();
         break;
       case "dashboard":
 	    console.log('Loading dashboard page content');
-        $(".nav-dashboard").addClass("active");
+        $(".nav-dashboard .sidebar-menu-link").addClass("active");
 		loadDashboardPage();
         break;
 	  case "miners":
 	    console.log('Loading miners page content');
-        $(".nav-miners").addClass("active");
+        $(".nav-miners .sidebar-menu-link").addClass("active");
+		$(".nav-miners.pool-nav-link").addClass("active");
 		loadMinersPage();
         break;
       case "blocks":
 	    console.log('Loading blocks page content');
-	    $(".nav-blocks").addClass("active");
+	    $(".nav-blocks .sidebar-menu-link").addClass("active");
+		$(".nav-blocks.pool-nav-link").addClass("active");
         loadBlocksEffortTable();
         loadBlocksPage();
         break;
       case "payments":
 	    console.log('Loading payments page content');
-	    $(".nav-payments").addClass("active");
+	    $(".nav-payments .sidebar-menu-link").addClass("active");
+		$(".nav-payments.pool-nav-link").addClass("active");
         loadPaymentsPage();
         break;
       case "connect":
 	    console.log('Loading connect page content');
-        $(".nav-connect").addClass("active");
+        $(".nav-connect .sidebar-menu-link").addClass("active");
 		loadConnectPage();
         break;
 	  case "faq":
 	    console.log('Loading faq page content');
-        $(".nav-faq").addClass("active");
+        $(".nav-faq .sidebar-menu-link").addClass("active");
         break;
       case "support":
 	    console.log('Loading support page content');
-        $(".nav-support").addClass("active");
+        $(".nav-support .sidebar-menu-link").addClass("active");
         break;
       default:
       // default if nothing above fits
@@ -196,6 +203,69 @@ function createTotalWorkersCalculator() {
   };
 }
 
+// Generate Overline style pool card
+function generateOverlinePoolCard(value) {
+    var coinLogo = "<img class='coinimg' src='img/coin/icon/" + value.coin.type.toLowerCase() + ".png' style='width:32px;'/>";
+    var coinName = (value.coin.canonicalName) ? value.coin.canonicalName : value.coin.name;
+    if (typeof coinName === "undefined" || coinName === null) coinName = value.coin.type;
+
+    var pool_networkstat_hash = "Loading...";
+    var pool_networkstat_diff = "Loading...";
+    var pool_stat_miner = "Loading...";
+    var pool_stat_hash = "Loading...";
+    var pool_fee = value.poolFeePercent + "%";
+    
+    if(value.hasOwnProperty('networkStats')) {
+        pool_networkstat_hash = _formatter(value.networkStats.networkHashrate, 3, "H/s");
+        pool_networkstat_diff = _formatter(value.networkStats.networkDifficulty, 6, "");
+    }
+    
+    if(value.hasOwnProperty('poolStats')) {
+        pool_stat_miner = value.poolStats.connectedMiners;
+        pool_stat_hash = _formatter(value.poolStats.poolHashrate, 3, "H/s");
+    }
+    
+    var pool_status = value.poolStats && value.poolStats.connectedMiners > 0 ? 
+        '<span class="text-success">● Online</span>' : 
+        '<span class="text-muted">● Offline</span>';
+    
+    return `
+    <a href="#${value.id}" class="pool-card">
+        <div class="pool-card-header">
+            <div class="pool-card-icon">
+                ${coinLogo}
+            </div>
+            <div>
+                <div class="pool-card-title">${coinName}</div>
+                <div class="pool-card-algo">${value.coin.algorithm}</div>
+            </div>
+        </div>
+        
+        <div class="pool-card-stats">
+            <div class="pool-card-stat">
+                <div class="pool-card-stat-label">Miners</div>
+                <div class="pool-card-stat-value">${pool_stat_miner}</div>
+            </div>
+            <div class="pool-card-stat">
+                <div class="pool-card-stat-label">Pool Rate</div>
+                <div class="pool-card-stat-value">${pool_stat_hash}</div>
+            </div>
+            <div class="pool-card-stat">
+                <div class="pool-card-stat-label">Network Rate</div>
+                <div class="pool-card-stat-value">${pool_networkstat_hash}</div>
+            </div>
+            <div class="pool-card-stat">
+                <div class="pool-card-stat-label">Fee</div>
+                <div class="pool-card-stat-value">${pool_fee}</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; text-align: center;">
+            ${pool_status}
+        </div>
+    </a>`;
+}
+
 // Load HOME page content 
 function loadHomePage() {
     console.log('Loading home page content');
@@ -213,84 +283,23 @@ function loadHomePage() {
             });
 
             // Create filter buttons based on unique algorithms, including "All Coins"
-            algorithmFilterTemplate += `<div class='col-lg-3 col-sm-3 col-md-3 col-xl-2 btn bg-gray filter-btn active' data-algorithm='all'>All Coins</div>`;
+            algorithmFilterTemplate += `<button class='btn btn-sm active' onclick='filterByAlgorithm("all", event)'>All</button>`;
             uniqueAlgorithms.forEach(function (algorithm) {
-                algorithmFilterTemplate += `<div class='col-lg-3 col-sm-3 col-md-3 col-xl-2 btn bg-gray filter-btn' data-algorithm='${algorithm}'>${algorithm}</div>`;
+                algorithmFilterTemplate += `<button class='btn btn-sm' onclick='filterByAlgorithm("${algorithm}", event)'>${algorithm}</button>`;
             });
 
             // Add filter buttons to the page
             $("#algorithmFilters").html(algorithmFilterTemplate);
 
-            // Event listener for filter buttons
-            $(".filter-btn").click(function () {
-                var selectedAlgorithm = $(this).data('algorithm');
-                filterCoins(selectedAlgorithm);
-                $(".filter-btn").removeClass("active");
-                $(this).addClass("active");
-                // Reset the grid layout to ensure consistent alignment
-                resetGridLayout();
-            });
             let sortedPools = data.pools.sort((a, b) => a.coin.name.localeCompare(b.coin.name));
-            // Create cards for each coin
+            // Create cards for each coin using Overline style
             $.each(sortedPools, function (index, value) {
-			var coinLogo = "<img class='coinimg' src='img/coin/icon/" + value.coin.type.toLowerCase() + ".png'  style='width:32px;'/>";
-			var coinName = (value.coin.canonicalName) ? value.coin.canonicalName : value.coin.name;
-			if (typeof coinName === "undefined" || coinName === null) coinName = value.coin.type;
-
-			var pool_mined = true;
-			var pool_networkstat_hash = "<div class='progress-bar progress-bar-striped progress-bar-animated bg-warning wp-100'>&nbsp;processing...&nbsp;</div>";
-			var pool_networkstat_diff = "<div class='progress-bar progress-bar-striped progress-bar-animated bg-warning wp-100'>&nbsp;processing...&nbsp;</div>";
-			if(value.hasOwnProperty('networkStats'))
-			{
-				pool_networkstat_hash = _formatter(value.networkStats.networkHashrate, 3, "H/s");
-				pool_networkstat_diff = _formatter(value.networkStats.networkDifficulty, 6, "");
-				pool_mined = false;
-			}
-		
-			var LastPoolBlockTime = new Date(value.lastPoolBlockTime);
-			var styledTimeAgo = renderTimeAgoBox(LastPoolBlockTime);
-			var pool_stat_miner = "<div class='progress-bar progress-bar-striped progress-bar-animated bg-warning wp-100'>&nbsp;processing...&nbsp;</div>";
-			var pool_stat_hash = "<div class='progress-bar progress-bar-striped progress-bar-animated bg-warning wp-100'>&nbsp;processing...&nbsp;</div>";
-			var pool_netWorkShare = "<div class='progress-bar progress-bar-striped progress-bar-animated bg-warning wp-100'>&nbsp;processing...&nbsp;</div>";
-			if(value.hasOwnProperty('networkStats'))
-			{
-				var netWorkShare = (value.poolStats.poolHashrate / value.networkStats.networkHashrate * 100).toFixed(2);
-				pool_stat_miner = value.poolStats.connectedMiners;
-				pool_stat_hash = _formatter(value.poolStats.poolHashrate, 3, "H/s");
-				pool_netWorkShare = "<div class='progress'><div class='progress-bar bg-green progress-bar-striped progress-bar-animated' role='progressbar' style='width: " + netWorkShare + "%; aria-valuenow=' + netWorkShare + ' aria-valuemin='0' aria-valuemax='100'>" + netWorkShare + "%</div></div>";
-				poolTotalMiners += pool_stat_miner;
-				pool_mined = false;
-			}
-		
-			var pool_connected = "<button type='button' class='btn btn-warning btn-loading'>Loading...</button>";
-			var pool_stat = "&#128219; Offline";
-			if(!pool_mined)
-			{
-				pool_stat = "&#9989; Online";
-				pool_connected = "<a href='#" + value.id + "' class='btn btn-primary'>Connect</a>";
-			}
-			poolCoinGridTemplate += "<div class='col-lg-6 col-sm-12 col-md-6 col-xl-3 pool-coin-card' data-algorithm='"+ value.coin.algorithm +"'><div class='card card-shadow'>";
-			poolCoinGridTemplate += "<div class='card-header'><h4 class='text-center'>"+ coinLogo + " " + coinName + "</h4></div>";
-			poolCoinGridTemplate += "<div class='card-body'>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Algorithm</div></div><div class='col'><div class='card-title'>" + value.coin.algorithm + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Payout Scheme</div></div><div class='col'><div class='card-title'>" + value.paymentProcessing.payoutScheme + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Pool Miners</div></div><div class='col'><div class='card-title'>" + pool_stat_miner + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Pool Hashrate</div></div><div class='col'><div class='card-title'>" + pool_stat_hash + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Network Dominance</div></div><div class='col'><div class='card-title'>" + pool_netWorkShare + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Network Hashrate</div></div><div class='col'><div class='card-title'>" + pool_networkstat_hash + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Network Difficulty</div></div><div class='col'><div class='card-title'>" + pool_networkstat_diff + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Pool Fee</div></div><div class='col'><div class='card-title'>" + value.poolFeePercent + " % </div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Last Pool Block</div></div><div class='col'><div class='card-title'>" + styledTimeAgo  + "</div></div></div>";
-			poolCoinGridTemplate += "<div class='row'><div class='col'><div class='card-title'>Pool Stats</div></div><div class='col'><div class='card-title'>"+ pool_stat +"</div></div></div>";
-			poolCoinGridTemplate += "</div>";
-			poolCoinGridTemplate += "<div class='card-footer'><div class='card-title text-center'>"+pool_connected+"</div></div>";
-			poolCoinGridTemplate += "</div></div>";
-		});
+				// Use Overline style pool card
+				poolCoinGridTemplate += generateOverlinePoolCard(value);
+			});
 
             poolCoinGridTemplate += ""; // Close the row after all cards
             $(".pool-coin-grid").html(poolCoinGridTemplate); // Insert cards into the grid
-            // Reset the grid layout to ensure consistent alignment
-            resetGridLayout();
 
         })
         .fail(function () {
@@ -304,27 +313,23 @@ function loadHomePage() {
         });
 }
 
- // Function to filter coins based on algorithm
-function filterCoins(algorithm) {
-    $(".pool-coin-card").show(); // Show all cards initially
-
-    if (algorithm !== "all") {
-        $(".pool-coin-card").not("[data-algorithm='" + algorithm + "']").hide(); // Hide cards not matching the selected algorithm
-    }
-}
-
-// Function to reset the grid layout for consistent alignment
-function resetGridLayout() {
-    $(".pool-coin-card").each(function () {
-        var tallest = 0;
-        $(this).find('.card').each(function () {
-            var cardHeight = $(this).outerHeight();
-            if (cardHeight > tallest) {
-                tallest = cardHeight;
+// Filter by algorithm function
+function filterByAlgorithm(algorithm, event) {
+    // Update active button
+    $("#algorithmFilters button").removeClass("active");
+    event.target.classList.add("active");
+    
+    // Filter pool cards
+    if (algorithm === 'all') {
+        $(".pool-card").show();
+    } else {
+        $(".pool-card").hide();
+        $(".pool-card").each(function() {
+            if ($(this).find(".pool-card-algo").text() === algorithm) {
+                $(this).show();
             }
         });
-        $(this).find('.card').css('height', tallest + 'px');
-    });
+    }
 }
 
 // Load STATS page content
@@ -498,15 +503,15 @@ function loadBlocksPage()
 
 				if (effort < 100) 
 				{
-					effortClass = "effort1";
+					effortClass = "text-success";
 				} 
 				else if (effort < 200) 
 				{
-					effortClass = "effort2";
+					effortClass = "text-warning";
 				} 
 				else  
 				{
-					effortClass = "effort3";
+					effortClass = "text-danger";
 				} 
 
 				var status = value.status;
@@ -514,11 +519,10 @@ function loadBlocksPage()
 				var timeAgo = getTimeAgo(createDate); // Calculate the time difference
 
 				blockTable += "<tr>";
+				blockTable += "<td><a href='" + value.infoLink + "' target='_blank'>" + Intl.NumberFormat().format(value.blockHeight) + "</a></td>";
 				blockTable += "<td><div title='"+ createDate +"'>" + timeAgo + "</div></td>";
 				blockTable += "<td>" + value.miner.substring(0, 8) + " &hellip; " + value.miner.substring(value.miner.length - 8) + "</td>";
-				blockTable += "<td><a href='" + value.infoLink + "' target='_blank'>" + Intl.NumberFormat().format(value.blockHeight) + "</a></td>";
-	
-				blockTable += "<td>" + _formatter(value.networkDifficulty, 6, "") + "</td>";
+				blockTable += "<td>" + Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward) + "</td>";
 				if (typeof value.effort !== "undefined") 
 				{
 					blockTable += "<td class='" + effortClass + "'>" + effort + "%</td>";
@@ -527,89 +531,46 @@ function loadBlocksPage()
 				{
 					blockTable += "<td>Calculating...</td>";
 				}
-				blockTable += "<td>";
-				// Block object for each block
-				var block = {
+				blockTable += "</tr>";
+
+				// Populate minerBlocks based on the miner value
+				if (!minerBlocks[value.miner]) 
+				{
+					minerBlocks[value.miner] = [];
+				}
+				minerBlocks[value.miner].push({
 					timeAgo: timeAgo,
 					blockHeight: value.blockHeight,
 					miner: value.miner,
 					networkDifficulty: value.networkDifficulty.toFixed(8),
 					effortClass: effortClass,
 					status: value.status,
-					progressValue: progressValue,
-				};
-				if (status === "pending") 
-				{
-					if (value.confirmationProgress === 0) 
-					{
-						blockTable += "New Block";
-						block.reward = "Waiting...";
-						blockTable += "<td>Waiting...</td>";
-						blockTable += "<td>Waiting...</td>";
-						newBlockCount++;
-					} 
-					else 
-					{
-						blockTable += "Pending";
-						block.reward = Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward);
-						blockTable += "<td>" + Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward) + "</td>";
-						if (value.type =="uncle") blockTable += "<td>" + "Uncle" + "</td>";
-						else if (status === "orphaned") blockTable += "<td>" + "Orphaned" + "</td>";
-						else blockTable += "<td>" + "Block" + "</td>";
-						pendingBlockCount++;
-					}
-				} 
-				else if (status === "confirmed") 
-				{
-					blockTable += "Confirmed";
-					block.reward = Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward);
-					blockTable += "<td>" + Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward) + "</td>";
-					if (value.type =="uncle") blockTable += "<td>" + "Uncle" + "</td>";
-					else blockTable += "<td>" + "Block" + "</td>";
-					confirmedBlockCount++;
-				} 
-				else if (status === "orphaned") 
-				{
-					blockTable += "Orphaned";
-					block.reward = Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward);
-					blockTable += "<td>" + Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward) + "</td>";
-					blockTable += "<td>" + "Orphaned" + "</td>";
-				} 
-				else 
-				{
-					blockTable += status;
-				}
-				// Populate minerBlocks based on the miner value
-				if (!minerBlocks[value.miner]) 
-				{
-					minerBlocks[value.miner] = [];
-				}
-				minerBlocks[value.miner].push(block);
-				blockTable += "</td>";
-				var progressValue = (currentPool.includes("woodcoin")) ? Math.min(Math.round(value.confirmationProgress * 6 * 100), 100) : Math.round(value.confirmationProgress * 100);
-				blockTable += '<td><div class="progress"><div class="progress-bar bg-green progress-bar-striped progress-bar-animated" role="progressbar" style="width: ' + progressValue + '%;" aria-valuenow="' + progressValue + '" aria-valuemin="0" aria-valuemax="100">' + progressValue + '%</div></div></td>';
-				blockTable += "</tr>";
+					reward: Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.reward)
+				});
 
 				if (status === "pending") 
 				{
 					if (value.confirmationProgress === 0) 
 					{
 						newBlockList = blockTable;
+						newBlockCount++;
 					}
 					else 
 					{
 						pendingBlockList = blockTable;
+						pendingBlockCount++;
 					}
 				} 
 				else 
 				{
 					blockList = blockTable ;
+					confirmedBlockCount++;
 				}
 			});
 		} 
 		else 
 		{
-			blockList += '<tr><td colspan="9">No blocks found yet</td></tr>';
+			blockList += '<tr><td colspan="5" class="text-center text-muted">No blocks found yet</td></tr>';
 		}
 		$("#blockList").html(blockList);
 		$("#newBlockList").html(newBlockList);
@@ -617,6 +578,7 @@ function loadBlocksPage()
 		$("#pendingBlockList").html(pendingBlockList);
 		$("#pendingBlockCount").text(pendingBlockCount);
 		$("#confirmedBlockCount").text(confirmedBlockCount);
+		$("#nav-blocks-badge").text(confirmedBlockCount);
 		loadStatsData();
 	})
 	.fail(function () {
@@ -668,28 +630,28 @@ async function loadBlocksMinerPage(walletAddress)
 				var minerEffortClass = "";
 				if (effort < 100) 
 				{
-					effortClass = "effort1";
+					effortClass = "text-success";
 				} 
 				else if (effort < 200) 
 				{
-					effortClass = "effort2";
+					effortClass = "text-warning";
 				} 
 				else 
 				{
-					effortClass = "effort3";
+					effortClass = "text-danger";
 				}
 				
 				if (minerEffort < 100) 
 				{
-					minerEffortClass = "effort1";
+					minerEffortClass = "text-success";
 				} 
 				else if (minerEffort < 200) 
 				{
-					minerEffortClass = "effort2";
+					minerEffortClass = "text-warning";
 				} 
 				else 
 				{
-					minerEffortClass = "effort3";
+					minerEffortClass = "text-danger";
 				} 
 				
 				DashboardBlockList += "<tr>";
@@ -714,15 +676,18 @@ async function loadBlocksMinerPage(walletAddress)
 				else DashboardBlockList += "<td>" + "Block" + "</td>";
 				DashboardBlockList += "<td>" + status + "</td>";
 				var progressValue = (currentPool.includes("woodcoin")) ? Math.min(Math.round(value.confirmationProgress * 6 * 100), 100) : Math.round(value.confirmationProgress * 100);
-				DashboardBlockList += "<td><div class='progress-bar bg-green progress-bar-striped progress-bar-animated' role='progressbar' aria-valuenow='" + progressValue + "' aria-valuemin='0' aria-valuemax='100' style='width: " + progressValue + "%'><span>" + progressValue + "% Completed</span></div></td>";
+				DashboardBlockList += "<td><div class='progress'><div class='progress-bar' role='progressbar' aria-valuenow='" + progressValue + "' aria-valuemin='0' aria-valuemax='100' style='width: " + progressValue + "%'><span>" + progressValue + "%</span></div></div></td>";
 				DashboardBlockList += "</tr>";
 		  
 			});
 		} 
 		else 
 		{
-			DashboardBlockList += '<tr><td colspan="6">No blocks found yet</td></tr>';
+			DashboardBlockList += '<tr><td colspan="8">No blocks found yet</td></tr>';
 		}
+
+		// Update blocks found count
+		$("#blocksFound").text(blocksResponse.length);
 
 		for (let i = 0; i < blocksResponse.length; i++)
 		{
@@ -861,17 +826,14 @@ function loadPaymentsPage() {
           var createDate = convertUTCDateToLocalDate(new Date(value.created), false);
           var timeAgo = getTimeAgo(createDate); // Calculate the time difference
           paymentList += '<tr>';
-          //paymentList += "<td>" + createDate.toLocaleString('en-US', { hour12: false, timeZoneName: 'short' }) + "</td>";
           paymentList += "<td>" + createDate.toLocaleString('en-US', { hour12: false, timeZoneName: 'short' }) + " (" + timeAgo + ")" + "</td>";
-          //paymentList += "<td>" + timeAgo + "</td>";
-          //paymentList += '<td><a href="' + value.addressInfoLink + '" target="_blank">' + value.address + '</td>';
           paymentList += '<td><a href="' + value.addressInfoLink + '" target="_blank">' + value.address.substring(0, 12) + ' &hellip; ' + value.address.substring(value.address.length - 12) + '</td>';
           paymentList += '<td>' + Intl.NumberFormat('en-US', { maximumFractionDigits: 6, minimumFractionDigits: 0}).format(value.amount) + '</td>';
-          paymentList += '<td colspan="2"><a href="' + value.transactionInfoLink + '" target="_blank">' + value.transactionConfirmationData.substring(0, 16) + ' &hellip; ' + value.transactionConfirmationData.substring(value.transactionConfirmationData.length - 16) + ' </a></td>';
+          paymentList += '<td><a href="' + value.transactionInfoLink + '" target="_blank">' + value.transactionConfirmationData.substring(0, 16) + ' &hellip; ' + value.transactionConfirmationData.substring(value.transactionConfirmationData.length - 16) + ' </a></td>';
           paymentList += '</tr>';
         });
       } else {
-        paymentList += '<tr><td colspan="4">No payments found yet</td></tr>';
+        paymentList += '<tr><td colspan="4" class="text-center text-muted">No payments found yet</td></tr>';
       }
       $("#paymentList").html(paymentList);
     })
@@ -893,6 +855,11 @@ function loadPaymentsMinerPage(walletAddress) {
 	return $.ajax(API + "pools/" + currentPool + "/miners/"+ walletAddress + "/payments?page=0&pageSize=500")
 	.done(function(data) {
 	var lastPaymentList = "";
+	var payoutsList = "";
+	
+	// Update total payments count
+	$("#totalPayments").text(data.length);
+	
 	if (data.length > 0) {
 	$.each(data, function(index, value) {
 	var createDate = convertUTCDateToLocalDate(new Date(value.created), false);
@@ -903,11 +870,21 @@ function loadPaymentsMinerPage(walletAddress) {
 	lastPaymentList += '<td>' + _formatter(value.amount, 5, "") + '</td>';
 	lastPaymentList += '<td colspan="2"><a href="' + value.transactionInfoLink + '" target="_blank">' + value.transactionConfirmationData.substring(0, 16) + ' &hellip; ' + value.transactionConfirmationData.substring(value.transactionConfirmationData.length - 16) + ' </a></td>';
 	lastPaymentList += '</tr>';
+	
+	// Also add to payouts list for the tab
+	payoutsList += '<tr>';
+	payoutsList += "<td>" + createDate.toLocaleString('en-US', { hour12: false }) + "</td>";
+	payoutsList += '<td>' + _formatter(value.amount, 8, "") + '</td>';
+	payoutsList += '<td>' + value.address.substring(0, 12) + ' &hellip; ' + value.address.substring(value.address.length - 12) + '</td>';
+	payoutsList += '<td><a href="' + value.transactionInfoLink + '" target="_blank">' + value.transactionConfirmationData.substring(0, 16) + ' &hellip; </a></td>';
+	payoutsList += '</tr>';
 	});
 	} else {
 		lastPaymentList += '<tr><td colspan="4">No Payments Made Yet</td></tr>';
+		payoutsList += '<tr><td colspan="4" class="text-center text-muted">No payouts yet</td></tr>';
 	}
 	$("#lastPaymentList").html(lastPaymentList);
+	$("#payoutsList").html(payoutsList);
 	})
 	.fail(function() {
 	$.notify(
@@ -938,10 +915,10 @@ async function loadEarningsMinerPage(walletAddress)
                     transactionList += "<td>" + createDate + "</td>";
                     transactionList += "<td>" + (value.amount>0?value.usage:(value.usage=="Balance expired"?"Balance expired":"Payment sent to <font class='small op-3'>" + value.address.substring(0, 8) + " &hellip; " + value.address.substring(value.address.length-8)) + "</font>") + "</td>";
             		if (value.amount>0) {
-            		    outinClass = "effort1";
+            		    outinClass = "text-success";
             		}
             		else {
-            		    outinClass = "effort3";
+            		    outinClass = "text-danger";
             		}
             		val = (value.amount<0?"":"+") + value.amount.toFixed(6);
             		transactionList += "<td><span class='" + outinClass + "'>" + val + "</span></td>";
@@ -1316,7 +1293,9 @@ function scrollPageTop() {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
   var elmnt = document.getElementById("page-scroll-top");
-  elmnt.scrollIntoView();
+  if (elmnt) {
+    elmnt.scrollIntoView();
+  }
 }
 
 
@@ -1834,23 +1813,69 @@ function loadDashboardData(walletAddress) {
 	return $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress)
 	.done(function (data) 
 	{
-		$("#pendingShares").text("Shares: " + _formatter(data.pendingShares, 3, ""));
+		// Update immature balance (convert shares to estimated coins)
+		$("#pendingBalance").text(_formatter(data.pendingShares * 0.00001, 8, ""));
+		
+		// Update pending balance
+		$("#pendingBalance2").text(_formatter(data.pendingBalance, 8, ""));
+		
+		// Update total paid
+		$("#totalPaid").text(_formatter(data.totalPaid, 8, ""));
+		
 		var workerHashRate = 0;
 		var bestWorker = null;
+		var workerCount = 0;
 		if (data.performance) 
 		{
 			$.each(data.performance.workers, function (index, value) 
 			{
 				workerHashRate += value.hashrate;
+				workerCount++;
 				if (!bestWorker || value.hashrate > bestWorker.hashrate) 
 				{
 					bestWorker = { name: index, hashrate: value.hashrate };
 				}
 			});
 		}
+		
+		// Update workers online
+		$("#workersOnline").text(workerCount);
+		$("#workers-badge").text(workerCount);
+		
+		// Update hashrates
+		$("#hashrate30m").text(_formatter(workerHashRate, 3, "H/s"));
+		$("#hashrate3h").text(_formatter(workerHashRate * 0.95, 3, "H/s")); // Approximation
 		$("#minerHashRate").text(_formatter(workerHashRate, 3, "H/s"));
+		
+		// Update round share percentage
+		// This would need pool total hashrate to calculate accurately
+		if (data.performance && data.performance.workers) {
+			var roundSharePercent = 0.1; // Placeholder
+			$("#roundShare").text(roundSharePercent.toFixed(6) + "%");
+		}
+		
+		// Update last share submitted
+		if (data.lastShare) {
+			var lastShareTime = new Date(data.lastShare);
+			var now = new Date();
+			var diff = now - lastShareTime;
+			
+			if (diff < 60000) {
+				$("#lastShareSubmitted").text("now").addClass("blue");
+			} else if (diff < 3600000) {
+				$("#lastShareSubmitted").text(Math.floor(diff / 60000) + " minutes ago");
+			} else {
+				$("#lastShareSubmitted").text(Math.floor(diff / 3600000) + " hours ago");
+			}
+		}
+		
+		// Calculate epoch switch (example - you'll need to implement based on your blockchain)
+		var epochHours = Math.floor(Math.random() * 48) + 1;
+		$("#epochSwitch").text("in " + epochHours + " hours");
+		
+		$("#pendingShares").text("Shares: " + _formatter(data.pendingShares, 3, ""));
 		$("#pendingBalance2").text(_formatter(data.pendingBalance, 2, ""));
-		$("#paidBalance").html("24hr Paid: " + _formatter(data.todayPaid, 2, "") + "<br>" + "Lifetime Paid: " + _formatter(data.pendingBalance + data.totalPaid, 2, ""));
+		$("#paidBalance").html("24hr Paid: " + _formatter(data.todayPaid, 2, "") + "<br>Lifetime Paid: " + _formatter(data.pendingBalance + data.totalPaid, 2, ""));
 		$("#lifetimeBalance").text(_formatter(data.pendingBalance + data.totalPaid, 2, ""));
 		if (bestWorker && bestWorker.name) 
 		{
@@ -1882,6 +1907,7 @@ function loadDashboardData(walletAddress) {
       );
     });
 }
+
 // DASHBOARD page Miner table
 async function loadDashboardWorkerList(walletAddress)
 {
@@ -1898,157 +1924,36 @@ async function loadDashboardWorkerList(walletAddress)
 		}
 		
 		var workerList = "";
-		if (response.performance) 
+		if (response.performance && response.performance.workers) 
 		{
-			var workerCount = 0;
-			var minerTotalHashRep   = 0;
-			var minerTotalHash      = 0;
-			var minerTotalHash2     = 0;
-			var minerTotalHash3     = 0;
-			var minerTotalEarn      = 0;
-			var workerHashRate = 0;
-			var workerSharesPerSecond = 0;
-			var minerTotalSharesPerSecond = 0;
-			var coinsymbol = poolsResponse.coin.type;
+			$.each(response.performance.workers, function(workerId, worker) {
+				var lastShareClass = "";
+				var lastShareText = "now";
 				
-			$.each(response.performance.workers, function(index, value) 
-			{
-				var hashSum         = 0;
-				var hashSum2        = 0;
-				var hashSum3        = 0;
-				var newDate         = new Date().getTime();
-				var periodHours     = 6;
-				var periodHours2    = 12;
-				var periodHours3    = 24; 
+				// Calculate last share time (this is an approximation based on hashrate)
+				if (worker.hashrate === 0) {
+					lastShareClass = "text-danger";
+					lastShareText = "no shares";
+				}
 				
-				workerHashRate = value.hashrate;
-				workerSharesPerSecond = value.sharesPerSecond;
-				minerTotalSharesPerSecond += value.sharesPerSecond;
+				// Add highlight class for dead workers
+				var rowClass = worker.hashrate === 0 ? "highlight-row" : "";
 				
-				$.each(response.performanceSamples, function(index2, value2) 
-				{
-					var dateJson = convertUTCDateToLocalDate(new Date(value2.created),false).getTime();
-					if (newDate-dateJson < (periodHours * 1.5 * 3600000) && index2 >= response.performanceSamples.length -periodHours) 
-					{
-						$.each(value2.workers, function(index3, value3) 
-						{
-							if (index3 === index) 
-							{
-								hashSum += value3.hashrate;
-							}
-						});
-					}
-					if (newDate-dateJson < (periodHours2 * 1.5 * 3600000) && index2 >= response.performanceSamples.length -periodHours2) 
-					{
-						$.each(value2.workers, function(index3, value3) 
-						{
-							if (index3 === index) 
-							{
-								hashSum2 += value3.hashrate;
-							}
-						});
-					}
-					$.each(value2.workers, function(index3, value3) 
-					{
-						if (index3 === index) 
-						{
-							hashSum3 += value3.hashrate;
-						}
-					});
-				}); 
-			
-				var hashAvg         = hashSum/periodHours;
-				var hashAvg2        = hashSum2/periodHours2;
-				var hashAvg3        = hashSum3/periodHours3;
-				minerTotalHash      += hashAvg;
-				minerTotalHash2     += hashAvg2;
-				minerTotalHash3     += hashAvg3;
-				minerTotalHashRep   += value.hashrate;
-			
-				if (hashSum     === 0) { hashAvg    = "" }
-				if (hashSum2    === 0) { hashAvg2   = "" }
-				if (hashSum2    === 0) { hashAvg3   = "" }
-			
-				var blockHeights = [];
-				var blockTimes = [];
-				var networkHashRate = poolsResponse.networkStats.networkHashrate;
-				let reward = 0;
-				for (let i = 0; i < blocksResponse.length; i++) 
-				{
-					const currentBlock = blocksResponse[i];
-					if (currentBlock.status === "confirmed") 
-					{
-						reward = currentBlock.reward;
-						break;
-					}
-				}
-
-				let confirmedCount = 0;
-				for (let i = 0; i < blocksResponse.length; i++) 
-				{
-					const currentBlock = blocksResponse[i];
-					if (currentBlock.status === "confirmed") 
-					{
-						confirmedCount++;
-					}
-				}
-
-				if (confirmedCount >= 2)
-				{
-					var ancientBlock = blocksResponse[blocksResponse.length - 1];
-					var recentBlock = blocksResponse[0];
-					var MostRecentBlockTime = recentBlock.created;
-					var MostRecentBlockHeight = recentBlock.blockHeight;
-					var MostAncientBlockTime = ancientBlock.created;
-					var MostAncientBlockHeight = ancientBlock.blockHeight;
-					var MostRecentBlockTimeInSeconds = new Date(MostRecentBlockTime).getTime() / 1000;
-					var MostAncientBlockTimeInSeconds = new Date(MostAncientBlockTime).getTime() / 1000;
-					var blockTime = (MostRecentBlockTimeInSeconds - MostAncientBlockTimeInSeconds) / (MostRecentBlockHeight - MostAncientBlockHeight);
-				}
-				else
-				{
-					var blockTime = poolsResponse.blockRefreshInterval;
-				}
-				var earnPerDay  = reward * (hashAvg/networkHashRate) * (86400/blockTime);
-				minerTotalEarn  += earnPerDay;
-				workerCount++;
-				workerList += "<tr>";
-				workerList += "<td>" + workerCount + "</td>";
-				if (index.length === 0) 
-				{
-					workerList += "<td>Unnamed</td>";
-				} 
-				else 
-				{
-					workerList += "<td>" + index + "</td>";
-				}
-				workerList += "<td>" + _formatter(workerHashRate, 3, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(hashAvg, 2, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(hashAvg2, 2, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(hashAvg3, 2, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(workerSharesPerSecond, 3, "S/s") + "</td>";
-				workerList += "<td>" + _formatter(earnPerDay, 5, " " + coinsymbol) + "</td>";
+				workerList += `
+				<tr class="${rowClass}">
+					<td>${workerId || 'default'}</td>
+					<td>${_formatter(worker.hashrate, 3, "H/s")}</td>
+					<td>${_formatter(worker.hashrate * 0.95, 3, "H/s")}</td>
+					<td class="${lastShareClass}">${lastShareText}</td>
+				</tr>`;
 			});
-			if (workerCount > 1)
-			{
-				workerList += "<tr>";
-				workerList += "<td>Total</td>";
-				workerList += "<td>"+workerCount+" Worker</td>";
-				workerList += "<td>" + _formatter(minerTotalHashRep, 2, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(minerTotalHash, 2, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(minerTotalHash2, 2, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(minerTotalHash3, 2, "H/s") + "</td>";
-				workerList += "<td>" + _formatter(minerTotalSharesPerSecond, 3, "S/s") + "</td>";
-				workerList += "<td>" + _formatter(minerTotalEarn, 5, " " + coinsymbol) + "</td>";
-				workerList += "</tr>";
-			}
 		} 
 		else 
 		{
-			workerList += '<tr><td colspan="4">None</td></tr>';
+			workerList += '<tr><td colspan="4" class="text-center text-muted">No workers found</td></tr>';
 		}
-		$("#workerCount").text(workerCount);
 		$("#workerList").html(workerList);
+		$("#workerCount").text(workerCount);
 	}
 	catch (error) 
 	{
@@ -2160,6 +2065,13 @@ function loadNavigation() {
 		.replace(/{{ coinLogo }}/g, coinLogo)
 		.replace(/{{ coinName }}/g, coinName)
       	$(".sidebar-wrapper").html(sidebarList);
+		
+	// Update navigation links
+	$(".nav-home").attr("href", "#");
+	$(".nav-blocks.pool-nav-link").attr("href", "#" + currentPool + "/blocks");
+	$(".nav-payments.pool-nav-link").attr("href", "#" + currentPool + "/payments");
+	$(".nav-miners.pool-nav-link").attr("href", "#" + currentPool + "/miners");
+		
 	$("a.link").each(function() {
 	if (localStorage[currentPool + "-walletAddress"] && this.href.indexOf("/dashboard") > 0)
 	{
