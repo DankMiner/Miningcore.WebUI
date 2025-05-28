@@ -1882,6 +1882,7 @@ function loadDashboardData(walletAddress) {
       );
     });
 }
+
 // DASHBOARD page Miner table
 async function loadDashboardWorkerList(walletAddress)
 {
@@ -2124,7 +2125,6 @@ function loadDashboardChart(walletAddress) {
     });
 }
 
-
 // Generate Coin based sidebar
 function loadNavigation() {
   return $.ajax(API + "pools")
@@ -2210,3 +2210,364 @@ function submitSettings() {
       }, 5000);
     });
 }
+
+// --------------------------------------------------------------------------------------------
+// ULTRA-FAST SERVER PING MONITORING SYSTEM
+// --------------------------------------------------------------------------------------------
+
+// Server configuration - UPDATED with your actual servers
+var servers = [
+    { name: "USA Central (MO)", host: "us1.1miner.net", region: "us", location: "Missouri" },
+    { name: "USA East (NY)", host: "us2.1miner.net", region: "us", location: "New York" },
+    { name: "USA West (WA)", host: "us3.1miner.net", region: "us", location: "Washington" },
+    { name: "USA South (HTX)", host: "us4.1miner.net", region: "us", location: "Houston" },
+    { name: "Asia (Singapore)", host: "sgp.1miner.net", region: "asia", location: "Singapore" },    
+    { name: "China (HK)", host: "cn1.1miner.net", region: "asia", location: "Hong Kong" },
+    { name: "Japan (Tokyo)", host: "jp.1miner.net", region: "asia", location: "Tokyo" },
+    { name: "Australia (Sydney)", host: "au.1miner.net", region: "oceania", location: "Sydney" },
+    { name: "Europe (France)", host: "eu1.1miner.net", region: "europe", location: "France" },
+    { name: "Europe (UK)", host: "eu2.1miner.net", region: "europe", location: "United Kingdom" }
+];
+
+// Store ping results
+var serverPingResults = {};
+var bestServer = null;
+var pingInterval = null;
+
+// Ultra-fast ping implementation using Nginx endpoint
+function pingServer(server) {
+    return new Promise((resolve) => {
+        // Take 3 measurements and use the best one for accuracy
+        const measurements = [];
+        let completed = 0;
+        const timeout = 5000; // 5 second timeout
+
+        function takeMeasurement(attemptNum) {
+            const startTime = performance.now();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+            // Use the ultra-fast /p endpoint (204 No Content response)
+            fetch(`https://${server.host}/p?_=${Date.now()}&attempt=${attemptNum}`, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache',
+                signal: controller.signal,
+                // Keep connection alive for better performance
+                keepalive: true
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                const ping = Math.round(performance.now() - startTime);
+                measurements.push(ping);
+                completed++;
+                
+                if (completed === 3) {
+                    // Use the minimum (best) measurement
+                    const bestPing = Math.min(...measurements);
+                    const avgPing = Math.round(measurements.reduce((a, b) => a + b, 0) / measurements.length);
+                    resolve({
+                        server: server,
+                        ping: bestPing,
+                        avgPing: avgPing,
+                        status: 'online',
+                        measurements: measurements
+                    });
+                }
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                console.log(`Ping attempt ${attemptNum} failed for ${server.host}:`, error.message);
+                completed++;
+                
+                if (completed === 3) {
+                    if (measurements.length > 0) {
+                        const bestPing = Math.min(...measurements);
+                        const avgPing = Math.round(measurements.reduce((a, b) => a + b, 0) / measurements.length);
+                        resolve({
+                            server: server,
+                            ping: bestPing,
+                            avgPing: avgPing,
+                            status: 'degraded',
+                            measurements: measurements
+                        });
+                    } else {
+                        resolve({
+                            server: server,
+                            ping: -1,
+                            avgPing: -1,
+                            status: 'offline',
+                            measurements: []
+                        });
+                    }
+                }
+            });
+        }
+
+        // Take 3 measurements with slight delays to avoid congestion
+        takeMeasurement(1);
+        setTimeout(() => takeMeasurement(2), 100);
+        setTimeout(() => takeMeasurement(3), 200);
+    });
+}
+
+// Ping all servers simultaneously
+async function pingAllServers() {
+    console.log('Pinging all servers...');
+    
+    try {
+        // Ping all servers in parallel for maximum speed
+        const pingPromises = servers.map(server => pingServer(server));
+        const results = await Promise.all(pingPromises);
+        
+        // Process results
+        results.forEach(result => {
+            serverPingResults[result.server.host] = {
+                name: result.server.name,
+                host: result.server.host,
+                region: result.server.region,
+                location: result.server.location,
+                ping: result.ping,
+                avgPing: result.avgPing,
+                status: result.status,
+                lastUpdate: Date.now(),
+                measurements: result.measurements
+            };
+        });
+        
+        // Find the best server (lowest ping among online servers)
+        const onlineServers = results.filter(r => r.status === 'online' || r.status === 'degraded');
+        if (onlineServers.length > 0) {
+            bestServer = onlineServers.reduce((best, current) => 
+                (current.ping < best.ping && current.ping > 0) ? current : best
+            );
+            console.log('Best server:', bestServer.server.host, bestServer.ping + 'ms');
+        }
+        
+        // Update the display
+        updateServerPingTable();
+        
+    } catch (error) {
+        console.error('Error pinging servers:', error);
+    }
+}
+
+// Initialize server ping monitoring
+function initServerPingMonitoring() {
+    // Only run on the main index page
+    if (currentPage !== "index") return;
+    
+    console.log('Initializing ultra-fast server ping monitoring...');
+    
+    // Initialize results for each server
+    servers.forEach(server => {
+        serverPingResults[server.host] = {
+            name: server.name,
+            host: server.host,
+            region: server.region,
+            location: server.location,
+            ping: -1,
+            status: 'connecting',
+            lastUpdate: null
+        };
+    });
+    
+    // Start pinging servers
+    pingAllServers();
+    
+    // Update every 10 seconds for faster updates
+    if (pingInterval) {
+        clearInterval(pingInterval);
+    }
+    
+    pingInterval = setInterval(() => {
+        pingAllServers();
+    }, 10000);
+}
+
+// Update the server ping table
+function updateServerPingTable() {
+    const tbody = document.getElementById('serverPingList');
+    if (!tbody) return;
+    
+    // Convert results to array and sort by ping (lowest first)
+    const sortedServers = Object.values(serverPingResults)
+        .sort((a, b) => {
+            // Online servers with valid pings come first
+            if (a.ping > 0 && b.ping > 0) return a.ping - b.ping;
+            if (a.ping > 0) return -1;
+            if (b.ping > 0) return 1;
+            return 0;
+        });
+    
+    // Build table HTML
+    let tableHTML = '';
+    sortedServers.forEach((server, index) => {
+        const rank = server.ping > 0 ? index + 1 : '-';
+        const regionFlag = getRegionFlag(server.region);
+        const statusClass = getStatusClass(server.status);
+        const pingDisplay = server.ping > 0 ? `${server.ping}ms` : '-';
+        const statusIcon = getStatusIcon(server.status);
+        const isBest = server.ping > 0 && index === 0;
+        
+        tableHTML += `
+            <tr class="${isBest ? 'best-server' : ''}">
+                <td>
+                    <div class="rank-badge ${isBest ? 'rank-best' : ''}">
+                        ${rank}
+                    </div>
+                </td>
+                <td>
+                    <strong>${server.name}</strong>
+                    ${isBest ? '<span class="badge badge-success ml-2">⚡ FASTEST</span>' : ''}
+                </td>
+                <td>${regionFlag} ${server.location}</td>
+                <td class="ping-cell">
+                    <span class="${statusClass}">
+                        ${pingDisplay}
+                    </span>
+                    ${server.ping > 0 ? getPingQualityBar(server.ping) : ''}
+                </td>
+                <td>
+                    <span class="status-indicator ${statusClass}">
+                        ${statusIcon} ${server.status.toUpperCase()}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = tableHTML;
+}
+
+// Connect to a specific server
+function connectToServer(serverHost) {
+    console.log(`Connecting to server: ${serverHost}`);
+    
+    // Update API to use selected server
+    API = `https://${serverHost}/api/`;
+    console.log('Updated API address:', API);
+    
+    // Store the selected server
+    localStorage.setItem('selectedServer', serverHost);
+    
+    // Show success message
+    $.notify({
+        message: `Connected to ${serverHost}! 🚀`
+    }, {
+        type: "success",
+        timer: 3000
+    });
+    
+    // Reload current page with new server
+    loadIndex();
+}
+
+// Get region flag emoji
+function getRegionFlag(region) {
+    const flags = {
+        'us': '🇺🇸',
+        'asia': '🌏',
+        'oceania': '🇦🇺',
+        'europe': '🇪🇺'
+    };
+    return flags[region] || '🌍';
+}
+
+// Get status class for styling
+function getStatusClass(status) {
+    switch(status) {
+        case 'online': return 'status-online text-success';
+        case 'degraded': return 'status-degraded text-warning';
+        case 'offline': return 'status-offline text-danger';
+        case 'connecting': return 'status-connecting text-info';
+        default: return '';
+    }
+}
+
+// Get status icon
+function getStatusIcon(status) {
+    switch(status) {
+        case 'online': return '✓';
+        case 'degraded': return '⚠';
+        case 'offline': return '✗';
+        case 'connecting': return '⟳';
+        default: return '';
+    }
+}
+
+// Get ping quality bar
+function getPingQualityBar(ping) {
+    let quality = 'excellent';
+    let width = '100%';
+    let color = '#28a745'; // Green
+    
+    if (ping > 200) {
+        quality = 'poor';
+        width = '25%';
+        color = '#dc3545'; // Red
+    } else if (ping > 100) {
+        quality = 'fair';
+        width = '50%';
+        color = '#ffc107'; // Yellow
+    } else if (ping > 50) {
+        quality = 'good';
+        width = '75%';
+        color = '#17a2b8'; // Blue
+    }
+    
+    return `<div class="ping-quality-bar" style="width: 30px; height: 4px; background: #e9ecef; border-radius: 2px; display: inline-block; margin-left: 8px;"><div style="width: ${width}; height: 100%; background: ${color}; border-radius: 2px;"></div></div>`;
+}
+
+// Stop ping monitoring
+function stopPingMonitoring() {
+    if (pingInterval) {
+        clearInterval(pingInterval);
+        pingInterval = null;
+        console.log('Stopped ping monitoring');
+    }
+}
+
+// Auto-select best server on page load
+function autoSelectBestServer() {
+    const savedServer = localStorage.getItem('selectedServer');
+    if (savedServer && servers.find(s => s.host === savedServer)) {
+        // Use saved server
+        API = `https://${savedServer}/api/`;
+        console.log('Using saved server:', savedServer);
+    } else if (bestServer && bestServer.server) {
+        // Use best performing server
+        API = `https://${bestServer.server.host}/api/`;
+        console.log('Auto-selected best server:', bestServer.server.host);
+        localStorage.setItem('selectedServer', bestServer.server.host);
+    }
+}
+
+// Initialize on document ready
+$(document).ready(function() {
+    console.log('Document ready - initializing ping system...');
+    
+    // Initialize ping monitoring when on index page
+    if (window.location.hash === '' || window.location.hash === '#' || window.location.hash === '#index') {
+        setTimeout(initServerPingMonitoring, 1000);
+    }
+    
+    // Auto-select best server after initial ping results
+    setTimeout(autoSelectBestServer, 8000);
+});
+
+// Reinitialize when navigating back to index
+$(window).on('hashchange', function() {
+    const hash = window.location.hash;
+    if (hash === '' || hash === '#' || hash === '#index') {
+        setTimeout(initServerPingMonitoring, 500);
+    } else {
+        // Stop ping monitoring when not on index page
+        stopPingMonitoring();
+    }
+});
+
+// Stop ping system when page unloads
+$(window).on('beforeunload', function() {
+    stopPingMonitoring();
+});
