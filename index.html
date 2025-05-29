@@ -412,6 +412,163 @@
         background: linear-gradient(135deg, #000000 0%, var(--bg-card) 100%) !important;
         border: 1px solid var(--accent-primary) !important;
       }
+      /* Server Ping Table Styles - Add to your existing <style> section */
+
+        /* Server ping table specific styles */
+#serverPingTable {
+    margin-bottom: 0;
+}
+
+#serverPingTable tbody tr {
+    transition: all 0.3s ease;
+}
+
+#serverPingTable tbody tr:hover {
+    transform: scale(1.01);
+    background-color: var(--bg-tertiary) !important;
+}
+
+.best-server {
+    background-color: rgba(0, 168, 255, 0.1) !important;
+    border-left: 3px solid var(--accent-primary);
+}
+
+/* Rank badge styling */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.rank-best {
+    background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%) !important;
+    color: white !important;
+    box-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-online {
+    color: var(--success);
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.status-timeout {
+    color: var(--warning);
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.status-error {
+    color: var(--danger);
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.status-connecting {
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+}
+
+/* Ping cell styling */
+.ping-cell {
+    position: relative;
+}
+
+.ping-cell span {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Ping quality indicator */
+.ping-quality {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.ping-excellent {
+    background-color: var(--success);
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+}
+
+.ping-good {
+    background-color: #10b981;
+}
+
+.ping-fair {
+    background-color: var(--warning);
+}
+
+.ping-poor {
+    background-color: var(--danger);
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+}
+
+/* Loading animation */
+.loading-container {
+    padding: 40px 0;
+    color: var(--text-secondary);
+}
+
+.loading-container i {
+    font-size: 2rem;
+    color: var(--accent-primary);
+    margin-right: 10px;
+}
+
+/* Badge styling */
+.badge-success {
+    background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Region flags */
+#serverPingTable td:nth-child(3) {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #serverPingTable {
+        font-size: 0.85rem;
+    }
+    
+    .rank-badge {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .badge-success {
+        display: none;
+    }
+}
     </style>
 </head>
 
@@ -559,6 +716,46 @@
 		</div>
 	</div>	
 <br>
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title text-center">
+                <h3 style="color: var(--accent-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">
+                    <i class="fas fa-server"></i> Server Latency Monitor
+                </h3>
+                <p style="color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">
+                    Real-time connection speed to our global mining servers
+                </p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table" id="serverPingTable">
+                    <thead class="text-primary">
+                        <tr>
+                            <th style="width: 10%;">Rank</th>
+                            <th style="width: 35%;">Server Location</th>
+                            <th style="width: 20%;">Region</th>
+                            <th style="width: 20%;">Latency</th>
+                            <th style="width: 15%;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serverPingList">
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                <div class="loading-container">
+                                    <i class="fas fa-spinner fa-spin"></i> Initializing server connections...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+	  
 <!-- INDEX FOOTER --> 
     <footer class="main-index-footer">
 		<strong><a target="_blank" href="https://1miner.net">&copy; <script>document.write(new Date().getFullYear())</script> 1miner.net - Made By DankMiner</a></strong>
