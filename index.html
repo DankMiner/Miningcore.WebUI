@@ -948,8 +948,49 @@
       </div>
 
     </main>
-  </div>
+  </div><br>
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title text-center">
+                <h3 style="color: var(--accent-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">
+                    <i class="fas fa-server"></i> Server Latency Monitor
+                </h3>
+                <p style="color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">
+                    Real-time connection speed to our global mining servers
+                </p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table" id="serverPingTable">
+                    <thead class="text-primary">
+                        <tr>
+                            <th style="width: 10%;">Rank</th>
+                            <th style="width: 35%;">Server Location</th>
+                            <th style="width: 20%;">Region</th>
+                            <th style="width: 20%;">Latency</th>
+                            <th style="width: 15%;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serverPingList">
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                <div class="loading-container">
+                                    <i class="fas fa-spinner fa-spin"></i> Initializing server connections...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+<br>
+</div>
+
+  
 
 <!-- Pool Selection Page -->
 <div class="main-index">
