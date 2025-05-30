@@ -698,6 +698,19 @@
       font-size: 11px;
       font-weight: 700;
       transition: var(--transition);
+      min-width: 0;
+    }
+
+    /* Ensure progress text is always visible */
+    .progress-bar[style*="width: 0%"],
+    .progress-bar[style*="width: 1%"],
+    .progress-bar[style*="width: 2%"],
+    .progress-bar[style*="width: 3%"],
+    .progress-bar[style*="width: 4%"],
+    .progress-bar[style*="width: 5%"] {
+      min-width: 35px;
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
     }
 
     /* Enhanced Pool Selection Page - Mobile Optimized */
@@ -836,6 +849,11 @@
     .text-danger { color: var(--danger) !important; }
     .text-info { color: var(--accent-primary) !important; }
     .text-muted { color: var(--text-muted) !important; }
+
+    /* Effort Classes for Blocks */
+    .effort1 { color: var(--success) !important; font-weight: 700; }
+    .effort2 { color: var(--warning) !important; font-weight: 700; }
+    .effort3 { color: var(--danger) !important; font-weight: 700; }
 
     /* Sidebar for pool pages - Mobile Optimized */
     .pool-layout {
@@ -1899,36 +1917,113 @@
 
       <!-- Blocks Page -->
       <div class="page page-blocks" style="display:none;">
-        <h2>Blocks Found</h2>
+        <h2>Pool Blocks Found</h2>
 
+        <!-- Block Statistics -->
+        <div class="stats-grid" style="margin-bottom: 25px;">
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-cubes"></i>
+              Total Blocks
+            </div>
+            <div class="stat-value" id="poolBlocks2">0</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-credit-card"></i>
+              Total Paid
+            </div>
+            <div class="stat-value" id="totalPaid2">0</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="far fa-money-bill-alt"></i>
+              Coin Value
+            </div>
+            <div class="stat-value" id="coinvalue">Loading...</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-dollar-sign"></i>
+              Block Reward
+            </div>
+            <div class="stat-value" id="blockreward">0</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-cube"></i>
+              Current Effort
+            </div>
+            <div class="stat-value" id="CurrentEffort">0%</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-cubes"></i>
+              Average Effort
+            </div>
+            <div class="stat-value" id="AverageEffort">0%</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-cube"></i>
+              Average Uncle Rate
+            </div>
+            <div class="stat-value" id="AverageUncleRate">0%</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-cubes"></i>
+              Average Orphaned Rate
+            </div>
+            <div class="stat-value" id="AverageOrphanedRate">0%</div>
+          </div>
+        </div>
+
+        <!-- Blocks Tabs -->
         <div class="tab-nav">
-          <a href="#" class="tab-link" onclick="switchBlockTab(event, 'pending-blocks')">
-            <i class="fas fa-clock"></i> Pending
-            <span class="tab-badge" id="pendingBlockCount">0</span>
-          </a>
           <a href="#" class="tab-link active" onclick="switchBlockTab(event, 'confirmed-blocks')">
             <i class="fas fa-check-circle"></i> Confirmed
             <span class="tab-badge" id="confirmedBlockCount">0</span>
           </a>
+          <a href="#" class="tab-link" onclick="switchBlockTab(event, 'pending-blocks')">
+            <i class="fas fa-clock"></i> Pending
+            <span class="tab-badge" id="pendingBlockCount">0</span>
+          </a>
+          <a href="#" class="tab-link" onclick="switchBlockTab(event, 'new-blocks')">
+            <i class="fas fa-sparkles"></i> New
+            <span class="tab-badge" id="newBlockCount">0</span>
+          </a>
         </div>
 
-        <!-- Pending Blocks Tab -->
-        <div id="pending-blocks" class="block-tab-content" style="display:none;">
+        <!-- Confirmed Blocks Tab -->
+        <div id="confirmed-blocks" class="block-tab-content" style="display:block;">
+          <h3 style="color: var(--text-primary); margin: 20px 0;">Confirmed Blocks</h3>
           <div class="table-responsive">
             <div class="data-table">
               <table>
                 <thead>
                   <tr>
+                    <th>Found Time</th>
+                    <th>Finder</th>
                     <th>Height</th>
-                    <th>Time Found</th>
-                    <th>Miner</th>
+                    <th>Net Diff</th>
+                    <th>Luck</th>
+                    <th>Status</th>
                     <th>Reward</th>
-                    <th>Confirmations</th>
+                    <th>Type</th>
+                    <th>Confirmation</th>
                   </tr>
                 </thead>
-                <tbody id="pendingBlockList">
+                <tbody id="blockList">
                   <tr>
-                    <td colspan="5" class="text-center text-muted">No pending blocks</td>
+                    <td colspan="9" class="text-center text-muted">No blocks found yet</td>
                   </tr>
                 </tbody>
               </table>
@@ -1936,23 +2031,57 @@
           </div>
         </div>
 
-        <!-- Confirmed Blocks Tab -->
-        <div id="confirmed-blocks" class="block-tab-content" style="display:block;">
+        <!-- Pending Blocks Tab -->
+        <div id="pending-blocks" class="block-tab-content" style="display:none;">
+          <h3 style="color: var(--text-primary); margin: 20px 0;">Pending Blocks</h3>
           <div class="table-responsive">
             <div class="data-table">
               <table>
                 <thead>
                   <tr>
+                    <th>Found Time</th>
+                    <th>Finder</th>
                     <th>Height</th>
-                    <th>Time Found</th>
-                    <th>Miner</th>
+                    <th>Net Diff</th>
+                    <th>Luck</th>
+                    <th>Status</th>
                     <th>Reward</th>
-                    <th>Effort</th>
+                    <th>Type</th>
+                    <th>Confirmation</th>
                   </tr>
                 </thead>
-                <tbody id="blockList">
+                <tbody id="pendingBlockList">
                   <tr>
-                    <td colspan="5" class="text-center text-muted">No blocks found yet</td>
+                    <td colspan="9" class="text-center text-muted">No pending blocks</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Blocks Tab -->
+        <div id="new-blocks" class="block-tab-content" style="display:none;">
+          <h3 style="color: var(--text-primary); margin: 20px 0;">New Blocks</h3>
+          <div class="table-responsive">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Found Time</th>
+                    <th>Finder</th>
+                    <th>Height</th>
+                    <th>Net Diff</th>
+                    <th>Luck</th>
+                    <th>Status</th>
+                    <th>Reward</th>
+                    <th>Type</th>
+                    <th>Confirmation</th>
+                  </tr>
+                </thead>
+                <tbody id="newBlockList">
+                  <tr>
+                    <td colspan="9" class="text-center text-muted">No new blocks</td>
                   </tr>
                 </tbody>
               </table>
@@ -1963,10 +2092,21 @@
         <!-- Additional Info Box -->
         <div class="info-box" style="margin-top: 20px;">
           <h4><i class="fas fa-info-circle"></i> Block Status Guide</h4>
-          <ul style="margin-bottom: 0;">
+          <ul style="margin-bottom: 0; list-style-type: disc; padding-left: 20px;">
+            <li><strong>New:</strong> Blocks just found, awaiting initial confirmation</li>
             <li><strong>Pending:</strong> Blocks with confirmations in progress</li>
-            <li><strong>Confirmed:</strong> Fully confirmed blocks ready for payout (includes orphaned blocks)</li>
+            <li><strong>Confirmed:</strong> Fully confirmed blocks ready for payout</li>
+            <li><strong>Orphaned:</strong> Blocks that were not included in the main chain</li>
+            <li><strong>Uncle:</strong> Blocks that contribute partial rewards</li>
           </ul>
+          <div style="margin-top: 15px;">
+            <h5>Effort/Luck Indicator:</h5>
+            <ul style="margin-bottom: 0; list-style-type: none; padding-left: 0;">
+              <li><span class="text-success">● Green:</span> Luck < 100% (Found faster than expected)</li>
+              <li><span class="text-warning">● Orange:</span> Luck 100-200% (Normal range)</li>
+              <li><span class="text-danger">● Red:</span> Luck > 200% (Took longer than expected)</li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -2389,6 +2529,11 @@ function switchBlockTab(evt, tabName) {
   // Show selected tab and mark as active
   document.getElementById(tabName).style.display = "block";
   evt.currentTarget.classList.add("active");
+  
+  // Scroll tab into view on mobile
+  if (window.innerWidth <= 768) {
+    evt.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+  }
 }
 
 // Fix navigation for global pages
