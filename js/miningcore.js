@@ -142,6 +142,7 @@ function loadIndex() {
                 console.log('Loading blocks page');
                 $(".nav-blocks .sidebar-menu-link").addClass("active");
                 $(".nav-blocks.pool-nav-link").addClass("active");
+                loadBlocksEffortTable();
                 loadBlocksPage();
                 break;
             case "payments":
@@ -921,16 +922,69 @@ function loadMinersPage() {
         });
 }
 
-// Load Blocks Page - Mobile optimized
+// Load Blocks Effort Table
+async function loadBlocksEffortTable() {
+    console.log("Loading blocks effort table");
+    try {
+        const data = await $.ajax(API + "pools");
+        const poolsResponse = data.pools.find(pool => currentPool === pool.id);
+        if (!poolsResponse) {
+            throw new Error("Pool not found");
+        }
+        
+        var totalBlocks = poolsResponse.totalBlocks;
+        var poolEffort = (poolsResponse.poolEffort * 100).toFixed(2);
+        const PoolblocksResponse = await $.ajax(API + "pools/" + currentPool + "/blocks?page=0&pageSize=" + totalBlocks);
+        
+        var effortsum = 0;
+        var uncleblocks = 0;
+        var orphanedblocks = 0;
+        
+        for (let i = 0; i < PoolblocksResponse.length; i++) {
+            const currentBlock = PoolblocksResponse[i];
+            if (typeof currentBlock.effort !== "undefined") {
+                effortsum = effortsum + Math.round(currentBlock.effort * 100);
+            }
+            if (currentBlock.status === "orphaned") {
+                orphanedblocks = orphanedblocks + 1;
+            }
+            if (currentBlock.type === "uncle") {
+                uncleblocks = uncleblocks + 1;
+            }
+        }
+
+        effortsum = Math.round(effortsum / totalBlocks);
+        uncleblocks = ((uncleblocks / totalBlocks) * 100).toFixed(2);
+        orphanedblocks = ((orphanedblocks / totalBlocks) * 100).toFixed(2);
+
+        $("#CurrentEffort").html(poolEffort + " %");
+        $("#AverageEffort").html(effortsum + " %");
+        $("#AverageUncleRate").html(uncleblocks + " %");
+        $("#AverageOrphanedRate").html(orphanedblocks + " %");
+        
+    } catch (error) {
+        console.error("Error loading blocks effort table:", error);
+    }
+}
+
+// Load Blocks Page - Enhanced with full original functionality
 function loadBlocksPage() {
     console.log('Loading blocks page');
     
+    // Load effort statistics
+    loadBlocksEffortTable();
+    
+    // Also load stats data to populate coin value and other info
+    loadBlocksStats();
+    
     return $.ajax(API + "pools/" + currentPool + "/blocks?page=0&pageSize=100")
         .done(function(data) {
-            var confirmedList = "";
-            var pendingList = "";
-            var confirmedCount = 0;
-            var pendingCount = 0;
+            var blockList = "";
+            var newBlockList = "";
+            var newBlockCount = 0;
+            var pendingBlockList = "";
+            var pendingBlockCount = 0;
+            var confirmedBlockCount = 0;
             
             if (data.length > 0) {
                 // Sort blocks by creation date (newest first)
@@ -939,63 +993,173 @@ function loadBlocksPage() {
                 $.each(data, function(index, value) {
                     var createDate = convertUTCDateToLocalDate(new Date(value.created), false);
                     var timeAgo = getTimeAgo(createDate);
-                    var effort = value.effort ? Math.round(value.effort * 100) : 0;
-                    var effortClass = effort < 100 ? "text-success" : effort < 200 ? "text-warning" : "text-danger";
+                    var effort = Math.round(value.effort * 100);
+                    var effortClass = "";
+                    
+                    if (effort < 100) {
+                        effortClass = "text-success";
+                    } else if (effort < 200) {
+                        effortClass = "text-warning";
+                    } else {
+                        effortClass = "text-danger";
+                    }
+                    
+                    var status = value.status;
+                    var blockTable = "";
                     
                     // Mobile-friendly miner address
                     var displayMiner = isMobile()
                         ? value.miner.substring(0, 6) + '...' + value.miner.substring(value.miner.length - 6)
                         : value.miner.substring(0, 8) + '...' + value.miner.substring(value.miner.length - 8);
                     
-                    // Common row structure
-                    var row = `
-                    <tr>
-                        <td><a href="${value.infoLink}" target="_blank">${value.blockHeight.toLocaleString()}</a></td>
-                        <td title="${createDate.toLocaleString()}">${timeAgo}</td>
-                        <td>
-                            <a href="#${currentPool}/dashboard?address=${value.miner}" class="text-info">
-                                ${displayMiner}
-                            </a>
-                        </td>
-                        <td>${_formatter(value.reward, 6, "")}</td>`;
+                    blockTable += "<tr>";
+                    blockTable += "<td><div title='" + createDate + "'>" + timeAgo + "</div></td>";
+                    blockTable += '<td><a href="#' + currentPool + '/dashboard?address=' + value.miner + '" class="text-info">' + displayMiner + '</a></td>';
+                    blockTable += "<td><a href='" + value.infoLink + "' target='_blank'>" + value.blockHeight.toLocaleString() + "</a></td>";
+                    blockTable += "<td>" + _formatter(value.networkDifficulty, 6, "") + "</td>";
                     
-                    // Categorize blocks
-                    if (value.status === "confirmed" || value.status === "orphaned") {
-                        if (value.status === "orphaned") {
-                            row += `<td><span class="text-danger">Orphaned</span></td></tr>`;
+                    if (typeof value.effort !== "undefined") {
+                        blockTable += "<td class='" + effortClass + "'>" + effort + "%</td>";
+                    } else {
+                        blockTable += "<td>Calculating...</td>";
+                    }
+                    
+                    blockTable += "<td>";
+                    if (status === "pending") {
+                        if (value.confirmationProgress === 0) {
+                            blockTable += "New Block";
+                            newBlockCount++;
                         } else {
-                            row += `<td class="${effortClass}">${effort}%</td></tr>`;
+                            blockTable += "Pending";
+                            pendingBlockCount++;
                         }
-                        confirmedList += row;
-                        confirmedCount++;
-                    } else if (value.status === "pending") {
-                        var progress = value.confirmationProgress ? Math.round(value.confirmationProgress * 100) : 0;
-                        row += `
-                        <td>
-                            <div class="progress" style="min-width: ${isMobile() ? '60px' : '100px'};">
-                                <div class="progress-bar" role="progressbar" style="width: ${progress}%">
-                                    ${progress}%
-                                </div>
-                            </div>
-                        </td></tr>`;
-                        pendingList += row;
-                        pendingCount++;
+                    } else if (status === "confirmed") {
+                        blockTable += "Confirmed";
+                        confirmedBlockCount++;
+                    } else if (status === "orphaned") {
+                        blockTable += "Orphaned";
+                    } else {
+                        blockTable += status;
+                    }
+                    blockTable += "</td>";
+                    
+                    // Reward
+                    if (status === "pending" && value.confirmationProgress === 0) {
+                        blockTable += "<td>Waiting...</td>";
+                    } else {
+                        blockTable += "<td>" + _formatter(value.reward, 6, "") + "</td>";
+                    }
+                    
+                    // Type
+                    if (value.type === "uncle") {
+                        blockTable += "<td>Uncle</td>";
+                    } else if (status === "orphaned") {
+                        blockTable += "<td>Orphaned</td>";
+                    } else {
+                        blockTable += "<td>Block</td>";
+                    }
+                    
+                    // Confirmation progress
+                    var progressValue = Math.round(value.confirmationProgress * 100);
+                    blockTable += '<td><div class="progress" style="min-width: ' + (isMobile() ? '60px' : '100px') + ';">';
+                    blockTable += '<div class="progress-bar" role="progressbar" style="width: ' + progressValue + '%">';
+                    blockTable += progressValue + '%</div></div></td>';
+                    blockTable += "</tr>";
+                    
+                    // Assign to appropriate list
+                    if (status === "pending") {
+                        if (value.confirmationProgress === 0) {
+                            newBlockList += blockTable;
+                        } else {
+                            pendingBlockList += blockTable;
+                        }
+                    } else {
+                        blockList += blockTable;
                     }
                 });
+            } else {
+                blockList = '<tr><td colspan="9" class="text-center text-muted">No blocks found yet</td></tr>';
             }
             
-            // Update lists
-            $("#blockList").html(confirmedList || '<tr><td colspan="5" class="text-center text-muted">No confirmed blocks yet</td></tr>');
-            $("#pendingBlockList").html(pendingList || '<tr><td colspan="5" class="text-center text-muted">No pending blocks</td></tr>');
+            // Update all three lists
+            $("#blockList").html(blockList);
+            $("#newBlockList").html(newBlockList || '<tr><td colspan="9" class="text-center text-muted">No new blocks</td></tr>');
+            $("#pendingBlockList").html(pendingBlockList || '<tr><td colspan="9" class="text-center text-muted">No pending blocks</td></tr>');
             
             // Update counts
-            $("#confirmedBlockCount").text(confirmedCount);
-            $("#pendingBlockCount").text(pendingCount);
-            $("#nav-blocks-badge").text(confirmedCount + pendingCount);
+            $("#newBlockCount").text(newBlockCount);
+            $("#pendingBlockCount").text(pendingBlockCount);
+            $("#confirmedBlockCount").text(confirmedBlockCount);
+            $("#nav-blocks-badge").text(newBlockCount + pendingBlockCount + confirmedBlockCount);
         })
         .fail(function() {
             showNotification("Failed to load blocks", "danger");
         });
+}
+
+// Load blocks statistics data
+function loadBlocksStats() {
+    $.ajax(API + "pools")
+        .done(function(data) {
+            var pool = data.pools.find(p => p.id === currentPool);
+            if (!pool) return;
+            
+            // Update total blocks and total paid
+            $("#poolBlocks2").text(pool.totalBlocks.toLocaleString());
+            $("#totalPaid2").html(pool.totalPaid.toLocaleString() + " " + pool.coin.type);
+            
+            // Get block reward from recent blocks
+            $.ajax(API + "pools/" + currentPool + "/blocks?page=0&pageSize=1")
+                .done(function(blocks) {
+                    if (blocks.length > 0) {
+                        var reward = blocks[0].reward;
+                        $("#blockreward").text(_formatter(reward, 6, "") + " " + pool.coin.type);
+                        
+                        // Try to get coin value
+                        getCoinValue(pool.coin.type, reward);
+                    }
+                });
+        });
+}
+
+// Get coin value from various exchanges
+function getCoinValue(coinType, reward) {
+    var getcoin_price = 0;
+    
+    // Try different price APIs based on coin
+    if (coinType === "LOG") {
+        $.ajax("https://api.coingecko.com/api/v3/simple/price?ids=woodcoin&vs_currencies=usd")
+            .done(function(data) {
+                getcoin_price = data.woodcoin.usd;
+                updateCoinValue(getcoin_price, reward);
+            })
+            .fail(function() {
+                updateCoinValue(0, reward);
+            });
+    } else {
+        // Try Xeggex API first
+        $.ajax("https://api.xeggex.com/api/v2/market/getbysymbol/" + coinType + "%2FUSDT")
+            .done(function(data) {
+                getcoin_price = data.lastPrice;
+                updateCoinValue(getcoin_price, reward);
+            })
+            .fail(function() {
+                // Fallback to no price
+                updateCoinValue(0, reward);
+            });
+    }
+}
+
+// Update coin value display
+function updateCoinValue(price, reward) {
+    if (price > 0) {
+        $("#coinvalue").html(
+            "Coin Price: " + _formatter(price, 6, "USD") + "<br>" +
+            "Block Value: " + _formatter(price * reward, 2, "USD")
+        );
+    } else {
+        $("#coinvalue").html("Coin Price: Not Available");
+    }
 }
 
 // Load Payments Page - Mobile optimized
