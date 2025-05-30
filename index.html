@@ -8,24 +8,63 @@
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <meta name="msapplication-TileImage" content="img/favicon-32x32.png">
   <link rel="icon" href="img/favicon.ico" sizes="96x96" type="image/x-icon"/>
-  
+
   <title>1miner.net - Mining Pool</title>
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">  
-  
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
   <!-- Core CSS -->
   <link rel="stylesheet" href="css/bootstrap.css">
   <link rel="stylesheet" href="css/chartist.min.css">
   <link rel="stylesheet" href="css/font-awesome-all.css">
   <link rel="stylesheet" href="css/themify-icons.css">
-  
+
   <!-- Core JS -->
   <script src="js/jquery.js"></script>
   <script src="js/bootstrap.js"></script>
   <script src="js/chartist.min.js"></script>
-  <script src="js/miningcore.js"></script>
 
-  <!-- Open Overline Pool Style Theme -->
+  <!-- Enhanced Mobile-Friendly Style -->
   <style>
+    /* CSS Variables for Theme Support */
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #242424;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --text-muted: #707070;
+      --accent-primary: #00d4ff;
+      --accent-secondary: #0099cc;
+      --border-color: #333333;
+      --card-bg: #1a1a1a;
+      --input-bg: #242424;
+      --success: #00ff88;
+      --warning: #ffaa00;
+      --danger: #ff4444;
+      --hover-bg: rgba(0, 212, 255, 0.1);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #fafafa;
+      --text-primary: #1a1a1a;
+      --text-secondary: #666666;
+      --text-muted: #999999;
+      --accent-primary: #0099cc;
+      --accent-secondary: #007aa6;
+      --border-color: #e0e0e0;
+      --card-bg: #ffffff;
+      --input-bg: #f5f5f5;
+      --success: #00cc66;
+      --warning: #ff9900;
+      --danger: #ff3333;
+      --hover-bg: rgba(0, 153, 204, 0.05);
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
     /* Reset and Base Styles */
     * {
       box-sizing: border-box;
@@ -34,48 +73,117 @@
     }
 
     body {
-      background-color: #f5f5f5;
-      color: #333;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
       font-size: 14px;
       line-height: 1.5;
+      transition: var(--transition);
+      overflow-x: hidden;
     }
 
-    /* Header Navigation */
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px var(--accent-primary); }
+      50% { box-shadow: 0 0 20px var(--accent-primary), 0 0 30px var(--accent-secondary); }
+      100% { box-shadow: 0 0 5px var(--accent-primary); }
+    }
+
+    /* Theme Toggle - Mobile Optimized */
+    .theme-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1001;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      padding: 5px;
+      cursor: pointer;
+      transition: var(--transition);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px var(--accent-primary);
+    }
+
+    .theme-toggle span {
+      display: block;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    /* Header Navigation - Mobile Optimized */
     .pool-nav-header {
-      background-color: #222;
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
       padding: 0;
       position: fixed;
       top: 0;
       width: 100%;
       z-index: 1000;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
     }
 
     .pool-nav-container {
       display: flex;
       align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
+      justify-content: space-between;
+      padding: 0 10px;
     }
 
     .pool-nav-brand {
-      color: #00d4ff;
+      color: var(--accent-primary);
       font-size: 18px;
-      font-weight: 500;
-      padding: 15px 20px;
+      font-weight: 600;
+      padding: 15px 10px;
       text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
     }
 
     .pool-nav-brand:hover {
-      color: #00d4ff;
+      color: var(--accent-secondary);
       text-decoration: none;
+    }
+
+    /* Mobile Navigation Toggle */
+    .mobile-nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 24px;
+      padding: 10px;
+      cursor: pointer;
     }
 
     .pool-nav-menu {
       display: flex;
-      margin-left: auto;
       list-style: none;
       margin-bottom: 0;
+      padding: 0;
     }
 
     .pool-nav-item {
@@ -83,295 +191,568 @@
     }
 
     .pool-nav-link {
-      color: #fff;
-      padding: 15px 20px;
-      display: block;
+      color: var(--text-secondary);
+      padding: 20px 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       text-decoration: none;
-      transition: background-color 0.2s;
+      transition: var(--transition);
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .pool-nav-link::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--accent-primary);
+      transform: translateX(-100%);
+      transition: var(--transition);
     }
 
     .pool-nav-link:hover {
-      background-color: #333;
-      color: #fff;
+      color: var(--accent-primary);
+      background: var(--hover-bg);
       text-decoration: none;
     }
 
+    .pool-nav-link:hover::before {
+      transform: translateX(0);
+    }
+
     .pool-nav-link.active {
-      background-color: #00d4ff;
-      color: #fff;
+      background: var(--hover-bg);
+      color: var(--accent-primary);
+    }
+
+    .pool-nav-link.active::before {
+      transform: translateX(0);
     }
 
     /* Notification Badge */
     .nav-badge {
-      background-color: #28a745;
+      background: linear-gradient(135deg, var(--success) 0%, #00cc66 100%);
       color: #fff;
       padding: 2px 6px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 11px;
+      font-weight: 700;
       margin-left: 5px;
-      font-weight: 600;
     }
 
-    /* Main Container */
+    /* Main Container - Mobile Optimized */
     .main-container {
       max-width: 1200px;
-      margin: 80px auto 20px;
-      padding: 0 20px;
+      margin: 60px auto 20px;
+      padding: 0 15px;
+      animation: fadeIn 0.5s ease-out;
     }
 
-    /* Stats Grid */
+    /* Enhanced Stats Grid - Mobile Responsive */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 15px;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     .stat-item {
-      background-color: #fff;
-      padding: 15px 20px;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-tertiary) 100%);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.2);
+      border-color: var(--accent-primary);
     }
 
     .stat-label {
-      color: #666;
-      font-size: 13px;
-      margin-bottom: 5px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .stat-label i {
-      font-size: 12px;
-      opacity: 0.7;
+      font-size: 14px;
+      color: var(--accent-primary);
     }
 
     .stat-value {
-      font-size: 18px;
-      font-weight: 600;
-      color: #333;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .stat-value.green {
-      color: #28a745;
+      color: var(--success);
     }
 
     .stat-value.blue {
-      color: #00d4ff;
+      color: var(--accent-primary);
     }
 
     .stat-description {
-      font-size: 12px;
-      color: #999;
-      margin-top: 3px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
     }
 
-    /* Tab Navigation */
+    /* Pending Info Style */
+    .pending-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pending-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .pending-info-label {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .pending-info-value {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    /* Enhanced Tab Navigation - Mobile Friendly */
     .tab-nav {
-      border-bottom: 2px solid #ddd;
+      border-bottom: 2px solid var(--border-color);
       margin-bottom: 20px;
       display: flex;
-      gap: 20px;
+      gap: 15px;
+      position: relative;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-primary) var(--bg-tertiary);
+    }
+
+    .tab-nav::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .tab-nav::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+    }
+
+    .tab-nav::-webkit-scrollbar-thumb {
+      background: var(--accent-primary);
+      border-radius: 3px;
     }
 
     .tab-link {
       padding: 10px 0;
-      color: #666;
+      color: var(--text-secondary);
       text-decoration: none;
       border-bottom: 2px solid transparent;
       margin-bottom: -2px;
-      transition: all 0.2s;
-      font-weight: 500;
+      transition: var(--transition);
+      font-weight: 600;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .tab-link:hover {
-      color: #333;
+      color: var(--text-primary);
       text-decoration: none;
     }
 
     .tab-link.active {
-      color: #00d4ff;
-      border-bottom-color: #00d4ff;
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
     }
 
     .tab-badge {
-      background-color: #dc3545;
+      background: linear-gradient(135deg, var(--danger) 0%, #cc0000 100%);
       color: #fff;
       padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 11px;
-      margin-left: 5px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
     }
 
-    /* Tables */
+    /* Responsive Tables */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -15px;
+      padding: 0 15px;
+    }
+
     .data-table {
       width: 100%;
-      background-color: #fff;
-      border-radius: 4px;
+      background: var(--card-bg);
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
     }
 
     .data-table table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 600px;
     }
 
     .data-table th {
-      background-color: #f8f9fa;
+      background: var(--bg-tertiary);
       padding: 12px 15px;
       text-align: left;
-      font-weight: 600;
-      color: #333;
-      border-bottom: 1px solid #dee2e6;
+      font-weight: 700;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     .data-table td {
       padding: 12px 15px;
-      border-bottom: 1px solid #f1f1f1;
+      border-bottom: 1px solid var(--border-color);
+      transition: var(--transition);
+      font-size: 13px;
+    }
+
+    .data-table tbody tr {
+      transition: var(--transition);
     }
 
     .data-table tbody tr:hover {
-      background-color: #f8f9fa;
+      background: var(--hover-bg);
     }
 
     .data-table tbody tr:last-child td {
       border-bottom: none;
     }
 
-    /* Info Box */
+    /* Server Ping Table Fix */
+    #serverPingTable {
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    #serverPingTable th {
+      background: var(--bg-tertiary);
+      padding: 15px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    #serverPingTable td {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    #serverPingTable tbody tr {
+      transition: var(--transition);
+    }
+
+    #serverPingTable tbody tr:hover {
+      background: var(--hover-bg);
+    }
+
+    #serverPingTable tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    #serverPingTable tbody tr.best-server {
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 16px;
+      border: 2px solid var(--border-color);
+    }
+
+    .rank-badge.rank-best {
+      background: linear-gradient(135deg, var(--success) 0%, #00cc66 100%);
+      color: #fff;
+      border-color: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    .ping-cell {
+      font-weight: 700;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .status-online { color: var(--success); }
+    .status-degraded { color: var(--warning); }
+    .status-offline { color: var(--danger); }
+    .status-connecting { color: var(--accent-primary); }
+
+    /* Mobile Table Card View */
+    @media (max-width: 600px) {
+      .mobile-table-cards .data-table table,
+      .mobile-table-cards .data-table thead,
+      .mobile-table-cards .data-table tbody,
+      .mobile-table-cards .data-table th,
+      .mobile-table-cards .data-table td,
+      .mobile-table-cards .data-table tr {
+        display: block;
+      }
+
+      .mobile-table-cards .data-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+
+      .mobile-table-cards .data-table tr {
+        border: 1px solid var(--border-color);
+        margin-bottom: 10px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .mobile-table-cards .data-table td {
+        border: none;
+        position: relative;
+        padding-left: 45%;
+      }
+
+      .mobile-table-cards .data-table td:before {
+        position: absolute;
+        top: 12px;
+        left: 15px;
+        width: 40%;
+        padding-right: 10px;
+        white-space: nowrap;
+        content: attr(data-label);
+        font-weight: 700;
+        color: var(--text-secondary);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+    }
+
+    /* Enhanced Info Box */
     .info-box {
-      background-color: #e8f4fd;
-      border: 1px solid #bee5eb;
-      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 204, 0.05) 100%);
+      border: 1px solid var(--accent-primary);
+      border-radius: 12px;
       padding: 15px;
       margin-bottom: 20px;
-      color: #004085;
+      color: var(--text-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-box::before {
+      content: '💡';
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 20px;
+      opacity: 0.3;
     }
 
     .info-box p {
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       font-size: 13px;
+      line-height: 1.6;
     }
 
-    .info-box p:last-child {
-      margin-bottom: 0;
-    }
-
-    /* Forms */
+    /* Enhanced Forms - Mobile Optimized */
     .form-control {
       display: block;
       width: 100%;
-      padding: 8px 12px;
+      padding: 10px 14px;
       font-size: 14px;
       line-height: 1.5;
-      color: #495057;
-      background-color: #fff;
+      color: var(--text-primary);
+      background-color: var(--input-bg);
       background-clip: padding-box;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: var(--transition);
+      -webkit-appearance: none;
     }
 
     .form-control:focus {
-      color: #495057;
-      background-color: #fff;
-      border-color: #00d4ff;
+      color: var(--text-primary);
+      background-color: var(--input-bg);
+      border-color: var(--accent-primary);
       outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(0,212,255,0.25);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.25);
     }
 
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Enhanced Buttons - Mobile Touch Optimized */
     .btn {
       display: inline-block;
-      font-weight: 400;
+      font-weight: 600;
       text-align: center;
       white-space: nowrap;
       vertical-align: middle;
       user-select: none;
       border: 1px solid transparent;
-      padding: 8px 16px;
+      padding: 10px 20px;
       font-size: 14px;
       line-height: 1.5;
-      border-radius: 4px;
-      transition: all 0.15s ease-in-out;
+      border-radius: 8px;
+      transition: var(--transition);
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
     }
 
     .btn-primary {
       color: #fff;
-      background-color: #00d4ff;
-      border-color: #00d4ff;
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      border-color: var(--accent-primary);
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
     }
 
     .btn-primary:hover {
       color: #fff;
-      background-color: #00b8e6;
-      border-color: #00a8d4;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
     }
 
-    /* Highlight Row */
-    .highlight-row {
-      background-color: #d4edda !important;
+    .btn-primary:active {
+      transform: scale(0.98) translateY(0);
     }
 
     /* Progress Bar */
     .progress {
       height: 20px;
-      background-color: #e9ecef;
-      border-radius: 4px;
+      background-color: var(--bg-tertiary);
+      border-radius: 10px;
       overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .progress-bar {
-      background-color: #28a745;
+      background: linear-gradient(135deg, var(--success) 0%, #00cc66 100%);
       color: #fff;
       text-align: center;
       line-height: 20px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
+      transition: var(--transition);
     }
 
-    /* Pool Selection Page */
+    /* Enhanced Pool Selection Page - Mobile Optimized */
     .pool-selection {
-      margin-top: 60px;
+      margin-top: 40px;
       text-align: center;
+      animation: fadeIn 0.8s ease-out;
     }
 
     .pool-logo {
-      max-width: 400px;
-      margin: 40px auto;
+      max-width: 300px;
+      width: 80%;
+      margin: 30px auto;
+      animation: pulse 3s infinite;
     }
 
     .pool-tagline {
       font-size: 24px;
-      color: #666;
-      margin-bottom: 40px;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+      font-weight: 300;
+      letter-spacing: 1px;
+      padding: 0 20px;
     }
 
     .pool-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
       margin-top: 30px;
     }
 
+    /* Enhanced Pool Card - Mobile Touch Optimized */
     .pool-card {
-      background-color: #fff;
-      border-radius: 4px;
+      background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-tertiary) 100%);
+      border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
       cursor: pointer;
       text-decoration: none;
       color: inherit;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pool-card:active {
+      transform: scale(0.98);
     }
 
     .pool-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(0, 212, 255, 0.3);
       text-decoration: none;
       color: inherit;
     }
@@ -386,23 +767,36 @@
     .pool-card-icon {
       width: 48px;
       height: 48px;
+      background: var(--bg-primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
     }
 
     .pool-card-icon img {
-      width: 100%;
-      height: 100%;
+      width: 32px;
+      height: 32px;
       object-fit: contain;
     }
 
     .pool-card-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #333;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+      text-align: left;
     }
 
     .pool-card-algo {
-      font-size: 14px;
-      color: #666;
+      font-size: 12px;
+      color: var(--accent-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: left;
     }
 
     .pool-card-stats {
@@ -414,61 +808,137 @@
 
     .pool-card-stat {
       text-align: left;
+      padding: 8px;
+      background: var(--bg-primary);
+      border-radius: 8px;
     }
 
     .pool-card-stat-label {
-      font-size: 12px;
-      color: #999;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
     }
 
     .pool-card-stat-value {
       font-size: 14px;
-      font-weight: 600;
-      color: #333;
+      font-weight: 700;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Status Colors */
-    .text-success { color: #28a745; }
-    .text-warning { color: #ffc107; }
-    .text-danger { color: #dc3545; }
-    .text-info { color: #17a2b8; }
-    .text-muted { color: #6c757d; }
+    .text-success { color: var(--success) !important; }
+    .text-warning { color: var(--warning) !important; }
+    .text-danger { color: var(--danger) !important; }
+    .text-info { color: var(--accent-primary) !important; }
+    .text-muted { color: var(--text-muted) !important; }
 
-    /* Hidden Elements */
-    .d-none { display: none !important; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .pool-nav-container {
-        flex-wrap: wrap;
-      }
-      
-      .pool-nav-menu {
-        width: 100%;
-        margin-left: 0;
-        flex-wrap: wrap;
-      }
-      
-      .pool-nav-item {
-        flex: 1;
-        text-align: center;
-      }
-      
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
+    /* Sidebar for pool pages - Mobile Optimized */
+    .pool-layout {
+      display: flex;
+      margin-top: 60px;
+      position: relative;
     }
 
-    /* Loading */
+    .pool-sidebar {
+      width: 240px;
+      background: var(--bg-secondary);
+      min-height: calc(100vh - 60px);
+      padding: 25px 15px;
+      position: fixed;
+      border-right: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      z-index: 998;
+      transition: transform 0.3s ease;
+    }
+
+    .pool-content {
+      flex: 1;
+      margin-left: 240px;
+      padding: 20px;
+      animation: fadeIn 0.5s ease-out;
+      min-height: calc(100vh - 60px);
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar-menu-item {
+      margin-bottom: 5px;
+    }
+
+    .sidebar-menu-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: var(--transition);
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-menu-link:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu-link.active {
+      background: var(--hover-bg);
+      color: var(--accent-primary);
+      font-weight: 700;
+    }
+
+    .sidebar-menu-link i {
+      width: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* Mobile Menu Toggle Button */
+    .mobile-menu-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
+      cursor: pointer;
+      z-index: 999;
+      transition: var(--transition);
+    }
+
+    .mobile-menu-toggle:active {
+      transform: scale(0.9);
+    }
+
+    /* Loading Animation */
     .loading {
       text-align: center;
       padding: 40px;
-      color: #666;
+      color: var(--text-secondary);
     }
 
     .loading i {
-      font-size: 48px;
-      color: #00d4ff;
+      font-size: 36px;
+      color: var(--accent-primary);
       animation: spin 1s linear infinite;
     }
 
@@ -477,66 +947,559 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Sidebar for pool pages */
-    .pool-layout {
+    /* Mobile Responsive Styles */
+    @media (max-width: 1024px) {
+      .pool-nav-link {
+        padding: 20px 12px;
+        font-size: 13px;
+      }
+
+      .pool-content {
+        margin-left: 0;
+      }
+
+      .pool-sidebar {
+        transform: translateX(-100%);
+      }
+
+      .pool-sidebar.active {
+        transform: translateX(0);
+      }
+
+      .mobile-menu-toggle {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* Mobile Navigation */
+      .mobile-nav-toggle {
+        display: block;
+      }
+
+      .pool-nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: var(--bg-secondary);
+        flex-direction: column;
+        padding: 20px;
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: var(--shadow);
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
+      }
+
+      .pool-nav-menu.active {
+        transform: translateY(0);
+      }
+
+      .pool-nav-link {
+        padding: 15px;
+        width: 100%;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .pool-nav-link:last-child {
+        border-bottom: none;
+      }
+
+      /* Main Container */
+      .main-container {
+        margin-top: 50px;
+        padding: 0 10px;
+      }
+
+      /* Pool Selection */
+      .pool-tagline {
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+
+      .pool-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .stat-item {
+        padding: 15px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+      }
+
+      /* Pool Content */
+      .pool-content {
+        padding: 15px;
+      }
+
+      /* Wallet Input */
+      .wallet-input-container form {
+        flex-direction: column;
+      }
+
+      .wallet-input-container .btn {
+        width: 100%;
+      }
+
+      /* About Page */
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      /* Help Content */
+      .help-content {
+        padding: 0 10px;
+      }
+
+      .command-box {
+        font-size: 12px;
+        padding: 15px;
+      }
+
+      /* Server Ping Table */
+      #serverPingTable {
+        font-size: 12px;
+      }
+
+      #serverPingTable th,
+      #serverPingTable td {
+        padding: 10px 8px;
+      }
+
+      .rank-badge {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      /* Extra small devices */
+      .pool-nav-brand {
+        font-size: 16px;
+        padding: 15px 5px;
+      }
+
+      .theme-toggle {
+        top: 60px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+      }
+
+      .stat-value {
+        font-size: 16px;
+      }
+
+      .pool-card {
+        padding: 15px;
+      }
+
+      .pool-card-title {
+        font-size: 16px;
+      }
+
+      .pool-card-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        font-size: 13px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      h3 {
+        font-size: 18px;
+      }
+
+      /* Mobile tables */
+      .data-table {
+        font-size: 12px;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 10px 12px;
+      }
+    }
+
+    /* Touch-friendly hover states */
+    @media (hover: none) {
+      .pool-card:hover {
+        transform: none;
+      }
+
+      .stat-item:hover {
+        transform: none;
+      }
+
+      .btn:hover {
+        transform: none;
+      }
+    }
+
+    /* Landscape orientation adjustments */
+    @media (max-height: 600px) and (orientation: landscape) {
+      .pool-nav-header {
+        padding: 0;
+      }
+
+      .pool-nav-link {
+        padding: 15px 10px;
+      }
+
+      .main-container {
+        margin-top: 50px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
+      .stat-item {
+        padding: 12px;
+      }
+
+      .stat-value {
+        font-size: 16px;
+      }
+    }
+
+    /* Server Ping Section - Mobile Optimized */
+    .server-ping-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 25px;
+      margin-top: 25px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    .server-ping-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .server-ping-header h3 {
+      color: var(--accent-primary);
+      font-size: 24px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .server-ping-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .server-ping-section {
+        padding: 20px;
+        margin: 20px -10px 0;
+      }
+
+      .server-ping-header h3 {
+        font-size: 20px;
+      }
+
+      .server-ping-header p {
+        font-size: 12px;
+      }
+    }
+
+    /* Wallet Input Enhancement - Mobile */
+    .wallet-input-container {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    .wallet-input-container form {
       display: flex;
-      margin-top: 60px;
+      gap: 12px;
+      align-items: stretch;
     }
 
-    .pool-sidebar {
-      width: 200px;
-      background-color: #f8f9fa;
-      min-height: calc(100vh - 60px);
+    @media (max-width: 600px) {
+      .wallet-input-container {
+        padding: 15px;
+      }
+
+      .wallet-input-container form {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .wallet-input-container .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+    }
+
+    /* Chart Enhancements - Mobile */
+    .ct-chart {
+      position: relative;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      padding: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .ct-chart {
+        padding: 10px;
+        margin: 0 -10px;
+      }
+      
+      /* Ensure labels are visible on mobile */
+      .ct-label {
+        font-size: 10px !important;
+      }
+    }
+
+    /* Additional chart fixes for visibility */
+    .ct-chart svg {
+      color: var(--text-secondary);
+    }
+    
+    .ct-chart .ct-series .ct-line,
+    .ct-chart .ct-series .ct-bar,
+    .ct-chart .ct-series .ct-slice-donut {
+      stroke: var(--accent-primary);
+    }
+    
+    .ct-chart .ct-series .ct-area,
+    .ct-chart .ct-series .ct-slice-pie,
+    .ct-chart .ct-series .ct-slice-donut-solid {
+      fill: var(--accent-primary);
+    }
+
+    /* Ensure text elements inherit theme colors */
+    .ct-chart text {
+      fill: var(--text-secondary) !important;
+      font-family: inherit;
+    }
+
+    /* Dashboard chart specific styling */
+    #chartDashboardHashRate {
+      background: var(--bg-tertiary);
+    }
+
+    /* Stats chart specific styling */
+    #chartStatsHashRatePool {
+      background: var(--bg-tertiary);
+    }
+
+    /* Hidden Elements */
+    .d-none { display: none !important; }
+
+    /* Accessibility improvements */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Focus styles for better accessibility */
+    a:focus,
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    /* About/Feature Grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .feature-item {
+      background: var(--card-bg);
       padding: 20px;
-      position: fixed;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
     }
 
-    .pool-content {
-      flex: 1;
-      margin-left: 200px;
-      padding: 20px;
+    .feature-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.2);
+      border-color: var(--accent-primary);
     }
 
-    .sidebar-menu {
-      list-style: none;
-    }
-
-    .sidebar-menu-item {
-      margin-bottom: 5px;
-    }
-
-    .sidebar-menu-link {
+    .feature-item i {
+      font-size: 36px;
+      color: var(--accent-primary);
+      margin-bottom: 15px;
       display: block;
-      padding: 8px 12px;
-      color: #666;
-      text-decoration: none;
-      border-radius: 4px;
-      transition: all 0.2s;
     }
 
-    .sidebar-menu-link:hover {
-      background-color: #e9ecef;
-      color: #333;
+    .feature-item h4 {
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      font-size: 18px;
     }
 
-    .sidebar-menu-link.active {
-      background-color: #00d4ff;
-      color: #fff;
+    .feature-item p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 0;
     }
 
-    .sidebar-menu-link i {
-      width: 20px;
-      margin-right: 8px;
+    /* Help Card */
+    .help-card {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    .help-card h3,
+    .help-card h4 {
+      color: var(--accent-primary);
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    .help-card h3:first-child,
+    .help-card h4:first-child {
+      margin-top: 0;
+    }
+
+    .help-card p,
+    .help-card ul {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .help-card ul {
+      padding-left: 20px;
+    }
+
+    .help-card li {
+      margin-bottom: 8px;
+    }
+
+    /* Command Box */
+    .command-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: var(--accent-primary);
+      overflow-x: auto;
+      white-space: pre;
+      margin: 15px 0;
+    }
+
+    /* About Section */
+    .about-section {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    .about-section h3 {
+      color: var(--accent-primary);
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .about-section p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .about-section ul {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      padding-left: 20px;
+    }
+
+    .about-section li {
+      margin-bottom: 8px;
+    }
+
+    /* Print styles */
+    @media print {
+      .theme-toggle,
+      .mobile-nav-toggle,
+      .mobile-menu-toggle,
+      .pool-nav-header,
+      .pool-sidebar {
+        display: none !important;
+      }
+
+      .pool-content {
+        margin-left: 0 !important;
+      }
+
+      body {
+        background: white;
+        color: black;
+      }
     }
   </style>
 </head>
 
-<body onhashchange="loadIndex()">
+<body onhashchange="loadIndex()" data-theme="dark">
+
+<!-- Theme Toggle -->
+<div class="theme-toggle" onclick="toggleTheme()">
+  <span id="themeIcon">🌙</span>
+</div>
 
 <!-- Navigation Header -->
 <nav class="pool-nav-header">
   <div class="pool-nav-container">
-    <a href="#" class="pool-nav-brand">1MinerPool</a>
+    <a href="#" class="pool-nav-brand">
+      <i class="fas fa-gem"></i> 1MinerPool
+    </a>
+    
+    <!-- Mobile Navigation Toggle -->
+    <button class="mobile-nav-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+      <i class="fas fa-bars"></i>
+    </button>
+    
     <ul class="pool-nav-menu" id="main-pool-nav" style="display:none;">
       <li class="pool-nav-item">
         <a href="#" class="pool-nav-link nav-home">
@@ -567,12 +1530,16 @@
       <li class="pool-nav-item">
         <a href="#" class="pool-nav-link nav-about">
           <i class="fas fa-info-circle"></i> About
-          <span class="nav-badge">?</span>
         </a>
       </li>
     </ul>
   </div>
 </nav>
+
+<!-- Mobile Menu Toggle -->
+<div class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle sidebar menu">
+  <i class="fas fa-bars"></i>
+</div>
 
 <!-- Main Pool Interface -->
 <div class="main-pool" style="display:none;">
@@ -584,16 +1551,16 @@
 
     <!-- Main Content -->
     <main class="pool-content">
-      
+
       <!-- Dashboard Page (Main Stats) -->
       <div class="page page-dashboard" style="display:none;">
         <!-- Wallet Input -->
-        <div style="margin-bottom: 30px;">
-          <form onsubmit="loadWallet(); return false;">
-            <div style="display: flex; gap: 10px;">
-              <input type="text" id="walletAddress" class="form-control" placeholder="Enter your wallet address" style="flex: 1;">
-              <button type="submit" class="btn btn-primary">Load Stats</button>
-            </div>
+        <div class="wallet-input-container">
+          <form onsubmit="return loadWallet();">
+            <input type="text" id="walletAddress" class="form-control" placeholder="Enter your wallet address" required>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-search"></i> <span class="d-none d-sm-inline">Load Stats</span>
+            </button>
           </form>
         </div>
 
@@ -602,8 +1569,17 @@
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-hourglass-half"></i>
-              Immature Balance:
-              <span class="stat-value" id="pendingBalance">0.00000000</span>
+              Pending Info
+            </div>
+            <div class="pending-info">
+              <div class="pending-info-row">
+                <span class="pending-info-label">Shares:</span>
+                <span class="pending-info-value" id="pendingShares">0</span>
+              </div>
+              <div class="pending-info-row">
+                <span class="pending-info-label">Coins:</span>
+                <span class="pending-info-value" id="pendingBalance">0.00000000</span>
+              </div>
             </div>
             <div class="stat-description">Preliminary balance awaiting blocks to mature.</div>
           </div>
@@ -611,309 +1587,431 @@
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-clock"></i>
-              Last Share Submitted:
-              <span class="stat-value blue" id="lastShareSubmitted">never</span>
+              Last Share Submitted
             </div>
+            <div class="stat-value blue" id="lastShareSubmitted">never</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-cubes"></i>
-              Blocks Found:
-              <span class="stat-value" id="blocksFound">0</span>
+              Blocks Found
             </div>
+            <div class="stat-value" id="blocksFound">0</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-wallet"></i>
-              Pending Balance:
-              <span class="stat-value" id="pendingBalance2">0.00000000</span>
+              Pending Balance
             </div>
+            <div class="stat-value" id="pendingBalance2">0.00000000</div>
             <div class="stat-description">Credited coins awaiting payout.</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-users"></i>
-              Workers Online:
-              <span class="stat-value" id="workersOnline">0</span>
+              Workers Online
             </div>
+            <div class="stat-value" id="workersOnline">0</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-money-check-alt"></i>
-              Total Payments:
-              <span class="stat-value" id="totalPayments">0</span>
+              Total Payments
             </div>
+            <div class="stat-value" id="totalPayments">0</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-dollar-sign"></i>
-              Total Paid:
-              <span class="stat-value" id="totalPaid">0.00000000</span>
+              Total Paid
             </div>
+            <div class="stat-value" id="totalPaid">0.00000000</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-server"></i>
-              Hashrate (30m):
-              <span class="stat-value green" id="hashrate30m">0 H/s</span>
+              Hashrate (30m)
             </div>
+            <div class="stat-value green" id="hashrate30m">0 H/s</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-percentage"></i>
-              Your Round Share:
-              <span class="stat-value" id="roundShare">0.000000%</span>
+              Your Round Share
             </div>
+            <div class="stat-value" id="roundShare">0.000000%</div>
             <div class="stat-description">Percent of your contribution to current round.</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-chart-line"></i>
-              Hashrate (3h):
-              <span class="stat-value green" id="hashrate3h">0 H/s</span>
+              Hashrate (3h)
             </div>
+            <div class="stat-value green" id="hashrate3h">0 H/s</div>
           </div>
 
           <div class="stat-item">
             <div class="stat-label">
               <i class="fas fa-sync"></i>
-              Epoch Switch:
-              <span class="stat-value" id="epochSwitch">in 0 hours</span>
+              Epoch Switch
             </div>
+            <div class="stat-value" id="epochSwitch">in 0 hours</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-tachometer-alt"></i>
+              Pool Effort
+            </div>
+            <div class="stat-value" id="poolEffort">0%</div>
           </div>
         </div>
 
         <!-- Tabs -->
         <div class="tab-nav">
           <a href="#" class="tab-link active" onclick="switchTab(event, 'workers-tab')">
-            Workers
+            <i class="fas fa-desktop"></i> Workers
             <span class="tab-badge" id="workers-badge">0</span>
           </a>
           <a href="#" class="tab-link" onclick="switchTab(event, 'payouts-tab')">
-            Payouts
+            <i class="fas fa-coins"></i> Payouts
+          </a>
+          <a href="#" class="tab-link" onclick="switchTab(event, 'blocks-tab')">
+            <i class="fas fa-cube"></i> Blocks
+          </a>
+          <a href="#" class="tab-link" onclick="switchTab(event, 'earnings-tab')">
+            <i class="fas fa-chart-area"></i> Earnings
           </a>
         </div>
 
         <!-- Workers Tab -->
         <div id="workers-tab" class="tab-content">
           <h3>Your Workers</h3>
-          
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Hashrate (rough, short average)</th>
-                  <th>Hashrate (accurate, long average)</th>
-                  <th>Last Share</th>
-                </tr>
-              </thead>
-              <tbody id="workerList">
-                <tr>
-                  <td colspan="4" class="text-center text-muted">No workers found</td>
-                </tr>
-              </tbody>
-            </table>
+
+          <div class="table-responsive mobile-table-cards">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Worker ID</th>
+                    <th>Hashrate (30m average)</th>
+                    <th>Hashrate (3h average)</th>
+                    <th>Last Share</th>
+                  </tr>
+                </thead>
+                <tbody id="workerList">
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">No workers found</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div class="info-box" style="margin-top: 20px;">
             <p>Your average hashrate will be smoothly adjusted until you have shares to fulfill estimation window.</p>
-            <p>There are two windows, long and short, first is equal to about 30 minutes and long window is usually equal to 3 hours.</p>
-            <p>Dead (sick) workers will be highlighted in a table of workers if they didn't submit a share for 1/2 of short window, so you can perform maintenance of your rigs.</p>
+            <p>There are two windows: short (30 minutes) and long (3 hours) for accurate hashrate calculation.</p>
+            <p>Dead workers will be highlighted if they haven't submitted a share for 15 minutes.</p>
           </div>
         </div>
 
         <!-- Payouts Tab -->
         <div id="payouts-tab" class="tab-content" style="display:none;">
           <h3>Your Payouts</h3>
-          
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Amount</th>
-                  <th>Address</th>
-                  <th>Tx ID</th>
-                </tr>
-              </thead>
-              <tbody id="payoutsList">
-                <tr>
-                  <td colspan="4" class="text-center text-muted">No payouts yet</td>
-                </tr>
-              </tbody>
-            </table>
+
+          <div class="table-responsive mobile-table-cards">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Amount</th>
+                    <th>Address</th>
+                    <th>Transaction ID</th>
+                  </tr>
+                </thead>
+                <tbody id="payoutsList">
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">No payouts yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
+
+        <!-- Blocks Tab -->
+        <div id="blocks-tab" class="tab-content" style="display:none;">
+          <h3>Your Blocks</h3>
+
+          <div class="table-responsive">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Height</th>
+                    <th>Pool Effort</th>
+                    <th>Your Effort</th>
+                    <th>Reward</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Confirmation</th>
+                  </tr>
+                </thead>
+                <tbody id="DashboardBlockList">
+                  <tr>
+                    <td colspan="8" class="text-center text-muted">No blocks found yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Earnings Tab -->
+        <div id="earnings-tab" class="tab-content" style="display:none;">
+          <h3>Your Earnings</h3>
+
+          <div class="table-responsive mobile-table-cards">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="EarningsList">
+                  <tr>
+                    <td colspan="3" class="text-center text-muted">No earnings yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Hashrate Chart -->
+        <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; margin-top: 25px; box-shadow: var(--shadow); border: 1px solid var(--border-color);">
+          <h3 style="color: var(--text-primary); margin-bottom: 20px;">Your Hashrate History</h3>
+          <div class="ct-chart ct-chart-line" id="chartDashboardHashRate" style="height: 200px;"></div>
         </div>
       </div>
 
       <!-- Stats Page -->
       <div class="page page-stats" style="display:none;">
         <h2>Pool Statistics</h2>
-        
+
         <div class="stats-grid">
           <div class="stat-item">
-            <div class="stat-label">Pool Hashrate</div>
+            <div class="stat-label">
+              <i class="fas fa-tachometer-alt"></i>
+              Pool Hashrate
+            </div>
             <div class="stat-value green" id="poolHashRate">-</div>
           </div>
-          
+
           <div class="stat-item">
-            <div class="stat-label">Active Miners</div>
+            <div class="stat-label">
+              <i class="fas fa-users"></i>
+              Active Miners
+            </div>
             <div class="stat-value" id="poolMiners">-</div>
           </div>
-          
+
           <div class="stat-item">
-            <div class="stat-label">Network Hashrate</div>
+            <div class="stat-label">
+              <i class="fas fa-network-wired"></i>
+              Network Hashrate
+            </div>
             <div class="stat-value" id="networkHashRate">-</div>
           </div>
-          
+
           <div class="stat-item">
-            <div class="stat-label">Network Difficulty</div>
+            <div class="stat-label">
+              <i class="fas fa-shield-alt"></i>
+              Network Difficulty
+            </div>
             <div class="stat-value" id="networkDifficulty">-</div>
           </div>
-          
+
           <div class="stat-item">
-            <div class="stat-label">Blockchain Height</div>
+            <div class="stat-label">
+              <i class="fas fa-layer-group"></i>
+              Blockchain Height
+            </div>
             <div class="stat-value" id="blockchainHeight">-</div>
           </div>
-          
+
           <div class="stat-item">
-            <div class="stat-label">Pool Fee</div>
+            <div class="stat-label">
+              <i class="fas fa-percentage"></i>
+              Pool Fee
+            </div>
             <div class="stat-value" id="poolFeePercent">-</div>
           </div>
         </div>
 
         <!-- Charts -->
-        <div style="background-color: #fff; padding: 20px; border-radius: 4px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <h3>Hashrate History</h3>
-          <div class="ct-chart" id="chartStatsHashRatePool" style="height: 300px;"></div>
+        <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; margin-top: 20px; box-shadow: var(--shadow); border: 1px solid var(--border-color);">
+          <h3 style="color: var(--text-primary); margin-bottom: 20px;">Hashrate History (24h)</h3>
+          <div class="ct-chart ct-chart-line" id="chartStatsHashRatePool" style="height: 300px;"></div>
         </div>
       </div>
 
       <!-- Miners Page -->
       <div class="page page-miners" style="display:none;">
         <h2>Top Miners</h2>
-        
-        <div class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Address</th>
-                <th>Hashrate</th>
-                <th>Share Rate</th>
-              </tr>
-            </thead>
-            <tbody id="minerList">
-              <tr>
-                <td colspan="3" class="text-center text-muted">Loading...</td>
-              </tr>
-            </tbody>
-          </table>
+
+        <div class="table-responsive mobile-table-cards">
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Hashrate</th>
+                  <th>Share Rate</th>
+                </tr>
+              </thead>
+              <tbody id="minerList">
+                <tr>
+                  <td colspan="3" class="text-center">
+                    <div class="loading">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- Blocks Page -->
       <div class="page page-blocks" style="display:none;">
         <h2>Blocks Found</h2>
-        
+
         <div class="tab-nav">
-          <a href="#" class="tab-link active" onclick="switchBlockTab(event, 'confirmed-blocks')">
-            Confirmed
-            <span class="tab-badge" id="confirmedBlockCount">0</span>
-          </a>
           <a href="#" class="tab-link" onclick="switchBlockTab(event, 'pending-blocks')">
-            Pending
+            <i class="fas fa-clock"></i> Pending
             <span class="tab-badge" id="pendingBlockCount">0</span>
           </a>
+          <a href="#" class="tab-link active" onclick="switchBlockTab(event, 'confirmed-blocks')">
+            <i class="fas fa-check-circle"></i> Confirmed
+            <span class="tab-badge" id="confirmedBlockCount">0</span>
+          </a>
         </div>
 
-        <div id="confirmed-blocks" class="tab-content">
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Height</th>
-                  <th>Time Found</th>
-                  <th>Miner</th>
-                  <th>Reward</th>
-                  <th>Effort</th>
-                </tr>
-              </thead>
-              <tbody id="blockList">
-                <tr>
-                  <td colspan="5" class="text-center text-muted">No blocks found yet</td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- Pending Blocks Tab -->
+        <div id="pending-blocks" class="block-tab-content" style="display:none;">
+          <div class="table-responsive">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Height</th>
+                    <th>Time Found</th>
+                    <th>Miner</th>
+                    <th>Reward</th>
+                    <th>Confirmations</th>
+                  </tr>
+                </thead>
+                <tbody id="pendingBlockList">
+                  <tr>
+                    <td colspan="5" class="text-center text-muted">No pending blocks</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <div id="pending-blocks" class="tab-content" style="display:none;">
-          <div class="data-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Height</th>
-                  <th>Time Found</th>
-                  <th>Miner</th>
-                  <th>Reward</th>
-                  <th>Confirmations</th>
-                </tr>
-              </thead>
-              <tbody id="pendingBlockList">
-                <tr>
-                  <td colspan="5" class="text-center text-muted">No pending blocks</td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- Confirmed Blocks Tab -->
+        <div id="confirmed-blocks" class="block-tab-content" style="display:block;">
+          <div class="table-responsive">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Height</th>
+                    <th>Time Found</th>
+                    <th>Miner</th>
+                    <th>Reward</th>
+                    <th>Effort</th>
+                  </tr>
+                </thead>
+                <tbody id="blockList">
+                  <tr>
+                    <td colspan="5" class="text-center text-muted">No blocks found yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
+
+        <!-- Additional Info Box -->
+        <div class="info-box" style="margin-top: 20px;">
+          <h4><i class="fas fa-info-circle"></i> Block Status Guide</h4>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Pending:</strong> Blocks with confirmations in progress</li>
+            <li><strong>Confirmed:</strong> Fully confirmed blocks ready for payout (includes orphaned blocks)</li>
+          </ul>
         </div>
       </div>
 
       <!-- Payments Page -->
       <div class="page page-payments" style="display:none;">
         <h2>Recent Payments</h2>
-        
-        <div class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Address</th>
-                <th>Amount</th>
-                <th>Transaction</th>
-              </tr>
-            </thead>
-            <tbody id="paymentList">
-              <tr>
-                <td colspan="4" class="text-center text-muted">No payments yet</td>
-              </tr>
-            </tbody>
-          </table>
+
+        <div class="table-responsive mobile-table-cards">
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Address</th>
+                  <th>Amount</th>
+                  <th>Transaction</th>
+                </tr>
+              </thead>
+              <tbody id="paymentList">
+                <tr>
+                  <td colspan="4" class="text-center text-muted">No payments yet</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- Connect Page -->
       <div class="page page-connect" style="display:none;">
         <h2>How to Connect</h2>
-        
-        <div style="background-color: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+
+        <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: var(--shadow);">
           <h3>Pool Configuration</h3>
-          <table class="data-table">
-            <tbody id="connectPoolConfig">
-              <tr>
-                <td>Loading configuration...</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <div class="data-table">
+              <table>
+                <tbody id="connectPoolConfig">
+                  <tr>
+                    <td>Loading configuration...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div id="miner-config" style="margin-top: 20px;"></div>
@@ -922,75 +2020,161 @@
       <!-- FAQ Page -->
       <div class="page page-faq" style="display:none;">
         <h2>Frequently Asked Questions</h2>
-        
-        <div style="background-color: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+
+        <div class="help-card">
           <h4>Do I need to register?</h4>
-          <p>No registration is required. Just configure your miner and start mining!</p>
-          
+          <p>No registration is required. Just configure your miner with your wallet address and start mining!</p>
+
           <h4>What is PPLNS?</h4>
-          <p>PPLNS stands for "Pay Per Last N Shares". This reward system pays miners based on the last N shares contributed when a block is found.</p>
-          
+          <p>PPLNS stands for "Pay Per Last N Shares". This reward system pays miners based on the last N shares contributed when a block is found. It rewards loyal miners and discourages pool hopping.</p>
+
           <h4>When do I get paid?</h4>
-          <p>Payments are processed automatically when your balance reaches the minimum payout threshold.</p>
+          <p>Payments are processed automatically when your balance reaches the minimum payout threshold. Check the pool configuration for specific amounts.</p>
+
+          <h4>How accurate is the hashrate display?</h4>
+          <p>The hashrate is calculated based on submitted shares. Short-term fluctuations are normal. The 3-hour average provides the most accurate representation.</p>
+
+          <h4>What if my worker shows as offline?</h4>
+          <p>Workers are marked offline if no shares are submitted for 15 minutes. Check your miner configuration and network connection.</p>
         </div>
       </div>
 
       <!-- Support Page -->
       <div class="page page-support" style="display:none;">
         <h2>Support</h2>
-        
-        <div style="background-color: #fff; padding: 40px; border-radius: 4px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <a href="https://discord.gg/ZyG3YKDCQQ" target="_blank">
-            <img style="width:200px;" src="img/discord.png" alt="Discord">
+
+        <div style="background-color: var(--card-bg); padding: 30px; border-radius: 12px; text-align: center; box-shadow: var(--shadow);">
+          <i class="fab fa-discord" style="font-size: 48px; color: var(--accent-primary); margin-bottom: 20px;"></i>
+          <h3>Join Our Community</h3>
+          <p style="margin: 20px 0; color: var(--text-secondary);">Get help, share tips, and connect with other miners!</p>
+          <a href="https://discord.gg/ZyG3YKDCQQ" target="_blank" class="btn btn-primary">
+            <i class="fab fa-discord"></i> Join Discord
           </a>
-          <p style="margin-top: 20px;">Join our Discord for support!</p>
+        </div>
+      </div>
+
+      <!-- Help Page -->
+      <div class="page page-help" style="display:none;">
+        <div class="help-content">
+          <h2>Getting Started Guide</h2>
+
+          <div class="help-card">
+            <h3>Quick Start</h3>
+            <p>Follow these simple steps to start mining:</p>
+
+            <h4>1. Choose Your Coin</h4>
+            <p>Select a coin from the home page based on your hardware and preferences.</p>
+
+            <h4>2. Get a Wallet</h4>
+            <p>Download the official wallet for your chosen coin and generate a receiving address.</p>
+
+            <h4>3. Download Mining Software</h4>
+            <p>Choose compatible mining software for your hardware:</p>
+            <ul>
+              <li><strong>GPU Mining:</strong> T-Rex, NBMiner, TeamRedMiner</li>
+              <li><strong>CPU Mining:</strong> XMRig, CPUminer</li>
+              <li><strong>ASIC Mining:</strong> Check manufacturer's software</li>
+            </ul>
+
+            <h4>4. Configure Your Miner</h4>
+            <p>Use the configuration examples from the Connect page for your specific setup.</p>
+
+            <div class="command-box">
+              miner.exe -a ALGORITHM -o stratum+tcp://POOL:PORT -u WALLET.WORKER
+            </div>
+
+            <h4>5. Monitor Your Stats</h4>
+            <p>Enter your wallet address in the dashboard to view your mining statistics.</p>
+          </div>
+
+          <div class="help-card">
+            <h3>Troubleshooting</h3>
+
+            <h4>Low Hashrate</h4>
+            <ul>
+              <li>Ensure your GPU drivers are up to date</li>
+              <li>Check temperature and power limits</li>
+              <li>Try different mining software</li>
+            </ul>
+
+            <h4>Connection Issues</h4>
+            <ul>
+              <li>Verify firewall isn't blocking connections</li>
+              <li>Try alternative ports if available</li>
+              <li>Check your internet connection stability</li>
+            </ul>
+
+            <h4>No Shares Accepted</h4>
+            <ul>
+              <li>Confirm you're using the correct algorithm</li>
+              <li>Verify your wallet address is valid</li>
+              <li>Check if difficulty is appropriate for your hashrate</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Page -->
+      <div class="page page-about" style="display:none;">
+        <h2>About 1MinerPool</h2>
+
+        <div class="about-section">
+          <h3>Our Mission</h3>
+          <p>1MinerPool is dedicated to providing reliable, efficient, and transparent cryptocurrency mining services. We believe in empowering miners of all sizes with enterprise-grade infrastructure and fair reward systems.</p>
+        </div>
+
+        <div class="about-section">
+          <h3>Why Choose Us?</h3>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <i class="fas fa-bolt"></i>
+              <h4>Ultra-Low Latency</h4>
+              <p>Global server network ensures minimal stale shares</p>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-shield-alt"></i>
+              <h4>DDoS Protected</h4>
+              <p>Enterprise-grade protection keeps pools online 24/7</p>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-chart-line"></i>
+              <h4>Real-time Stats</h4>
+              <p>Monitor your mining performance with detailed analytics</p>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-hand-holding-usd"></i>
+              <h4>Fair Rewards</h4>
+              <p>PPLNS system ensures fair distribution based on contribution</p>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-lock"></i>
+              <h4>Secure Payouts</h4>
+              <p>Automated payments with transaction tracking</p>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-headset"></i>
+              <h4>24/7 Support</h4>
+              <p>Active community and dedicated support team</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>Pool Features</h3>
+          <ul>
+            <li>Professional mining infrastructure with 99.9% uptime</li>
+            <li>Multiple coin support with easy switching</li>
+            <li>Detailed worker statistics and performance tracking</li>
+            <li>Low minimum payouts for all miners</li>
+            <li>Transparent fee structure with no hidden costs</li>
+            <li>Regular updates and new coin additions</li>
+          </ul>
         </div>
       </div>
 
     </main>
-  </div><br>
-<div class="col-12">
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title text-center">
-                <h3 style="color: var(--accent-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">
-                    <i class="fas fa-server"></i> Server Latency Monitor
-                </h3>
-                <p style="color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem;">
-                    Real-time connection speed to our global mining servers
-                </p>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table" id="serverPingTable">
-                    <thead class="text-primary">
-                        <tr>
-                            <th style="width: 10%;">Rank</th>
-                            <th style="width: 35%;">Server Location</th>
-                            <th style="width: 20%;">Region</th>
-                            <th style="width: 20%;">Latency</th>
-                            <th style="width: 15%;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="serverPingList">
-                        <tr>
-                            <td colspan="5" class="text-center">
-                                <div class="loading-container">
-                                    <i class="fas fa-spinner fa-spin"></i> Initializing server connections...
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
-<br>
-</div>
-
-  
 
 <!-- Pool Selection Page -->
 <div class="main-index">
@@ -998,10 +2182,40 @@
     <div class="pool-selection">
       <img src="img/logo.gif" alt="1miner.net" class="pool-logo">
       <h1 class="pool-tagline">Select a coin to start mining</h1>
-      
-      <div id="algorithmFilters" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;"></div>
-      
+
       <div class="pool-grid pool-coin-grid"></div>
+    </div>
+
+    <!-- Server Ping Monitor -->
+    <div class="server-ping-section">
+      <div class="server-ping-header">
+        <h3><i class="fas fa-server"></i> Server Latency Monitor</h3>
+        <p>Real-time connection speed to our global mining servers</p>
+      </div>
+      <div class="table-responsive">
+        <div class="data-table">
+          <table id="serverPingTable">
+            <thead>
+              <tr>
+                <th style="width: 10%;">Rank</th>
+                <th style="width: 35%;">Server Location</th>
+                <th style="width: 20%;">Region</th>
+                <th style="width: 20%;">Latency</th>
+                <th style="width: 15%;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="serverPingList">
+              <tr>
+                <td colspan="5" class="text-center">
+                  <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Initializing server connections...
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1057,41 +2271,246 @@
   </ul>
 </div>
 
-<!-- Additional Scripts -->
+<!-- Include the miningcore.js file -->
+<script src="js/miningcore.js"></script>
+
+<!-- Enhanced Scripts with Mobile Support -->
 <script>
-// Tab switching functions
-function switchTab(evt, tabName) {
-  var i, tabcontent, tablinks;
+// Theme Management
+function toggleTheme() {
+  const body = document.body;
+  const currentTheme = body.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+  body.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+
+  // Update theme icon
+  document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '🌙' : '☀️';
+}
+
+// Load saved theme
+document.addEventListener('DOMContentLoaded', function() {
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.body.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+});
+
+// Mobile Navigation Toggle
+function toggleMobileNav() {
+  const nav = document.getElementById('main-pool-nav');
+  nav.classList.toggle('active');
   
+  // Close mobile menu if clicking on nav toggle
+  const sidebar = document.getElementById('pool-sidebar');
+  if (sidebar && sidebar.classList.contains('active')) {
+    sidebar.classList.remove('active');
+  }
+}
+
+// Mobile Menu Toggle
+function toggleMobileMenu() {
+  const sidebar = document.getElementById('pool-sidebar');
+  sidebar.classList.toggle('active');
+  
+  // Close mobile nav if clicking on menu toggle
+  const nav = document.getElementById('main-pool-nav');
+  if (nav && nav.classList.contains('active')) {
+    nav.classList.remove('active');
+  }
+}
+
+// Close mobile menus when clicking outside
+document.addEventListener('click', function(event) {
+  const nav = document.getElementById('main-pool-nav');
+  const navToggle = document.querySelector('.mobile-nav-toggle');
+  const sidebar = document.getElementById('pool-sidebar');
+  const menuToggle = document.querySelector('.mobile-menu-toggle');
+  
+  // Close nav if clicking outside
+  if (nav && nav.classList.contains('active') && 
+      !nav.contains(event.target) && 
+      !navToggle.contains(event.target)) {
+    nav.classList.remove('active');
+  }
+  
+  // Close sidebar if clicking outside
+  if (sidebar && sidebar.classList.contains('active') && 
+      !sidebar.contains(event.target) && 
+      !menuToggle.contains(event.target)) {
+    sidebar.classList.remove('active');
+  }
+});
+
+// Enhanced Tab Switching
+function switchTab(evt, tabName) {
+  evt.preventDefault();
+  var i, tabcontent, tablinks;
+
   // Hide all tab content
   tabcontent = document.getElementsByClassName("tab-content");
   for (i = 0; i < tabcontent.length; i++) {
     tabcontent[i].style.display = "none";
   }
-  
+
   // Remove active class from all tab links
   tablinks = evt.currentTarget.parentElement.getElementsByClassName("tab-link");
   for (i = 0; i < tablinks.length; i++) {
     tablinks[i].classList.remove("active");
   }
+
+  // Show selected tab and mark as active
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.classList.add("active");
   
+  // Scroll tab into view on mobile
+  if (window.innerWidth <= 768) {
+    evt.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+  }
+}
+
+// Function to handle block tab switching
+function switchBlockTab(evt, tabName) {
+  evt.preventDefault();
+  var i, tabcontent, tablinks;
+
+  // Hide all block tab content
+  tabcontent = document.getElementsByClassName("block-tab-content");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Remove active class from all tab links in blocks section
+  tablinks = evt.currentTarget.parentElement.getElementsByClassName("tab-link");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].classList.remove("active");
+  }
+
   // Show selected tab and mark as active
   document.getElementById(tabName).style.display = "block";
   evt.currentTarget.classList.add("active");
 }
 
-function switchBlockTab(evt, tabName) {
-  switchTab(evt, tabName);
-}
+// Fix navigation for global pages
+$(document).on('click', '.nav-help', function(e) {
+  e.preventDefault();
+  window.location.hash = 'help';
+  loadIndex();
+  
+  // Close mobile menu
+  const nav = document.getElementById('main-pool-nav');
+  if (nav && nav.classList.contains('active')) {
+    nav.classList.remove('active');
+  }
+});
 
-// Override pool coin card template to match open-overline style
-$(document).on('DOMContentLoaded', function() {
-  // Custom pool card rendering can be added here
+$(document).on('click', '.nav-about', function(e) {
+  e.preventDefault();
+  window.location.hash = 'about';
+  loadIndex();
+  
+  // Close mobile menu
+  const nav = document.getElementById('main-pool-nav');
+  if (nav && nav.classList.contains('active')) {
+    nav.classList.remove('active');
+  }
+});
+
+// Close sidebar on link click (mobile)
+$(document).on('click', '.sidebar-menu-link', function() {
+  if (window.innerWidth <= 1024) {
+    const sidebar = document.getElementById('pool-sidebar');
+    if (sidebar && sidebar.classList.contains('active')) {
+      sidebar.classList.remove('active');
+    }
+  }
 });
 
 // Initialize page
 $(document).ready(function() {
   loadIndex();
+
+  // Add smooth scrolling
+  $('a[href*="#"]').on('click', function(e) {
+    if (this.hash !== '') {
+      e.preventDefault();
+      const hash = this.hash;
+      $('html, body').animate({
+        scrollTop: 0
+      }, 300, function() {
+        window.location.hash = hash;
+      });
+    }
+  });
+  
+  // Add touch event handling for mobile
+  if ('ontouchstart' in window) {
+    document.body.classList.add('touch-device');
+  }
+  
+  // Handle responsive tables
+  addDataLabelsToTables();
+});
+
+// Add data labels to tables for mobile card view
+function addDataLabelsToTables() {
+  // Worker table
+  $('#workerList').on('DOMNodeInserted', 'tr', function() {
+    $(this).find('td').each(function(index) {
+      const headers = ['Worker ID', 'Hashrate (30m)', 'Hashrate (3h)', 'Last Share'];
+      $(this).attr('data-label', headers[index]);
+    });
+  });
+  
+  // Payouts table
+  $('#payoutsList').on('DOMNodeInserted', 'tr', function() {
+    $(this).find('td').each(function(index) {
+      const headers = ['Time', 'Amount', 'Address', 'Transaction ID'];
+      $(this).attr('data-label', headers[index]);
+    });
+  });
+  
+  // Earnings table
+  $('#EarningsList').on('DOMNodeInserted', 'tr', function() {
+    $(this).find('td').each(function(index) {
+      const headers = ['Date', 'Description', 'Amount'];
+      $(this).attr('data-label', headers[index]);
+    });
+  });
+  
+  // Miners table
+  $('#minerList').on('DOMNodeInserted', 'tr', function() {
+    $(this).find('td').each(function(index) {
+      const headers = ['Address', 'Hashrate', 'Share Rate'];
+      $(this).attr('data-label', headers[index]);
+    });
+  });
+  
+  // Payments table
+  $('#paymentList').on('DOMNodeInserted', 'tr', function() {
+    $(this).find('td').each(function(index) {
+      const headers = ['Time', 'Address', 'Amount', 'Transaction'];
+      $(this).attr('data-label', headers[index]);
+    });
+  });
+}
+
+// Prevent zoom on input focus (iOS)
+$(document).on('touchstart', 'input[type="text"], input[type="email"], input[type="password"], textarea', function() {
+  $(this).css('font-size', '16px');
+});
+
+// Handle orientation change
+window.addEventListener('orientationchange', function() {
+  // Adjust layout after orientation change
+  setTimeout(function() {
+    window.scrollTo(0, 0);
+  }, 300);
+});
+
+// Improve touch scrolling for tables
+$(document).on('touchmove', '.table-responsive', function(e) {
+  e.stopPropagation();
 });
 </script>
 
