@@ -9,7 +9,7 @@
   <meta name="msapplication-TileImage" content="img/favicon-32x32.png">
   <link rel="icon" href="img/favicon.ico" sizes="96x96" type="image/x-icon"/>
 
-  <title>1Miner.Net - Mining Made Easy</title>
+  <title>1miner.net - Mining Made Easy</title>
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 
   <!-- Core CSS -->
@@ -1732,6 +1732,14 @@
 
           <div class="stat-item">
             <div class="stat-label">
+              <i class="fas fa-cubes"></i>
+              Blocks Found
+            </div>
+            <div class="stat-value" id="blocksFound">0</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
               <i class="fas fa-wallet"></i>
               Pending Balance
             </div>
@@ -1745,6 +1753,14 @@
               Workers Online
             </div>
             <div class="stat-value" id="workersOnline">0</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-money-check-alt"></i>
+              Total Payments
+            </div>
+            <div class="stat-value" id="totalPayments">0</div>
           </div>
 
           <div class="stat-item">
@@ -1778,6 +1794,14 @@
               Hashrate (3h)
             </div>
             <div class="stat-value green" id="hashrate3h">0 H/s</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label">
+              <i class="fas fa-sync"></i>
+              Epoch Switch
+            </div>
+            <div class="stat-value" id="epochSwitch">in 0 hours</div>
           </div>
 
           <div class="stat-item">
@@ -1934,6 +1958,21 @@
               </table>
             </div>
           </div>
+
+          <!-- Daily Earnings List -->
+          <div class="daily-earnings-list">
+            <div class="daily-earnings-header">
+              <div class="daily-earnings-title">
+                <i class="fas fa-calendar-alt"></i> Daily Earnings Summary
+              </div>
+            </div>
+            <div id="dailyEarningsList">
+              <div class="text-center text-muted" style="padding: 20px;">
+                No daily earnings data available
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Dashboard Hashrate Chart -->
         <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; margin-top: 25px; box-shadow: var(--shadow); border: 1px solid var(--border-color);">
@@ -2372,11 +2411,11 @@
 
       <!-- About Page -->
       <div class="page page-about" style="display:none;">
-        <h2>About 1MinerPool</h2>
+        <h2>About 1Miner.Net</h2>
 
         <div class="about-section">
           <h3>Our Mission</h3>
-          <p>1MinerPool is dedicated to providing reliable, efficient, and transparent cryptocurrency mining services. We believe in empowering miners of all sizes with enterprise-grade infrastructure and fair reward systems.</p>
+          <p>1Miner.Net is dedicated to providing reliable, efficient, and transparent cryptocurrency mining services. We believe in empowering miners of all sizes with enterprise-grade infrastructure and fair reward systems.</p>
         </div>
 
         <div class="about-section">
