@@ -449,6 +449,46 @@
       margin-top: 4px;
     }
 
+    /* Daily Payment Summary Box */
+    .daily-payment-summary {
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--card-bg) 100%);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+    }
+
+    .daily-payment-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .daily-payment-stat {
+      text-align: center;
+      padding: 12px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .daily-payment-stat-label {
+      color: var(--text-secondary);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .daily-payment-stat-value {
+      color: var(--accent-primary);
+      font-size: 20px;
+      font-weight: 700;
+      display: block;
+    }
+
     /* Responsive Tables */
     .table-responsive {
       overflow-x: auto;
@@ -502,6 +542,15 @@
 
     .data-table tbody tr:last-child td {
       border-bottom: none;
+    }
+
+    /* Table row states */
+    .table-secondary {
+      background-color: rgba(108, 117, 125, 0.1);
+    }
+
+    .table-danger {
+      background-color: rgba(220, 53, 69, 0.1);
     }
 
     /* Server Ping Table Fix */
@@ -787,7 +836,7 @@
       margin-top: 30px;
     }
 
-    /* FIXED Pool Card - Mobile Touch Optimized with Better Dark Mode Support */
+    /* Pool Card - Mobile Touch Optimized with Better Dark Mode Support */
     .pool-card {
       background: var(--card-bg);
       border-radius: 16px;
@@ -1218,6 +1267,16 @@
       .payment-stat-value {
         font-size: 20px;
       }
+
+      /* Daily Payment Stats */
+      .daily-payment-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .daily-payment-stat-value {
+        font-size: 18px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -1462,8 +1521,27 @@
       background: var(--bg-tertiary);
     }
 
+    /* Daily payments chart styling */
+    #chartDailyPayments {
+      background: var(--bg-tertiary);
+    }
+
+    #chartDailyPayments .ct-bar {
+      stroke: var(--success);
+      stroke-width: 20px;
+    }
+
     /* Hidden Elements */
     .d-none { display: none !important; }
+    .d-sm-inline {
+      display: none !important;
+    }
+
+    @media (min-width: 576px) {
+      .d-sm-inline {
+        display: inline !important;
+      }
+    }
 
     /* Accessibility improvements */
     .sr-only {
@@ -1611,6 +1689,11 @@
 
     .about-section li {
       margin-bottom: 8px;
+    }
+
+    /* Margins and spacing */
+    .ml-2 {
+      margin-left: 0.5rem !important;
     }
 
     /* Print styles */
@@ -1928,10 +2011,59 @@
           </div>
         </div>
 
-        <!-- Earnings Tab -->
+        <!-- FIXED Earnings Tab with Daily Payment History -->
         <div id="earnings-tab" class="tab-content" style="display:none;">
           <h3>Your Earnings</h3>
 
+          <!-- Daily Payment Summary -->
+          <div class="daily-payment-summary">
+            <h4 style="margin-bottom: 15px;">30-Day Payment Summary</h4>
+            <div class="daily-payment-stats">
+              <div class="daily-payment-stat">
+                <span class="daily-payment-stat-label">Total (30 Days)</span>
+                <span class="daily-payment-stat-value" id="total30Days">0.00000000</span>
+              </div>
+              <div class="daily-payment-stat">
+                <span class="daily-payment-stat-label">Average Per Day</span>
+                <span class="daily-payment-stat-value" id="average30Days">0.00000000</span>
+              </div>
+              <div class="daily-payment-stat">
+                <span class="daily-payment-stat-label">Days With Payments</span>
+                <span class="daily-payment-stat-value" id="daysWithPayments">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Payment Chart -->
+          <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; margin-top: 20px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border-color);">
+            <h4 style="color: var(--text-primary); margin-bottom: 20px;">Daily Payment History (Last 14 Days)</h4>
+            <div class="ct-chart ct-chart-bar" id="chartDailyPayments" style="height: 200px;"></div>
+          </div>
+
+          <!-- Daily Payment History Table -->
+          <h4 style="margin-bottom: 15px;">Daily Payment History</h4>
+          <div class="table-responsive mobile-table-cards">
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="DailyPaymentList">
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">Loading daily payment history...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Balance Changes (Earnings/Payments) -->
+          <h4 style="margin-top: 25px; margin-bottom: 15px;">Recent Balance Changes</h4>
           <div class="table-responsive mobile-table-cards">
             <div class="data-table">
               <table>
@@ -1944,7 +2076,7 @@
                 </thead>
                 <tbody id="EarningsList">
                   <tr>
-                    <td colspan="3" class="text-center text-muted">No earnings yet</td>
+                    <td colspan="3" class="text-center text-muted">No balance changes yet</td>
                   </tr>
                 </tbody>
               </table>
@@ -2752,6 +2884,14 @@ function addDataLabelsToTables() {
   $('#EarningsList').on('DOMNodeInserted', 'tr', function() {
     $(this).find('td').each(function(index) {
       const headers = ['Date', 'Description', 'Amount'];
+      $(this).attr('data-label', headers[index]);
+    });
+  });
+  
+  // Daily Payment table
+  $('#DailyPaymentList').on('DOMNodeInserted', 'tr', function() {
+    $(this).find('td').each(function(index) {
+      const headers = ['Date', 'Day', 'Amount', 'Status'];
       $(this).attr('data-label', headers[index]);
     });
   });
