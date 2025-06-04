@@ -787,9 +787,9 @@
       margin-top: 30px;
     }
 
-    /* Enhanced Pool Card - Mobile Touch Optimized */
+    /* FIXED Pool Card - Mobile Touch Optimized with Better Dark Mode Support */
     .pool-card {
-      background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-tertiary) 100%);
+      background: var(--card-bg);
       border-radius: 16px;
       padding: 20px;
       box-shadow: var(--shadow);
@@ -801,10 +801,7 @@
       position: relative;
       overflow: hidden;
       -webkit-tap-highlight-color: transparent;
-    }
-
-    .pool-card:active {
-      transform: scale(0.98);
+      display: block;
     }
 
     .pool-card:hover {
@@ -812,43 +809,51 @@
       box-shadow: 0 12px 40px rgba(0, 212, 255, 0.3);
       text-decoration: none;
       color: inherit;
+      border-color: var(--accent-primary);
+    }
+
+    .pool-card.touch-active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
     }
 
     .pool-card-header {
       display: flex;
       align-items: center;
       gap: 15px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .pool-card-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--bg-primary);
+      width: 56px;
+      height: 56px;
+      background: var(--bg-tertiary);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
+      border: 1px solid var(--border-color);
     }
 
     .pool-card-icon img {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       object-fit: contain;
     }
 
     .pool-card-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       text-align: left;
+      line-height: 1.2;
     }
 
     .pool-card-algo {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--accent-primary);
       font-weight: 600;
       text-transform: uppercase;
@@ -858,33 +863,45 @@
 
     .pool-card-stats {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 15px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .pool-card-stat {
-      text-align: left;
-      padding: 8px;
-      background: var(--bg-primary);
-      border-radius: 8px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid var(--border-color);
     }
 
     .pool-card-stat-label {
       font-size: 11px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
+      display: block;
+      font-weight: 600;
     }
 
     .pool-card-stat-value {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--text-primary);
+      display: block;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .pool-card-status {
+      text-align: center;
+      padding-top: 5px;
+      border-top: 1px solid var(--border-color);
+      font-size: 13px;
+      font-weight: 600;
     }
 
     /* Status Colors */
@@ -1084,6 +1101,51 @@
         grid-template-columns: 1fr;
         gap: 15px;
       }
+      
+      /* Pool Card Mobile Adjustments */
+      .pool-card {
+        padding: 16px;
+      }
+      
+      .pool-card-header {
+        margin-bottom: 16px;
+      }
+      
+      .pool-card-icon {
+        width: 48px;
+        height: 48px;
+      }
+      
+      .pool-card-icon img {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .pool-card-title {
+        font-size: 18px;
+      }
+      
+      .pool-card-algo {
+        font-size: 12px;
+      }
+      
+      .pool-card-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      
+      .pool-card-stat {
+        padding: 10px 8px;
+      }
+      
+      .pool-card-stat-label {
+        font-size: 10px;
+      }
+      
+      .pool-card-stat-value {
+        font-size: 14px;
+      }
 
       /* Stats Grid */
       .stats-grid {
@@ -1186,7 +1248,8 @@
       }
 
       .pool-card-stats {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
       }
 
       .btn {
