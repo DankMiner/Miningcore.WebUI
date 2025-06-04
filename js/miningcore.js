@@ -1,6 +1,6 @@
 /*!
- * Miningcore.js v2.2 - Mobile Optimized Version with Payment Statistics
- * Enhanced with: Payment totals, daily earnings display, improved pool cards
+ * Miningcore.js v2.3 - Fixed Daily Payment History Implementation
+ * Enhanced with: Corrected payment endpoints, proper date handling, fixed chart rendering
  */
 
 // Global Variables
@@ -242,7 +242,7 @@ function addTouchHandlers() {
     });
 }
 
-// FIXED: Enhanced pool card generator with improved dark mode support
+// Enhanced pool card generator with improved dark mode support
 function generatePoolCard(value) {
     var coinLogo = `<img src='img/coin/icon/${value.coin.type.toLowerCase()}.png' 
                     onerror="this.src='img/coin/icon/default.png'"
@@ -342,7 +342,7 @@ function loadNavigation() {
         });
 }
 
-// Fixed Stats Page Loader
+// Stats Page Loader
 function loadStatsPage() {
     console.log('Loading stats page');
     
@@ -489,7 +489,7 @@ function loadStatsChart() {
         });
 }
 
-// Fixed Dashboard Page Loader
+// Dashboard Page Loader
 function loadDashboardPage() {
     console.log('Loading dashboard page');
     
@@ -511,7 +511,7 @@ function loadDashboardPage() {
     }
 }
 
-// FIXED: Load wallet stats with proper error handling
+// Load wallet stats with proper error handling
 function loadWallet() {
     var walletAddress = $("#walletAddress").val().trim();
     
@@ -776,7 +776,7 @@ function loadPaymentsMinerPage(walletAddress) {
         });
 }
 
-// NEW: Calculate Payment Statistics
+// Calculate Payment Statistics
 function calculatePaymentStatistics(payments) {
     if (!payments || payments.length === 0) {
         $("#todayPaymentTotal").text("0.00000000");
@@ -886,9 +886,10 @@ function loadBlocksMinerPage(walletAddress) {
         });
 }
 
-// Enhanced Load Miner Earnings (Removed Daily Earnings)
+// FIXED: Load Miner Earnings with Daily Payment History
 function loadEarningsMinerPage(walletAddress) {
-    return $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/balancechanges?page=0&pageSize=999")
+    // First, load the balance changes for transaction history
+    $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/balancechanges?page=0&pageSize=999")
         .done(function(data) {
             var earningsList = "";
             
@@ -912,14 +913,156 @@ function loadEarningsMinerPage(walletAddress) {
                     </tr>`;
                 });
             } else {
-                earningsList = '<tr><td colspan="3" class="text-center text-muted">No earnings yet</td></tr>';
+                earningsList = '<tr><td colspan="3" class="text-center text-muted">No balance changes yet</td></tr>';
             }
             
             $("#EarningsList").html(earningsList);
         })
         .fail(function() {
-            $("#EarningsList").html('<tr><td colspan="3" class="text-center text-danger">Failed to load earnings</td></tr>');
+            $("#EarningsList").html('<tr><td colspan="3" class="text-center text-danger">Failed to load balance changes</td></tr>');
         });
+    
+    // FIXED: Load daily payment history with proper error handling
+    loadDailyPaymentHistory(walletAddress);
+}
+
+// FIXED: Load Daily Payment History
+function loadDailyPaymentHistory(walletAddress) {
+    console.log('Loading daily payment history for:', walletAddress);
+    
+    $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/payments?page=0&pageSize=999")
+        .done(function(payments) {
+            console.log('Loaded payments:', payments.length);
+            
+            // Create daily totals object
+            var dailyTotals = {};
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Initialize last 30 days with zero
+            for (let i = 0; i < 30; i++) {
+                let date = new Date(today);
+                date.setDate(date.getDate() - i);
+                let dateKey = formatDateKey(date);
+                dailyTotals[dateKey] = 0;
+            }
+            
+            // Process payments and group by date
+            payments.forEach(function(payment) {
+                try {
+                    var paymentDate = new Date(payment.created);
+                    if (isNaN(paymentDate.getTime())) {
+                        console.warn('Invalid payment date:', payment.created);
+                        return;
+                    }
+                    
+                    var dateKey = formatDateKey(paymentDate);
+                    var amount = parseFloat(payment.amount) || 0;
+                    
+                    if (dailyTotals.hasOwnProperty(dateKey)) {
+                        dailyTotals[dateKey] += amount;
+                    }
+                } catch (error) {
+                    console.error('Error processing payment:', payment, error);
+                }
+            });
+            
+            // Process data for display
+            var chartLabels = [];
+            var chartData = [];
+            var dailyPaymentList = "";
+            var totalPaid30Days = 0;
+            var daysWithPayments = 0;
+            
+            // Sort dates and prepare display (newest first)
+            var sortedDates = Object.keys(dailyTotals).sort().reverse();
+            
+            sortedDates.forEach(function(dateKey, index) {
+                var amount = dailyTotals[dateKey];
+                var date = parseDate(dateKey);
+                var displayDate = date.toLocaleDateString();
+                var dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                totalPaid30Days += amount;
+                if (amount > 0) daysWithPayments++;
+                
+                // Add to chart data (last 14 days only, reverse order for proper chart display)
+                if (index < 14) {
+                    chartLabels.unshift(isMobile() ? date.getDate().toString() : dayOfWeek);
+                    chartData.unshift(amount);
+                }
+                
+                // Add to table
+                var amountClass = amount > 0 ? "text-success" : "text-muted";
+                var rowClass = amount > 0 ? "" : "table-secondary";
+                
+                dailyPaymentList += `
+                <tr class="${rowClass}">
+                    <td data-label="Date">${displayDate}</td>
+                    <td data-label="Day">${dayOfWeek}</td>
+                    <td data-label="Amount" class="${amountClass}">${_formatter(amount, 8, "")}</td>
+                    <td data-label="Status">${amount > 0 ? '<span class="text-success">Paid</span>' : '<span class="text-muted">No Payment</span>'}</td>
+                </tr>`;
+            });
+            
+            // Update the daily payment history table
+            $("#DailyPaymentList").html(dailyPaymentList);
+            
+            // Update summary statistics
+            var averageDaily = daysWithPayments > 0 ? totalPaid30Days / daysWithPayments : 0;
+            $("#total30Days").text(_formatter(totalPaid30Days, 8, ""));
+            $("#average30Days").text(_formatter(averageDaily, 8, ""));
+            $("#daysWithPayments").text(daysWithPayments);
+            
+            // FIXED: Create daily payment chart with proper error handling
+            try {
+                if (chartLabels.length > 0 && chartData.length > 0) {
+                    new Chartist.Bar("#chartDailyPayments", {
+                        labels: chartLabels,
+                        series: [chartData]
+                    }, {
+                        height: isMobile() ? "150px" : "200px",
+                        axisX: {
+                            showGrid: false
+                        },
+                        axisY: {
+                            offset: isMobile() ? 35 : 50,
+                            labelInterpolationFnc: function(value) {
+                                return _formatter(value, 2, "");
+                            }
+                        },
+                        low: 0,
+                        distributeSeries: true
+                    });
+                } else {
+                    console.warn('No chart data available');
+                    $("#chartDailyPayments").html('<div class="text-center text-muted" style="padding: 40px;">No payment data available for chart</div>');
+                }
+            } catch (chartError) {
+                console.error('Error creating chart:', chartError);
+                $("#chartDailyPayments").html('<div class="text-center text-danger" style="padding: 40px;">Error loading chart</div>');
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Failed to load daily payment history:', status, error);
+            $("#DailyPaymentList").html('<tr><td colspan="4" class="text-center text-danger">Failed to load daily payment history</td></tr>');
+            $("#total30Days").text("0.00000000");
+            $("#average30Days").text("0.00000000");
+            $("#daysWithPayments").text("0");
+            $("#chartDailyPayments").html('<div class="text-center text-danger" style="padding: 40px;">Failed to load chart data</div>');
+        });
+}
+
+// Helper functions for date handling
+function formatDateKey(date) {
+    return date.getFullYear() + '-' + 
+           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(date.getDate()).padStart(2, '0');
+}
+
+function parseDate(dateKey) {
+    var parts = dateKey.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 }
 
 // Load Miners Page - Mobile optimized
