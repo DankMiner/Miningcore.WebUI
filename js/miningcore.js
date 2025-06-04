@@ -2221,12 +2221,12 @@ var servers = [
     { name: "USA East (NY)", host: "us2.1miner.net", region: "us", location: "New York" },
     { name: "USA West (WA)", host: "us3.1miner.net", region: "us", location: "Washington" },
     { name: "USA South (HTX)", host: "us4.1miner.net", region: "us", location: "Houston" },
-    { name: "Asia (Singapore)", host: "sgp.1miner.net", region: "asia", location: "Singapore" },    
-    { name: "China (HK)", host: "cn1.1miner.net", region: "asia", location: "Hong Kong" },
-    { name: "Japan (Tokyo)", host: "jp.1miner.net", region: "asia", location: "Tokyo" },
+    { name: "Asia (Singapore)", host: "sgp.1miner.net", region: "singapore", location: "Singapore" },
+    { name: "China (HK)", host: "cn1.1miner.net", region: "china", location: "Hong Kong" },
+    { name: "Japan (Tokyo)", host: "jp.1miner.net", region: "japan", location: "Tokyo" },
     { name: "Australia (Sydney)", host: "au.1miner.net", region: "oceania", location: "Sydney" },
-    { name: "Europe (France)", host: "eu1.1miner.net", region: "europe", location: "France" },
-    { name: "Europe (UK)", host: "eu2.1miner.net", region: "europe", location: "United Kingdom" }
+    { name: "Europe (France)", host: "eu1.1miner.net", region: "france", location: "France" },
+    { name: "Europe (UK)", host: "eu2.1miner.net", region: "uk", location: "United Kingdom" }
 ];
 
 // Store ping results
@@ -2467,12 +2467,16 @@ function connectToServer(serverHost) {
 function getRegionFlag(region) {
     const flags = {
         'us': '🇺🇸',
-        'asia': '🌏',
+        'singapore': '🇸🇬',
         'oceania': '🇦🇺',
-        'europe': '🇪🇺'
+        'france': '🇫🇷' ,
+        'china': '🇨🇳',
+        'uk': '🇬🇧',
+        'japan': '🇯🇵'
     };
     return flags[region] || '🌍';
 }
+
 
 // Get status class for styling
 function getStatusClass(status) {
