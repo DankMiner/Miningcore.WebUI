@@ -9,7 +9,7 @@
   <meta name="msapplication-TileImage" content="img/favicon-32x32.png">
   <link rel="icon" href="img/favicon.ico" sizes="96x96" type="image/x-icon"/>
 
-  <title>1miner.net - Mining Made Easy</title>
+  <title>1Miner.Net - Mining Pool</title>
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 
   <!-- Core CSS -->
@@ -447,53 +447,6 @@
       color: var(--text-muted);
       font-size: 11px;
       margin-top: 4px;
-    }
-
-    /* Daily Earnings List */
-    .daily-earnings-list {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      border: 1px solid var(--border-color);
-    }
-
-    .daily-earnings-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .daily-earnings-title {
-      color: var(--text-primary);
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .daily-earnings-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .daily-earnings-item:last-child {
-      border-bottom: none;
-    }
-
-    .daily-earnings-date {
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-
-    .daily-earnings-amount {
-      color: var(--success);
-      font-size: 16px;
-      font-weight: 700;
     }
 
     /* Responsive Tables */
@@ -1732,14 +1685,6 @@
 
           <div class="stat-item">
             <div class="stat-label">
-              <i class="fas fa-cubes"></i>
-              Blocks Found
-            </div>
-            <div class="stat-value" id="blocksFound">0</div>
-          </div>
-
-          <div class="stat-item">
-            <div class="stat-label">
               <i class="fas fa-wallet"></i>
               Pending Balance
             </div>
@@ -1753,14 +1698,6 @@
               Workers Online
             </div>
             <div class="stat-value" id="workersOnline">0</div>
-          </div>
-
-          <div class="stat-item">
-            <div class="stat-label">
-              <i class="fas fa-money-check-alt"></i>
-              Total Payments
-            </div>
-            <div class="stat-value" id="totalPayments">0</div>
           </div>
 
           <div class="stat-item">
@@ -1794,14 +1731,6 @@
               Hashrate (3h)
             </div>
             <div class="stat-value green" id="hashrate3h">0 H/s</div>
-          </div>
-
-          <div class="stat-item">
-            <div class="stat-label">
-              <i class="fas fa-sync"></i>
-              Epoch Switch
-            </div>
-            <div class="stat-value" id="epochSwitch">in 0 hours</div>
           </div>
 
           <div class="stat-item">
@@ -1956,20 +1885,6 @@
                   </tr>
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          <!-- Daily Earnings List -->
-          <div class="daily-earnings-list">
-            <div class="daily-earnings-header">
-              <div class="daily-earnings-title">
-                <i class="fas fa-calendar-alt"></i> Daily Earnings Summary
-              </div>
-            </div>
-            <div id="dailyEarningsList">
-              <div class="text-center text-muted" style="padding: 20px;">
-                No daily earnings data available
-              </div>
             </div>
           </div>
         </div>
