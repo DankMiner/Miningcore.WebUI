@@ -1596,7 +1596,7 @@ var servers = [
     { name: "USA Central (MO)", host: "us1.1miner.net", region: "us", location: "Missouri" },
     { name: "USA East (NY)", host: "us2.1miner.net", region: "us", location: "New York" },
     { name: "USA West (WA)", host: "us3.1miner.net", region: "us", location: "Washington" },
-    { name: "USA South (HTX)", host: "us4.1miner.net", region: "us", location: "Houston" },
+    { name: "USA South (TX)", host: "us4.1miner.net", region: "us", location: "Texas" },
     { name: "Asia (Singapore)", host: "sgp.1miner.net", region: "singapore", location: "Singapore" },
     { name: "China (HK)", host: "cn1.1miner.net", region: "china", location: "Hong Kong" },
     { name: "Japan (Tokyo)", host: "jp.1miner.net", region: "japan", location: "Tokyo" },
