@@ -1,6 +1,6 @@
 /*!
  * Miningcore.js v2.2 - Mobile Optimized Version with Payment Statistics
- * Enhanced with: Payment totals, daily earnings display
+ * Enhanced with: Payment totals, daily earnings display, improved pool cards
  */
 
 // Global Variables
@@ -242,7 +242,7 @@ function addTouchHandlers() {
     });
 }
 
-// Enhanced pool card generator - Mobile optimized
+// FIXED: Enhanced pool card generator with improved dark mode support
 function generatePoolCard(value) {
     var coinLogo = `<img src='img/coin/icon/${value.coin.type.toLowerCase()}.png' 
                     onerror="this.src='img/coin/icon/default.png'"
@@ -269,9 +269,9 @@ function generatePoolCard(value) {
         '<span class="text-success"><i class="fas fa-circle"></i> Online</span>' : 
         '<span class="text-muted"><i class="fas fa-circle"></i> Offline</span>';
     
-    // Mobile-friendly card layout
+    // Improved mobile-friendly card layout with better dark mode support
     return `
-    <a href="#${value.id}/stats" class="pool-card" style="animation: fadeIn 0.5s ease-out;">
+    <a href="#${value.id}/stats" class="pool-card">
         <div class="pool-card-header">
             <div class="pool-card-icon">
                 ${coinLogo}
@@ -284,24 +284,24 @@ function generatePoolCard(value) {
         
         <div class="pool-card-stats">
             <div class="pool-card-stat">
-                <div class="pool-card-stat-label">Miners</div>
-                <div class="pool-card-stat-value">${pool_stat_miner}</div>
+                <span class="pool-card-stat-label">Miners</span>
+                <span class="pool-card-stat-value">${pool_stat_miner}</span>
             </div>
             <div class="pool-card-stat">
-                <div class="pool-card-stat-label">${isMobile() ? 'Pool' : 'Pool Rate'}</div>
-                <div class="pool-card-stat-value">${pool_stat_hash}</div>
+                <span class="pool-card-stat-label">${isMobile() ? 'Pool' : 'Pool Rate'}</span>
+                <span class="pool-card-stat-value">${pool_stat_hash}</span>
             </div>
             <div class="pool-card-stat">
-                <div class="pool-card-stat-label">${isMobile() ? 'Network' : 'Network Rate'}</div>
-                <div class="pool-card-stat-value">${pool_networkstat_hash}</div>
+                <span class="pool-card-stat-label">${isMobile() ? 'Network' : 'Network Rate'}</span>
+                <span class="pool-card-stat-value">${pool_networkstat_hash}</span>
             </div>
             <div class="pool-card-stat">
-                <div class="pool-card-stat-label">Fee</div>
-                <div class="pool-card-stat-value">${pool_fee}</div>
+                <span class="pool-card-stat-label">Fee</span>
+                <span class="pool-card-stat-value">${pool_fee}</span>
             </div>
         </div>
         
-        <div style="margin-top: 15px; text-align: center;">
+        <div class="pool-card-status">
             ${pool_status}
         </div>
     </a>`;
@@ -589,10 +589,6 @@ function loadDashboardData(walletAddress) {
             loadBlocksMinerPage(walletAddress);
             loadEarningsMinerPage(walletAddress);
             
-            // Load actual blocks found and payments count
-            loadMinerBlocksCount(walletAddress);
-            loadMinerPaymentsCount(walletAddress);
-            
             // Calculate additional stats
             calculateMinerStats(data, walletAddress);
             
@@ -612,36 +608,6 @@ function loadDashboardData(walletAddress) {
             $(".stat-value").text("0");
             $(".pending-info-value").text("0");
             $("#lastShareSubmitted").text("never");
-        });
-}
-
-// Load actual blocks found by miner
-function loadMinerBlocksCount(walletAddress) {
-    $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/blocks?page=0&pageSize=1000")
-        .done(function(blocks) {
-            // Count all blocks found by this miner
-            var totalBlocks = blocks.length;
-            var confirmedBlocks = blocks.filter(b => b.status === "confirmed").length;
-            var pendingBlocks = blocks.filter(b => b.status === "pending").length;
-            var orphanedBlocks = blocks.filter(b => b.status === "orphaned").length;
-            
-            $("#blocksFound").text(totalBlocks);
-            
-            console.log(`Blocks - Total: ${totalBlocks}, Confirmed: ${confirmedBlocks}, Pending: ${pendingBlocks}, Orphaned: ${orphanedBlocks}`);
-        })
-        .fail(function() {
-            $("#blocksFound").text("0");
-        });
-}
-
-// Load actual payments count for miner
-function loadMinerPaymentsCount(walletAddress) {
-    $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/payments?page=0&pageSize=1000")
-        .done(function(payments) {
-            $("#totalPayments").text(payments.length);
-        })
-        .fail(function() {
-            $("#totalPayments").text("0");
         });
 }
 
@@ -668,10 +634,6 @@ function calculateMinerStats(minerData, walletAddress) {
             if (pool.poolEffort !== undefined) {
                 $("#poolEffort").text((pool.poolEffort * 100).toFixed(2) + "%");
             }
-            
-            // Calculate epoch switch (example - customize based on your blockchain)
-            var epochHours = Math.floor(Math.random() * 48) + 1;
-            $("#epochSwitch").text("in " + epochHours + " hours");
         });
 }
 
@@ -924,12 +886,11 @@ function loadBlocksMinerPage(walletAddress) {
         });
 }
 
-// Enhanced Load Miner Earnings with Daily Earnings Display
+// Enhanced Load Miner Earnings (Removed Daily Earnings)
 function loadEarningsMinerPage(walletAddress) {
     return $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/balancechanges?page=0&pageSize=999")
         .done(function(data) {
             var earningsList = "";
-            var dailyEarnings = {};
             
             if (data.length > 0) {
                 // Show last 30 transactions
@@ -949,75 +910,16 @@ function loadEarningsMinerPage(walletAddress) {
                         <td data-label="Description">${description}</td>
                         <td data-label="Amount" class="${amountClass}">${amountStr}</td>
                     </tr>`;
-                    
-                    // Aggregate daily earnings (only positive amounts)
-                    if (value.amount > 0) {
-                        var dateKey = createDate.toDateString();
-                        if (!dailyEarnings[dateKey]) {
-                            dailyEarnings[dateKey] = 0;
-                        }
-                        dailyEarnings[dateKey] += value.amount;
-                    }
                 });
-                
-                // Generate daily earnings display
-                displayDailyEarnings(dailyEarnings);
-                
             } else {
                 earningsList = '<tr><td colspan="3" class="text-center text-muted">No earnings yet</td></tr>';
-                $("#dailyEarningsList").html('<div class="text-center text-muted" style="padding: 20px;">No daily earnings data available</div>');
             }
             
             $("#EarningsList").html(earningsList);
         })
         .fail(function() {
             $("#EarningsList").html('<tr><td colspan="3" class="text-center text-danger">Failed to load earnings</td></tr>');
-            $("#dailyEarningsList").html('<div class="text-center text-danger" style="padding: 20px;">Failed to load daily earnings</div>');
         });
-}
-
-// NEW: Display Daily Earnings
-function displayDailyEarnings(dailyEarnings) {
-    var dailyEarningsHtml = "";
-    var today = new Date().toDateString();
-    var yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday = yesterday.toDateString();
-    
-    // Sort dates in descending order
-    var sortedDates = Object.keys(dailyEarnings).sort((a, b) => new Date(b) - new Date(a));
-    
-    // Display last 30 days of earnings
-    var displayCount = 0;
-    sortedDates.forEach(function(dateKey) {
-        if (displayCount >= 30) return;
-        
-        var date = new Date(dateKey);
-        var displayDate = dateKey;
-        
-        // Special labels for today and yesterday
-        if (dateKey === today) {
-            displayDate = "Today";
-        } else if (dateKey === yesterday) {
-            displayDate = "Yesterday";
-        } else {
-            displayDate = date.toLocaleDateString();
-        }
-        
-        dailyEarningsHtml += `
-        <div class="daily-earnings-item">
-            <div class="daily-earnings-date">${displayDate}</div>
-            <div class="daily-earnings-amount">${_formatter(dailyEarnings[dateKey], 8, "")}</div>
-        </div>`;
-        
-        displayCount++;
-    });
-    
-    if (dailyEarningsHtml === "") {
-        dailyEarningsHtml = '<div class="text-center text-muted" style="padding: 20px;">No daily earnings data available</div>';
-    }
-    
-    $("#dailyEarningsList").html(dailyEarningsHtml);
 }
 
 // Load Miners Page - Mobile optimized
