@@ -1,6 +1,6 @@
 /*!
- * Miningcore.js v2.3 - Fixed Daily Payment History Implementation
- * Enhanced with: Corrected payment endpoints, proper date handling, fixed chart rendering
+ * Miningcore.js v3.0 - Enhanced with Modern Chart.js Charts
+ * Features: Real-time updates, interactive tooltips, zoom/pan, multiple timeframes, gradient fills
  */
 
 // Global Variables
@@ -9,16 +9,76 @@ if (WebURL.substring(WebURL.length-1) != "/") {
     WebURL = WebURL + "/";
 }
 
+// Update pool cards with USD price information
+function updatePoolCardsWithPrices(poolsWithPrices) {
+    console.log('Updating pool cards with price information');
+    
+    poolsWithPrices.forEach(pool => {
+        // Find the corresponding pool card
+        const poolCard = $(`.pool-card[href="#${pool.id}/stats"]`);
+        if (poolCard.length > 0) {
+            // Find the "Total Paid" stat value element
+            const totalPaidElement = poolCard.find('.pool-card-stat-label:contains("Total Paid")').next('.pool-card-stat-value');
+            
+            if (totalPaidElement.length > 0) {
+                let formattedValue = "N/A";
+                
+                if (pool.totalPaidUSD !== undefined && pool.totalPaidUSD > 0) {
+                    // Format USD values nicely
+                    if (pool.totalPaidUSD >= 1000000) {
+                        formattedValue = "$" + (pool.totalPaidUSD / 1000000).toFixed(1) + "M";
+                    } else if (pool.totalPaidUSD >= 1000) {
+                        formattedValue = "$" + (pool.totalPaidUSD / 1000).toFixed(1) + "K";
+                    } else if (pool.totalPaidUSD >= 1) {
+                        formattedValue = "$" + pool.totalPaidUSD.toFixed(0);
+                    } else if (pool.totalPaidUSD > 0) {
+                        formattedValue = "$" + pool.totalPaidUSD.toFixed(2);
+                    } else {
+                        formattedValue = "$0";
+                    }
+                }
+                
+                // Update the value with a smooth animation
+                totalPaidElement.fadeOut(200, function() {
+                    $(this).text(formattedValue).fadeIn(200);
+                });
+            }
+        }
+    });
+}
+
 var API = "https://1miner.net/api/";
 if (API.substring(API.length-1) != "/") {
     API = API + "/";
 }
+
+// Add debug logging for API calls
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (window.debugMode || window.location.search.includes('debug=true')) {
+            console.log('API Request:', settings.type, settings.url);
+        }
+    },
+    complete: function(xhr, status) {
+        if (window.debugMode || window.location.search.includes('debug=true')) {
+            console.log('API Response:', status, xhr.status);
+            if (xhr.responseJSON) {
+                console.log('Response data:', xhr.responseJSON);
+            }
+        }
+    }
+});
 
 var stratumAddress = window.location.hostname;
 var currentPage = "index";
 var currentPool = null;
 var currentAddress = null;
 var minerBlocks = {};
+
+// Chart instances storage
+window.chartInstances = window.chartInstances || {};
+window.currentDashboardAddress = null;
+window.dailyPaymentChartData = null;
 
 // Interval management
 var activeIntervals = [];
@@ -27,6 +87,77 @@ var activePingInterval = null;
 console.log('MiningCore.WebUI:', WebURL);
 console.log('API address:', API);
 console.log('Stratum address:', "stratum+tcp://" + stratumAddress + ":");
+
+// Wait for Chart.js to be available
+function waitForChartJS(callback) {
+    if (typeof Chart !== 'undefined') {
+        callback();
+    } else {
+        setTimeout(() => waitForChartJS(callback), 100);
+    }
+}
+
+// Initialize Chart.js when ready
+waitForChartJS(() => {
+    console.log('Chart.js is ready, version:', Chart.version);
+    
+    // Chart.js default configuration
+    Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif';
+    Chart.defaults.font.size = 12;
+    
+    // Set default color after DOM is ready
+    $(document).ready(function() {
+        Chart.defaults.color = getThemeColors().textSecondary;
+    });
+});
+
+// Test function to create a simple chart with dummy data
+function createTestChart(canvasId) {
+    console.log('Creating test chart on canvas:', canvasId);
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) {
+        console.error('Canvas element not found:', canvasId);
+        return;
+    }
+    
+    const colors = getThemeColors();
+    
+    // Create simple test data
+    const labels = [];
+    const data = [];
+    for (let i = 0; i < 10; i++) {
+        labels.push(new Date(Date.now() - (9 - i) * 3600000));
+        data.push(Math.random() * 100);
+    }
+    
+    try {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Test Data',
+                    data: data,
+                    borderColor: colors.primary,
+                    backgroundColor: colors.primary + '20',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time'
+                    }
+                }
+            }
+        });
+        console.log('Test chart created successfully');
+    } catch (error) {
+        console.error('Error creating test chart:', error);
+    }
+}
 
 // Mobile detection
 function isMobile() {
@@ -48,6 +179,59 @@ function clearAllIntervals() {
 // Add interval to tracking
 function addInterval(intervalId) {
     activeIntervals.push(intervalId);
+}
+
+// Get theme colors with fallback
+function getThemeColors() {
+    try {
+        const root = document.documentElement;
+        const computedStyle = getComputedStyle(root);
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        
+        return {
+            primary: computedStyle.getPropertyValue('--accent-primary').trim() || '#00d4ff',
+            secondary: computedStyle.getPropertyValue('--accent-secondary').trim() || '#0099cc',
+            success: computedStyle.getPropertyValue('--success').trim() || '#00ff88',
+            warning: computedStyle.getPropertyValue('--warning').trim() || '#ffaa00',
+            danger: computedStyle.getPropertyValue('--danger').trim() || '#ff4444',
+            textPrimary: computedStyle.getPropertyValue('--text-primary').trim() || '#ffffff',
+            textSecondary: computedStyle.getPropertyValue('--text-secondary').trim() || '#b0b0b0',
+            textMuted: computedStyle.getPropertyValue('--text-muted').trim() || '#707070',
+            bgPrimary: computedStyle.getPropertyValue('--bg-primary').trim() || '#0a0a0a',
+            bgSecondary: computedStyle.getPropertyValue('--bg-secondary').trim() || '#1a1a1a',
+            bgTertiary: computedStyle.getPropertyValue('--bg-tertiary').trim() || '#242424',
+            borderColor: computedStyle.getPropertyValue('--border-color').trim() || '#333333',
+            gridColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+            tooltipBg: isDark ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)'
+        };
+    } catch (error) {
+        console.error('Error getting theme colors:', error);
+        // Return default dark theme colors
+        return {
+            primary: '#00d4ff',
+            secondary: '#0099cc',
+            success: '#00ff88',
+            warning: '#ffaa00',
+            danger: '#ff4444',
+            textPrimary: '#ffffff',
+            textSecondary: '#b0b0b0',
+            textMuted: '#707070',
+            bgPrimary: '#0a0a0a',
+            bgSecondary: '#1a1a1a',
+            bgTertiary: '#242424',
+            borderColor: '#333333',
+            gridColor: 'rgba(255, 255, 255, 0.05)',
+            tooltipBg: 'rgba(26, 26, 26, 0.95)'
+        };
+    }
+}
+
+// Create gradient for charts
+function createGradient(ctx, color1, color2) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+    return gradient;
 }
 
 // Main page loader with mobile optimizations
@@ -204,8 +388,9 @@ function loadHomePage() {
                 return nameA.localeCompare(nameB);
             });
 
-            // Create pool cards
+            // First, create pool cards with loading state for USD values
             $.each(sortedPools, function(index, value) {
+                value.totalPaidUSD = "loading"; // Set loading state
                 poolCoinGridTemplate += generatePoolCard(value);
             });
 
@@ -220,6 +405,18 @@ function loadHomePage() {
             if (isTouchDevice()) {
                 addTouchHandlers();
             }
+
+            // Then load coin prices and update the USD values
+            loadAllCoinPrices(sortedPools).then(poolsWithPrices => {
+                updatePoolCardsWithPrices(poolsWithPrices);
+            }).catch(error => {
+                console.error('Error loading coin prices:', error);
+                // Update cards to show N/A for USD values
+                updatePoolCardsWithPrices(sortedPools.map(pool => {
+                    pool.totalPaidUSD = 0;
+                    return pool;
+                }));
+            });
         })
         .fail(function() {
             $(".pool-coin-grid").html(`
@@ -242,18 +439,83 @@ function addTouchHandlers() {
     });
 }
 
-// Enhanced pool card generator with improved dark mode support
+// Load coin prices for all pools
+function loadAllCoinPrices(pools) {
+    return new Promise((resolve) => {
+        const pricePromises = pools.map(pool => {
+            return new Promise((resolvePrice) => {
+                const coinSymbol = getCoinSymbol(pool.coin.type);
+                
+                // Set timeout for price API calls (3 seconds)
+                const timeout = setTimeout(() => {
+                    console.log(`Price API timeout for ${coinSymbol}`);
+                    pool.coinPrice = 0;
+                    pool.totalPaidUSD = 0;
+                    resolvePrice(pool);
+                }, 3000);
+                
+                // Helper function to resolve with cleanup
+                const resolveWithCleanup = (price = 0) => {
+                    clearTimeout(timeout);
+                    pool.coinPrice = price;
+                    pool.totalPaidUSD = pool.totalPaid * price;
+                    resolvePrice(pool);
+                };
+                
+                // Try different price APIs based on coin symbol
+                if (coinSymbol === "LOG") {
+                    $.ajax({
+                        url: "https://api.coingecko.com/api/v3/simple/price?ids=woodcoin&vs_currencies=usd",
+                        timeout: 2500,
+                        method: 'GET'
+                    })
+                        .done(function(data) {
+                            const price = data.woodcoin?.usd || 0;
+                            resolveWithCleanup(price);
+                        })
+                        .fail(function() {
+                            resolveWithCleanup(0);
+                        });
+                } else {
+                    // Try Xeggex API first with coin symbol
+                    $.ajax({
+                        url: "https://api.xeggex.com/api/v2/market/getbysymbol/" + coinSymbol + "%2FUSDT",
+                        timeout: 2500,
+                        method: 'GET'
+                    })
+                        .done(function(data) {
+                            const price = data.lastPrice || 0;
+                            resolveWithCleanup(price);
+                        })
+                        .fail(function() {
+                            resolveWithCleanup(0);
+                        });
+                }
+            });
+        });
+        
+        // Wait for all price requests to complete (or timeout)
+        Promise.all(pricePromises).then(poolsWithPrices => {
+            console.log('All coin prices loaded');
+            resolve(poolsWithPrices);
+        });
+    });
+}
+
+// Enhanced pool card generator with payment scheme indicator
 function generatePoolCard(value) {
     var coinLogo = `<img src='img/coin/icon/${value.coin.type.toLowerCase()}.png' 
                     onerror="this.src='img/coin/icon/default.png'"
                     alt='${value.coin.type}' loading="lazy" />`;
     var coinName = value.coin.canonicalName || value.coin.name || value.coin.type;
+    var coinSymbol = getCoinSymbol(value.coin.type);
     
     var pool_networkstat_hash = "Loading...";
     var pool_networkstat_diff = "Loading...";
     var pool_stat_miner = "0";
     var pool_stat_hash = "0 H/s";
     var pool_fee = value.poolFeePercent + "%";
+    var pool_total_paid_usd = "Loading...";
     
     if(value.networkStats) {
         pool_networkstat_hash = _formatter(value.networkStats.networkHashrate, 3, "H/s");
@@ -265,20 +527,75 @@ function generatePoolCard(value) {
         pool_stat_hash = _formatter(value.poolStats.poolHashrate, 3, "H/s");
     }
     
+    // Format total paid USD
+    if (value.totalPaidUSD === "loading") {
+        pool_total_paid_usd = '<i class="fas fa-spinner fa-spin"></i>';
+    } else if (value.totalPaidUSD !== undefined) {
+        if (value.totalPaidUSD > 0) {
+            // Format USD values nicely
+            if (value.totalPaidUSD >= 1000000) {
+                pool_total_paid_usd = "$" + (value.totalPaidUSD / 1000000).toFixed(1) + "M";
+            } else if (value.totalPaidUSD >= 1000) {
+                pool_total_paid_usd = "$" + (value.totalPaidUSD / 1000).toFixed(1) + "K";
+            } else if (value.totalPaidUSD >= 1) {
+                pool_total_paid_usd = "$" + value.totalPaidUSD.toFixed(0);
+            } else if (value.totalPaidUSD > 0) {
+                pool_total_paid_usd = "$" + value.totalPaidUSD.toFixed(2);
+            } else {
+                pool_total_paid_usd = "$0";
+            }
+        } else {
+            pool_total_paid_usd = "N/A";
+        }
+    }
+    
     var pool_status = value.poolStats && value.poolStats.connectedMiners > 0 ? 
         '<span class="text-success"><i class="fas fa-circle"></i> Online</span>' : 
         '<span class="text-muted"><i class="fas fa-circle"></i> Offline</span>';
     
-    // Improved mobile-friendly card layout with better dark mode support
+    // Get payment scheme and style it
+    var paymentScheme = value.paymentProcessing.payoutScheme || 'Unknown';
+    var schemeClass = 'payment-scheme-badge';
+    var schemeIcon = '';
+    
+    // Add specific styling and icons based on payment scheme
+    switch(paymentScheme.toUpperCase()) {
+        case 'SOLO':
+            schemeClass += ' scheme-solo';
+            schemeIcon = '<i class="fas fa-user"></i>';
+            break;
+        case 'PPLNS':
+            schemeClass += ' scheme-pplns';
+            schemeIcon = '<i class="fas fa-chart-line"></i>';
+            break;
+        case 'PROP':
+            schemeClass += ' scheme-prop';
+            schemeIcon = '<i class="fas fa-percentage"></i>';
+            break;
+        case 'PPS':
+            schemeClass += ' scheme-pps';
+            schemeIcon = '<i class="fas fa-coins"></i>';
+            break;
+        default:
+            schemeClass += ' scheme-default';
+            schemeIcon = '<i class="fas fa-info-circle"></i>';
+    }
+    
+    // Improved mobile-friendly card layout with payment scheme indicator
     return `
     <a href="#${value.id}/stats" class="pool-card">
+        <div class="payment-scheme-indicator">
+            <span class="${schemeClass}">
+                ${schemeIcon} ${paymentScheme}
+            </span>
+        </div>
         <div class="pool-card-header">
             <div class="pool-card-icon">
                 ${coinLogo}
             </div>
             <div>
                 <div class="pool-card-title">${coinName}</div>
-                <div class="pool-card-algo">${value.coin.algorithm}</div>
+                <div class="pool-card-algo">${coinSymbol} • ${value.coin.algorithm}</div>
             </div>
         </div>
         
@@ -292,8 +609,8 @@ function generatePoolCard(value) {
                 <span class="pool-card-stat-value">${pool_stat_hash}</span>
             </div>
             <div class="pool-card-stat">
-                <span class="pool-card-stat-label">${isMobile() ? 'Network' : 'Network Rate'}</span>
-                <span class="pool-card-stat-value">${pool_networkstat_hash}</span>
+                <span class="pool-card-stat-label">${isMobile() ? 'Total Paid' : 'Total Paid (USD)'}</span>
+                <span class="pool-card-stat-value">${pool_total_paid_usd}</span>
             </div>
             <div class="pool-card-stat">
                 <span class="pool-card-stat-label">Fee</span>
@@ -349,15 +666,18 @@ function loadStatsPage() {
     // Clear existing intervals
     clearAllIntervals();
     
-    // Load data immediately
-    loadStatsData();
-    loadStatsChart();
-    
-    // Set up intervals for updates
-    const dataInterval = setInterval(loadStatsData, 60000);
-    const chartInterval = setInterval(loadStatsChart, 60000);
-    addInterval(dataInterval);
-    addInterval(chartInterval);
+    // Wait for Chart.js to be ready
+    waitForChartJS(() => {
+        // Load data immediately
+        loadStatsData();
+        loadStatsChart('24h');
+        
+        // Set up intervals for updates
+        const dataInterval = setInterval(loadStatsData, 60000);
+        const chartInterval = setInterval(() => loadStatsChart('24h'), 60000);
+        addInterval(dataInterval);
+        addInterval(chartInterval);
+    });
 }
 
 // Enhanced Stats Data Loader
@@ -428,64 +748,319 @@ function loadBlockStats(pool) {
         });
 }
 
-// Enhanced Stats Chart - Mobile responsive
-function loadStatsChart() {
-    return $.ajax(API + "pools/" + currentPool + "/performance")
+// Simple test to verify API structure
+function testAPIStructure() {
+    console.log('Testing API structure...');
+    
+    // Test pools endpoint
+    $.ajax(API + "pools")
         .done(function(data) {
-            var labels = [];
-            var poolHashRate = [];
-            var networkHashRate = [];
-            var connectedMiners = [];
+            console.log('Pools API response:', data);
+            if (data.pools && data.pools.length > 0) {
+                const firstPool = data.pools[0];
+                console.log('First pool ID:', firstPool.id);
+                
+                // Test performance endpoint
+                $.ajax(API + "pools/" + firstPool.id + "/performance?page=0&pageSize=10")
+                    .done(function(perfData) {
+                        console.log('Performance API response:', perfData);
+                        console.log('Performance data structure:', {
+                            isArray: Array.isArray(perfData),
+                            hasStats: perfData.stats !== undefined,
+                            firstItem: perfData.stats ? perfData.stats[0] : perfData[0]
+                        });
+                    })
+                    .fail(function(xhr) {
+                        console.error('Performance API failed:', xhr);
+                    });
+            }
+        })
+        .fail(function(xhr) {
+            console.error('Pools API failed:', xhr);
+        });
+}
+
+// Enhanced Stats Chart with better error handling and API structure detection
+function loadStatsChart(timeframe = '24h') {
+    console.log('Loading stats chart with timeframe:', timeframe);
+    
+    const endDate = new Date();
+    let pageSize = 48; // Default for 24h (30 min intervals)
+    
+    switch(timeframe) {
+        case '7d':
+            pageSize = 336; // 7 days of 30 min intervals
+            break;
+        case '30d':
+            pageSize = 1440; // 30 days of 30 min intervals
+            break;
+    }
+    
+    return $.ajax(API + "pools/" + currentPool + "/performance?page=0&pageSize=" + pageSize)
+        .done(function(rawData) {
+            console.log('Stats chart data received:', rawData);
             
-            // Reduce data points for mobile
-            const skipRate = isMobile() ? 4 : 2;
+            const colors = getThemeColors();
+            const ctx = document.getElementById('chartStatsHashRatePool');
+            if (!ctx) {
+                console.error('Chart canvas element not found');
+                return;
+            }
             
-            $.each(data.stats, function(index, value) {
-                if (index % skipRate === 0) {
-                    var date = convertUTCDateToLocalDate(new Date(value.created), false);
-                    labels.push(date.getHours() + ":00");
-                    poolHashRate.push(value.poolHashrate);
-                    networkHashRate.push(value.networkHashrate);
-                    connectedMiners.push(value.connectedMiners);
+            // Detect API response structure
+            let data;
+            if (rawData.stats && Array.isArray(rawData.stats)) {
+                // Response has stats property
+                data = rawData.stats;
+            } else if (Array.isArray(rawData)) {
+                // Response is directly an array
+                data = rawData;
+            } else {
+                console.error('Unknown API response structure:', rawData);
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-exclamation-triangle"></i><p>Invalid data format</p></div>';
+                return;
+            }
+            
+            // Check if we have valid data
+            if (!data || data.length === 0) {
+                console.warn('No stats data available');
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-info-circle"></i><p>No data available</p></div>';
+                return;
+            }
+            
+            console.log('Processing', data.length, 'data points');
+            
+            // Process data
+            const labels = [];
+            const poolHashRate = [];
+            const networkHashRate = [];
+            const connectedMiners = [];
+            
+            // Calculate skip rate based on timeframe and device
+            let skipRate = 1;
+            if (timeframe === '7d') skipRate = isMobile() ? 8 : 4;
+            if (timeframe === '30d') skipRate = isMobile() ? 32 : 16;
+            
+            // Reverse the data array to show oldest to newest
+            const reversedData = data.slice().reverse();
+            
+            reversedData.forEach((value, index) => {
+                if (index % skipRate === 0 && value) {
+                    const date = new Date(value.created);
+                    if (!isNaN(date.getTime())) {
+                        labels.push(date);
+                        poolHashRate.push(value.poolHashrate || value.poolHashRate || 0);
+                        networkHashRate.push(value.networkHashrate || value.networkHashRate || 0);
+                        connectedMiners.push(value.connectedMiners || 0);
+                    }
                 }
             });
             
-            // Mobile-optimized chart options
-            var options = {
-                height: isMobile() ? "200px" : "300px",
-                showArea: true,
-                showPoint: false,
-                fullWidth: true,
-                chartPadding: {
-                    right: isMobile() ? 20 : 40,
-                    left: isMobile() ? 10 : 20,
-                    top: 20,
-                    bottom: 20
-                },
-                axisX: {
-                    showGrid: false,
-                    labelInterpolationFnc: function(value, index) {
-                        return isMobile() ? (index % 2 === 0 ? value : null) : value;
-                    }
-                },
-                axisY: {
-                    offset: isMobile() ? 40 : 60,
-                    labelInterpolationFnc: function(value) {
-                        return _formatter(value, 1, "");
-                    }
-                },
-                lineSmooth: Chartist.Interpolation.cardinal({
-                    tension: 0.2
-                })
-            };
+            console.log('Processed chart data:', {
+                labels: labels.length,
+                poolHashRate: poolHashRate.length,
+                networkHashRate: networkHashRate.length,
+                hasData: poolHashRate.some(v => v > 0)
+            });
             
-            new Chartist.Line("#chartStatsHashRatePool", {
-                labels: labels,
-                series: [poolHashRate]
-            }, options);
+            // If no valid data points, show message
+            if (labels.length === 0) {
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-info-circle"></i><p>No valid data points found</p></div>';
+                return;
+            }
+            
+            // Calculate statistics
+            const currentPoolRate = poolHashRate[poolHashRate.length - 1] || 0;
+            const previousPoolRate = poolHashRate[poolHashRate.length - 2] || currentPoolRate;
+            const poolRateChange = previousPoolRate > 0 ? ((currentPoolRate - previousPoolRate) / previousPoolRate * 100).toFixed(1) : 0;
+            
+            const currentNetworkRate = networkHashRate[networkHashRate.length - 1] || 0;
+            const currentMinersCount = connectedMiners[connectedMiners.length - 1] || 0;
+            const previousMinersCount = connectedMiners[connectedMiners.length - 2] || currentMinersCount;
+            const minersChange = currentMinersCount - previousMinersCount;
+            
+            const poolShare = currentNetworkRate > 0 ? (currentPoolRate / currentNetworkRate * 100).toFixed(2) : 0;
+            
+            // Update statistics panel
+            $("#currentPoolRate").text(_formatter(currentPoolRate, 2, "H/s"));
+            $("#poolRateChange").text((poolRateChange >= 0 ? '+' : '') + poolRateChange + '%')
+                .removeClass('positive negative')
+                .addClass(poolRateChange >= 0 ? 'positive' : 'negative');
+            
+            $("#currentNetworkRate").text(_formatter(currentNetworkRate, 2, "H/s"));
+            $("#currentMiners").text(currentMinersCount);
+            $("#minersChange").text((minersChange >= 0 ? '+' : '') + minersChange)
+                .removeClass('positive negative')
+                .addClass(minersChange >= 0 ? 'positive' : 'negative');
+            
+            $("#poolShare").text(poolShare + '%');
+            
+            // Destroy existing chart
+            if (window.chartInstances.statsChart) {
+                window.chartInstances.statsChart.destroy();
+            }
+            
+            // Create new chart
+            try {
+                window.chartInstances.statsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Pool Hashrate',
+                            data: poolHashRate,
+                            borderColor: colors.primary,
+                            backgroundColor: createGradient(ctx.getContext('2d'), 
+                                colors.primary + '40', 
+                                colors.primary + '05'),
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: colors.primary,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Network Hashrate',
+                            data: networkHashRate,
+                            borderColor: colors.success,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: colors.success,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Active Miners',
+                            data: connectedMiners,
+                            borderColor: colors.warning,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: colors.warning,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            yAxisID: 'y1',
+                            hidden: isMobile() // Hide on mobile by default
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: false // Using custom legend
+                            },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: colors.tooltipBg,
+                                titleColor: colors.textPrimary,
+                                bodyColor: colors.textSecondary,
+                                borderColor: colors.borderColor,
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: true,
+                                callbacks: {
+                                    title: function(context) {
+                                        const date = new Date(context[0].parsed.x);
+                                        return date.toLocaleString();
+                                    },
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            if (context.datasetIndex === 2) {
+                                                label += context.parsed.y + ' miners';
+                                            } else {
+                                                label += _formatter(context.parsed.y, 2, "H/s");
+                                            }
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    displayFormats: {
+                                        hour: 'HH:mm',
+                                        day: 'MMM dd',
+                                        week: 'MMM dd',
+                                        month: 'MMM yyyy'
+                                    }
+                                },
+                                ticks: {
+                                    color: colors.textSecondary,
+                                    maxTicksLimit: isMobile() ? 6 : 12,
+                                    autoSkip: true
+                                },
+                                grid: {
+                                    color: colors.gridColor,
+                                    drawBorder: false
+                                }
+                            },
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: colors.textSecondary,
+                                    callback: function(value) {
+                                        return _formatter(value, 1, "");
+                                    }
+                                },
+                                grid: {
+                                    color: colors.gridColor,
+                                    drawBorder: false
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: colors.textSecondary,
+                                    callback: function(value) {
+                                        return Math.round(value);
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('Stats chart created successfully');
+            } catch (error) {
+                console.error('Error creating stats chart:', error);
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-exclamation-triangle"></i><p>Error creating chart</p></div>';
+            }
         })
-        .fail(function() {
-            console.error("Failed to load chart data");
+        .fail(function(xhr, status, error) {
+            console.error("Failed to load stats chart data:", status, error);
+            const ctx = document.getElementById('chartStatsHashRatePool');
+            if (ctx) {
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-exclamation-triangle"></i><p>Failed to load chart data</p></div>';
+            }
         });
 }
 
@@ -496,19 +1071,24 @@ function loadDashboardPage() {
     // Clear existing intervals
     clearAllIntervals();
     
-    // Check for wallet in URL or localStorage
-    var walletQueryString = window.location.hash.split(/[#/?]/)[3];
-    if (walletQueryString) {
-        var wallet = walletQueryString.replace("address=", "");
-        if (wallet) {
-            $("#walletAddress").val(wallet);
-            localStorage.setItem(currentPool + "-walletAddress", wallet);
-            loadDashboardData(wallet);
+    // Wait for Chart.js to be ready
+    waitForChartJS(() => {
+        // Check for wallet in URL or localStorage
+        var walletQueryString = window.location.hash.split(/[#/?]/)[3];
+        if (walletQueryString) {
+            var wallet = walletQueryString.replace("address=", "");
+            if (wallet) {
+                $("#walletAddress").val(wallet);
+                localStorage.setItem(currentPool + "-walletAddress", wallet);
+                window.currentDashboardAddress = wallet;
+                loadDashboardData(wallet);
+            }
+        } else if (localStorage[currentPool + "-walletAddress"]) {
+            $("#walletAddress").val(localStorage[currentPool + "-walletAddress"]);
+            window.currentDashboardAddress = localStorage[currentPool + "-walletAddress"];
+            loadDashboardData(localStorage[currentPool + "-walletAddress"]);
         }
-    } else if (localStorage[currentPool + "-walletAddress"]) {
-        $("#walletAddress").val(localStorage[currentPool + "-walletAddress"]);
-        loadDashboardData(localStorage[currentPool + "-walletAddress"]);
-    }
+    });
 }
 
 // Load wallet stats with proper error handling
@@ -522,6 +1102,7 @@ function loadWallet() {
     
     console.log('Loading wallet:', walletAddress);
     localStorage.setItem(currentPool + "-walletAddress", walletAddress);
+    window.currentDashboardAddress = walletAddress;
     
     // Update URL without triggering navigation
     if (history.pushState) {
@@ -584,7 +1165,7 @@ function loadDashboardData(walletAddress) {
             
             // Load additional data
             loadDashboardWorkerList(walletAddress);
-            loadDashboardChart(walletAddress);
+            loadDashboardChart(walletAddress, '24h');
             loadPaymentsMinerPage(walletAddress);
             loadBlocksMinerPage(walletAddress);
             loadEarningsMinerPage(walletAddress);
@@ -676,56 +1257,250 @@ function loadDashboardWorkerList(walletAddress) {
         });
 }
 
-// Dashboard Chart - Mobile responsive
-function loadDashboardChart(walletAddress) {
-    return $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/performance")
+// Enhanced Dashboard Chart with Chart.js - Modern real-time hashrate chart
+function loadDashboardChart(walletAddress, timeframe = '24h') {
+    console.log('Loading dashboard chart for wallet:', walletAddress, 'timeframe:', timeframe);
+    
+    if (!walletAddress) {
+        console.error('No wallet address provided');
+        return;
+    }
+    
+    let pageSize = 48; // Default for 24h
+    
+    switch(timeframe) {
+        case '7d':
+            pageSize = 336;
+            break;
+        case '30d':
+            pageSize = 720;
+            break;
+    }
+    
+    return $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/performance?page=0&pageSize=" + pageSize)
         .done(function(data) {
-            var labels = [];
-            var minerHashRate = [];
+            console.log('Dashboard chart data received:', data);
             
-            // Reduce data points for mobile
-            const skipRate = isMobile() ? 4 : 2;
+            const colors = getThemeColors();
+            const ctx = document.getElementById('chartDashboardHashRate');
+            if (!ctx) {
+                console.error('Dashboard chart canvas element not found');
+                return;
+            }
             
-            $.each(data, function(index, value) {
+            // Check if we have valid data
+            if (!data || data.length === 0) {
+                console.warn('No performance data available');
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-exclamation-triangle"></i><p>No data available</p></div>';
+                return;
+            }
+            
+            // Process data
+            const labels = [];
+            const minerHashRate = [];
+            const workerData = {};
+            
+            // Calculate skip rate based on timeframe
+            let skipRate = 1;
+            if (timeframe === '7d') skipRate = isMobile() ? 8 : 4;
+            if (timeframe === '30d') skipRate = isMobile() ? 16 : 8;
+            
+            // Reverse the data array to show oldest to newest
+            const reversedData = data.slice().reverse();
+            
+            reversedData.forEach((value, index) => {
                 if (index % skipRate === 0) {
-                    var date = convertUTCDateToLocalDate(new Date(value.created), false);
-                    labels.push(date.getHours() + ":00");
+                    const date = new Date(value.created);
+                    labels.push(date);
                     
-                    var workerHashRate = 0;
-                    $.each(value.workers, function(index2, value2) {
-                        workerHashRate += value2.hashrate;
-                    });
-                    minerHashRate.push(workerHashRate);
+                    let totalHashRate = 0;
+                    let activeWorkers = 0;
+                    
+                    if (value.workers) {
+                        $.each(value.workers, function(workerId, worker) {
+                            const workerHashrate = worker.hashrate || 0;
+                            totalHashRate += workerHashrate;
+                            if (workerHashrate > 0) activeWorkers++;
+                            
+                            // Track individual worker data
+                            if (!workerData[workerId]) {
+                                workerData[workerId] = [];
+                            }
+                            workerData[workerId].push(workerHashrate);
+                        });
+                    }
+                    
+                    minerHashRate.push(totalHashRate);
                 }
             });
             
-            new Chartist.Line("#chartDashboardHashRate", {
-                labels: labels,
-                series: [minerHashRate]
-            }, {
-                height: isMobile() ? "150px" : "200px",
-                showArea: true,
-                showPoint: false,
-                fullWidth: true,
-                axisX: {
-                    showGrid: false,
-                    labelInterpolationFnc: function(value, index) {
-                        return isMobile() ? (index % 2 === 0 ? value : null) : value;
-                    }
-                },
-                axisY: {
-                    offset: isMobile() ? 35 : 47,
-                    labelInterpolationFnc: function(value) {
-                        return _formatter(value, 1, "");
-                    }
-                },
-                lineSmooth: Chartist.Interpolation.cardinal({
-                    tension: 0.2
-                })
+            console.log('Processed dashboard chart data:', {
+                labels: labels.length,
+                minerHashRate: minerHashRate.length,
+                workers: Object.keys(workerData).length
             });
+            
+            // Calculate statistics
+            const currentHashrate = minerHashRate[minerHashRate.length - 1] || 0;
+            const avgHashrate = minerHashRate.reduce((a, b) => a + b, 0) / minerHashRate.length || 0;
+            const peakHashrate = Math.max(...minerHashRate) || 0;
+            const activeWorkers = Object.keys(workerData).filter(w => {
+                const lastValue = workerData[w][workerData[w].length - 1];
+                return lastValue > 0;
+            }).length;
+            
+            // Calculate hashrate change
+            const previousHashrate = minerHashRate[minerHashRate.length - 2] || currentHashrate;
+            const hashrateChange = previousHashrate > 0 ? ((currentHashrate - previousHashrate) / previousHashrate * 100).toFixed(1) : 0;
+            
+            // Update statistics panel
+            $("#currentHashrateStat").text(_formatter(currentHashrate, 3, "H/s"));
+            $("#avgHashrateStat").text(_formatter(avgHashrate, 3, "H/s"));
+            $("#peakHashrateStat").text(_formatter(peakHashrate, 3, "H/s"));
+            $("#activeWorkersStat").text(activeWorkers);
+            $("#hashrateChange").text((hashrateChange >= 0 ? '+' : '') + hashrateChange + '%')
+                .removeClass('positive negative')
+                .addClass(hashrateChange >= 0 ? 'positive' : 'negative');
+            
+            // Destroy existing chart
+            if (window.chartInstances.dashboardChart) {
+                window.chartInstances.dashboardChart.destroy();
+            }
+            
+            // Create gradient
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, ctx.height);
+            gradient.addColorStop(0, colors.primary + '40');
+            gradient.addColorStop(1, colors.primary + '05');
+            
+            // Create new chart
+            try {
+                window.chartInstances.dashboardChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Hashrate',
+                            data: minerHashRate,
+                            borderColor: colors.primary,
+                            backgroundColor: gradient,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: colors.primary,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverBorderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        animation: {
+                            duration: 750,
+                            easing: 'easeInOutQuart'
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: colors.tooltipBg,
+                                titleColor: colors.textPrimary,
+                                bodyColor: colors.textSecondary,
+                                borderColor: colors.borderColor,
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: false,
+                                callbacks: {
+                                    title: function(context) {
+                                        const date = new Date(context[0].parsed.x);
+                                        return date.toLocaleString();
+                                    },
+                                    label: function(context) {
+                                        return 'Hashrate: ' + _formatter(context.parsed.y, 3, "H/s");
+                                    },
+                                    afterLabel: function(context) {
+                                        const index = context.dataIndex;
+                                        const activeCount = Object.keys(workerData).filter(w => {
+                                            return workerData[w][index] > 0;
+                                        }).length;
+                                        return 'Active Workers: ' + activeCount;
+                                    }
+                                }
+                            },
+                            zoom: {
+                                pan: {
+                                    enabled: !isMobile(),
+                                    mode: 'x'
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: !isMobile()
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: 'x'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    displayFormats: {
+                                        hour: 'HH:mm',
+                                        day: 'MMM dd',
+                                        week: 'MMM dd'
+                                    }
+                                },
+                                ticks: {
+                                    color: colors.textSecondary,
+                                    maxTicksLimit: isMobile() ? 6 : 12,
+                                    autoSkip: true
+                                },
+                                grid: {
+                                    color: colors.gridColor,
+                                    drawBorder: false
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: colors.textSecondary,
+                                    callback: function(value) {
+                                        return _formatter(value, 1, "");
+                                    }
+                                },
+                                grid: {
+                                    color: colors.gridColor,
+                                    drawBorder: false
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('Dashboard chart created successfully');
+            } catch (error) {
+                console.error('Error creating dashboard chart:', error);
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-exclamation-triangle"></i><p>Error creating chart</p></div>';
+            }
         })
-        .fail(function() {
-            console.error("Failed to load dashboard chart");
+        .fail(function(xhr, status, error) {
+            console.error("Failed to load dashboard chart:", status, error);
+            // Show error message in chart area
+            const ctx = document.getElementById('chartDashboardHashRate');
+            if (ctx) {
+                ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-exclamation-triangle"></i><p>Failed to load chart data</p></div>';
+            }
         });
 }
 
@@ -886,7 +1661,7 @@ function loadBlocksMinerPage(walletAddress) {
         });
 }
 
-// FIXED: Load Miner Earnings with Daily Payment History
+// Load Miner Earnings with Daily Payment History
 function loadEarningsMinerPage(walletAddress) {
     // First, load the balance changes for transaction history
     $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/balancechanges?page=0&pageSize=999")
@@ -922,17 +1697,20 @@ function loadEarningsMinerPage(walletAddress) {
             $("#EarningsList").html('<tr><td colspan="3" class="text-center text-danger">Failed to load balance changes</td></tr>');
         });
     
-    // FIXED: Load daily payment history with proper error handling
+    // Load daily payment history with enhanced chart
     loadDailyPaymentHistory(walletAddress);
 }
 
-// FIXED: Load Daily Payment History
+// Enhanced Daily Payment History with Chart.js
 function loadDailyPaymentHistory(walletAddress) {
     console.log('Loading daily payment history for:', walletAddress);
     
     $.ajax(API + "pools/" + currentPool + "/miners/" + walletAddress + "/payments?page=0&pageSize=999")
         .done(function(payments) {
             console.log('Loaded payments:', payments.length);
+            
+            // Store data globally for timeframe updates
+            window.dailyPaymentChartData = payments;
             
             // Create daily totals object
             var dailyTotals = {};
@@ -1014,34 +1792,8 @@ function loadDailyPaymentHistory(walletAddress) {
             $("#average30Days").text(_formatter(averageDaily, 8, ""));
             $("#daysWithPayments").text(daysWithPayments);
             
-            // FIXED: Create daily payment chart with proper error handling
-            try {
-                if (chartLabels.length > 0 && chartData.length > 0) {
-                    new Chartist.Bar("#chartDailyPayments", {
-                        labels: chartLabels,
-                        series: [chartData]
-                    }, {
-                        height: isMobile() ? "150px" : "200px",
-                        axisX: {
-                            showGrid: false
-                        },
-                        axisY: {
-                            offset: isMobile() ? 35 : 50,
-                            labelInterpolationFnc: function(value) {
-                                return _formatter(value, 2, "");
-                            }
-                        },
-                        low: 0,
-                        distributeSeries: true
-                    });
-                } else {
-                    console.warn('No chart data available');
-                    $("#chartDailyPayments").html('<div class="text-center text-muted" style="padding: 40px;">No payment data available for chart</div>');
-                }
-            } catch (chartError) {
-                console.error('Error creating chart:', chartError);
-                $("#chartDailyPayments").html('<div class="text-center text-danger" style="padding: 40px;">Error loading chart</div>');
-            }
+            // Create daily payment chart
+            createDailyPaymentChart(chartLabels, chartData);
         })
         .fail(function(xhr, status, error) {
             console.error('Failed to load daily payment history:', status, error);
@@ -1049,8 +1801,164 @@ function loadDailyPaymentHistory(walletAddress) {
             $("#total30Days").text("0.00000000");
             $("#average30Days").text("0.00000000");
             $("#daysWithPayments").text("0");
-            $("#chartDailyPayments").html('<div class="text-center text-danger" style="padding: 40px;">Failed to load chart data</div>');
         });
+}
+
+// Create daily payment chart with Chart.js
+function createDailyPaymentChart(labels, data) {
+    console.log('Creating daily payment chart with:', labels.length, 'labels');
+    
+    const colors = getThemeColors();
+    const ctx = document.getElementById('chartDailyPayments');
+    if (!ctx) {
+        console.error('Daily payment chart canvas element not found');
+        return;
+    }
+    
+    // Check if we have valid data
+    if (!labels || labels.length === 0 || !data || data.length === 0) {
+        console.warn('No payment data available for chart');
+        ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-info-circle"></i><p>No payment data available</p></div>';
+        return;
+    }
+    
+    // Destroy existing chart
+    if (window.chartInstances.dailyPaymentChart) {
+        window.chartInstances.dailyPaymentChart.destroy();
+    }
+    
+    // Create gradient
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, ctx.height);
+    gradient.addColorStop(0, colors.success + '80');
+    gradient.addColorStop(1, colors.success + '20');
+    
+    // Create new chart
+    try {
+        window.chartInstances.dailyPaymentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Daily Payment',
+                    data: data,
+                    backgroundColor: gradient,
+                    borderColor: colors.success,
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: colors.tooltipBg,
+                        titleColor: colors.textPrimary,
+                        bodyColor: colors.textSecondary,
+                        borderColor: colors.borderColor,
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Payment: ' + _formatter(context.parsed.y, 8, "");
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: colors.textSecondary,
+                            maxRotation: 0
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: colors.textSecondary,
+                            callback: function(value) {
+                                return _formatter(value, 2, "");
+                            }
+                        },
+                        grid: {
+                            color: colors.gridColor,
+                            drawBorder: false
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('Daily payment chart created successfully');
+    } catch (error) {
+        console.error('Error creating daily payment chart:', error);
+        ctx.parentElement.innerHTML = '<div class="chart-loading"><i class="fas fa-exclamation-triangle"></i><p>Error creating chart</p></div>';
+    }
+}
+
+// Update daily payment chart timeframe
+function updateDailyPaymentChart(payments, days) {
+    if (!payments) return;
+    
+    // Create daily totals object
+    var dailyTotals = {};
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Initialize days with zero
+    for (let i = 0; i < days; i++) {
+        let date = new Date(today);
+        date.setDate(date.getDate() - i);
+        let dateKey = formatDateKey(date);
+        dailyTotals[dateKey] = 0;
+    }
+    
+    // Process payments
+    payments.forEach(function(payment) {
+        var paymentDate = new Date(payment.created);
+        var dateKey = formatDateKey(paymentDate);
+        var amount = parseFloat(payment.amount) || 0;
+        
+        if (dailyTotals.hasOwnProperty(dateKey)) {
+            dailyTotals[dateKey] += amount;
+        }
+    });
+    
+    // Prepare chart data
+    var chartLabels = [];
+    var chartData = [];
+    var sortedDates = Object.keys(dailyTotals).sort();
+    
+    sortedDates.forEach(function(dateKey) {
+        var amount = dailyTotals[dateKey];
+        var date = parseDate(dateKey);
+        var label = days <= 14 
+            ? (isMobile() ? date.getDate().toString() : date.toLocaleDateString('en-US', { weekday: 'short' }))
+            : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        chartLabels.push(label);
+        chartData.push(amount);
+    });
+    
+    // Update chart
+    if (window.chartInstances.dailyPaymentChart) {
+        window.chartInstances.dailyPaymentChart.data.labels = chartLabels;
+        window.chartInstances.dailyPaymentChart.data.datasets[0].data = chartData;
+        window.chartInstances.dailyPaymentChart.update();
+    }
 }
 
 // Helper functions for date handling
@@ -1284,16 +2192,18 @@ function loadBlocksStats() {
             var pool = data.pools.find(p => p.id === currentPool);
             if (!pool) return;
             
+            var coinSymbol = getCoinSymbol(pool.coin.type);
+            
             // Update total blocks and total paid
             $("#poolBlocks2").text(pool.totalBlocks.toLocaleString());
-            $("#totalPaid2").html(pool.totalPaid.toLocaleString() + " " + pool.coin.type);
+            $("#totalPaid2").html(pool.totalPaid.toLocaleString() + " " + coinSymbol);
             
             // Get block reward from recent blocks
             $.ajax(API + "pools/" + currentPool + "/blocks?page=0&pageSize=1")
                 .done(function(blocks) {
                     if (blocks.length > 0) {
                         var reward = blocks[0].reward;
-                        $("#blockreward").text(_formatter(reward, 6, "") + " " + pool.coin.type);
+                        $("#blockreward").text(_formatter(reward, 6, "") + " " + coinSymbol);
                         
                         // Try to get coin value
                         getCoinValue(pool.coin.type, reward);
@@ -1305,9 +2215,10 @@ function loadBlocksStats() {
 // Get coin value from various exchanges
 function getCoinValue(coinType, reward) {
     var getcoin_price = 0;
+    var coinSymbol = getCoinSymbol(coinType);
     
-    // Try different price APIs based on coin
-    if (coinType === "LOG") {
+    // Try different price APIs based on coin symbol
+    if (coinSymbol === "LOG") {
         $.ajax("https://api.coingecko.com/api/v3/simple/price?ids=woodcoin&vs_currencies=usd")
             .done(function(data) {
                 getcoin_price = data.woodcoin.usd;
@@ -1317,8 +2228,8 @@ function getCoinValue(coinType, reward) {
                 updateCoinValue(0, reward);
             });
     } else {
-        // Try Xeggex API first
-        $.ajax("https://api.xeggex.com/api/v2/market/getbysymbol/" + coinType + "%2FUSDT")
+        // Try Xeggex API first with coin symbol
+        $.ajax("https://api.xeggex.com/api/v2/market/getbysymbol/" + coinSymbol + "%2FUSDT")
             .done(function(data) {
                 getcoin_price = data.lastPrice;
                 updateCoinValue(getcoin_price, reward);
@@ -1391,7 +2302,7 @@ function loadPaymentsPage() {
         });
 }
 
-// Load Connect Page
+// Enhanced Load Connect Page with Multiple Stratum Servers
 function loadConnectPage() {
     console.log('Loading connect page');
     
@@ -1405,13 +2316,14 @@ function loadConnectPage() {
             
             var connectConfig = "";
             var coinName = pool.coin.canonicalName || pool.coin.name || pool.coin.type;
+            var coinSymbol = getCoinSymbol(pool.coin.type);
             
-            // Build configuration table
-            connectConfig += `<tr><td>Coin</td><td>${coinName} (${pool.coin.type})</td></tr>`;
-            connectConfig += `<tr><td>Algorithm</td><td>${pool.coin.algorithm}</td></tr>`;
+            // Build basic configuration table
+            connectConfig += `<tr><td><strong>Coin</strong></td><td>${coinName} (${coinSymbol})</td></tr>`;
+            connectConfig += `<tr><td><strong>Algorithm</strong></td><td>${pool.coin.algorithm}</td></tr>`;
             
             if (pool.coin.website) {
-                connectConfig += `<tr><td>Website</td><td><a href="${pool.coin.website}" target="_blank">${pool.coin.website}</a></td></tr>`;
+                connectConfig += `<tr><td><strong>Website</strong></td><td><a href="${pool.coin.website}" target="_blank">${pool.coin.website}</a></td></tr>`;
             }
             
             // Mobile-friendly pool wallet display
@@ -1419,71 +2331,265 @@ function loadConnectPage() {
                 ? pool.address.substring(0, 8) + '...' + pool.address.substring(pool.address.length - 8)
                 : pool.address.substring(0, 12) + '...' + pool.address.substring(pool.address.length - 12);
             
-            connectConfig += `<tr><td>Pool Wallet</td><td><a href="${pool.addressInfoLink}" target="_blank">${displayPoolAddress}</a></td></tr>`;
-            connectConfig += `<tr><td>Payout Scheme</td><td>${pool.paymentProcessing.payoutScheme}</td></tr>`;
-            connectConfig += `<tr><td>Minimum Payment</td><td>${pool.paymentProcessing.minimumPayment} ${pool.coin.type}</td></tr>`;
-            connectConfig += `<tr><td>Pool Fee</td><td>${pool.poolFeePercent}%</td></tr>`;
+            connectConfig += `<tr><td><strong>Pool Wallet</strong></td><td><a href="${pool.addressInfoLink}" target="_blank">${displayPoolAddress}</a></td></tr>`;
+            connectConfig += `<tr><td><strong>Payout Scheme</strong></td><td>${pool.paymentProcessing.payoutScheme}</td></tr>`;
+            connectConfig += `<tr><td><strong>Minimum Payment</strong></td><td>${pool.paymentProcessing.minimumPayment} ${coinSymbol}</td></tr>`;
+            connectConfig += `<tr><td><strong>Pool Fee</strong></td><td>${pool.poolFeePercent}%</td></tr>`;
             
-            // Add ports
-            $.each(pool.ports, function(port, options) {
-                var stratum = pool.coin.family === "ethereum" ? "stratum2" : "stratum";
-                connectConfig += "<tr><td>";
+            // Build the complete HTML structure including stratum servers section
+            var pageHTML = `
+                <h2>How to Connect</h2>
+                <div style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: var(--shadow);">
+                    <h3>Pool Configuration</h3>
+                    <div class="table-responsive">
+                        <div class="data-table">
+                            <table>
+                                <tbody id="connectPoolConfig">
+                                    ${connectConfig}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 
-                if (options.tls) {
-                    connectConfig += `${stratum}+ssl://${stratumAddress}:${port}`;
-                } else {
-                    connectConfig += `${stratum}+tcp://${stratumAddress}:${port}`;
-                }
-                
-                connectConfig += "</td><td>";
-                connectConfig += `Difficulty: ${options.difficulty}`;
-                if (options.varDiff) {
-                    connectConfig += ` (VarDiff ${options.varDiff.minDiff}-${options.varDiff.maxDiff})`;
-                }
-                connectConfig += ` [${options.name}]</td></tr>`;
-            });
+                <div id="stratumSection" style="background-color: var(--card-bg); padding: 20px; border-radius: 12px; margin-top: 20px; box-shadow: var(--shadow);">
+                    <h3>Stratum Servers</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        Choose the server closest to your location for best performance. 
+                        Check the <a href="#" onclick="window.location.hash=''; loadIndex();">server latency monitor</a> to find your best server.
+                    </p>
+                    <div class="table-responsive">
+                        <div class="data-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Server Location</th>
+                                        <th>Stratum URL</th>
+                                        <th>Ports & Difficulty</th>
+                                        <th>SSL Available</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stratumServersList">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Loading servers...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            $("#connectPoolConfig").html(connectConfig);
+            // Set the page content
+            $(".page-connect").html(pageHTML);
             
-            // Load miner configuration examples
-            loadMinerConfig(pool);
+            // Populate stratum servers table
+            populateStratumServersTable(pool);
         })
         .fail(function() {
             showNotification("Failed to load pool configuration", "danger");
         });
 }
 
-// Load miner configuration examples
-function loadMinerConfig(pool) {
-    var algorithm = pool.coin.algorithm.toLowerCase();
-    var defaultPort = Object.keys(pool.ports)[0];
+// Populate the stratum servers table
+function populateStratumServersTable(pool) {
+    var serversList = "";
+    var stratum = pool.coin.family === "ethereum" ? "stratum2" : "stratum";
     
-    // Try to load algorithm-specific config
-    $("#miner-config").load(`poolconfig/${algorithm}.html`, function(response, status) {
-        if (status === "error") {
-            // Fall back to default config
-            $("#miner-config").load("poolconfig/default.html", function() {
-                replaceMinerConfigVariables(pool, defaultPort);
+    // Group servers by region for better organization
+    var groupedServers = {};
+    servers.forEach(server => {
+        if (!groupedServers[server.region]) {
+            groupedServers[server.region] = [];
+        }
+        groupedServers[server.region].push(server);
+    });
+    
+    // Define region order
+    var regionOrder = ['us', 'singapore', 'china', 'japan', 'oceania', 'france', 'uk'];
+    var regionNames = {
+        'us': '🇺🇸 United States',
+        'singapore': '🇸🇬 Singapore', 
+        'china': '🇨🇳 China',
+        'japan': '🇯🇵 Japan',
+        'oceania': '🇦🇺 Australia',
+        'france': '🇫🇷 France',
+        'uk': '🇬🇧 United Kingdom'
+    };
+    
+    // Process servers in order
+    regionOrder.forEach(region => {
+        if (groupedServers[region]) {
+            groupedServers[region].forEach(server => {
+                var regionFlag = getRegionFlag(server.region);
+                var displayName = isMobile() ? server.location : server.name;
+                
+                // Build ports information
+                var portsInfo = "";
+                var sslAvailable = false;
+                
+                Object.entries(pool.ports).forEach(([port, options], index) => {
+                    if (index > 0) portsInfo += "<br>";
+                    
+                    portsInfo += `<strong>${port}</strong>: `;
+                    portsInfo += `Diff ${options.difficulty}`;
+                    
+                    if (options.varDiff) {
+                        portsInfo += ` (VarDiff ${options.varDiff.minDiff}-${options.varDiff.maxDiff})`;
+                    }
+                    
+                    if (options.name) {
+                        portsInfo += ` [${options.name}]`;
+                    }
+                    
+                    if (options.tls) {
+                        sslAvailable = true;
+                    }
+                });
+                
+                // Main stratum URLs
+                var primaryPort = Object.keys(pool.ports)[0];
+                var stratumUrl = `${stratum}+tcp://${server.host}:${primaryPort}`;
+                
+                // Add ping info if available
+                var pingInfo = "";
+                if (serverPingResults[server.host] && serverPingResults[server.host].ping > 0) {
+                    var ping = serverPingResults[server.host].ping;
+                    var pingClass = ping < 50 ? 'text-success' : ping < 100 ? 'text-warning' : 'text-danger';
+                    pingInfo = `<small class="${pingClass}"> (${ping}ms)</small>`;
+                }
+                
+                serversList += `
+                    <tr>
+                        <td data-label="Server Location">
+                            ${regionFlag} <strong>${displayName}</strong>${pingInfo}
+                        </td>
+                        <td data-label="Stratum URL">
+                            <code style="font-size: ${isMobile() ? '11px' : '12px'}; background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; cursor: pointer; word-break: break-all;" title="Click to copy">
+                                ${stratumUrl}
+                            </code>
+                        </td>
+                        <td data-label="Ports & Difficulty">
+                            <small>${portsInfo}</small>
+                        </td>
+                        <td data-label="SSL Available">
+                            ${sslAvailable ? 
+                                '<span class="text-success"><i class="fas fa-check-circle"></i> Yes</span>' : 
+                                '<span class="text-muted"><i class="fas fa-times-circle"></i> No</span>'
+                            }
+                        </td>
+                    </tr>
+                `;
+                
+                // Add SSL row if available
+                if (sslAvailable) {
+                    var sslPorts = Object.entries(pool.ports)
+                        .filter(([port, options]) => options.tls)
+                        .map(([port, options]) => port);
+                    
+                    if (sslPorts.length > 0) {
+                        var sslPort = sslPorts[0];
+                        var sslUrl = `${stratum}+ssl://${server.host}:${sslPort}`;
+                        
+                        serversList += `
+                            <tr style="background-color: rgba(0, 212, 255, 0.05);">
+                                <td data-label="Server Location">
+                                    <i class="fas fa-lock text-success"></i> <em>SSL Encrypted</em>
+                                </td>
+                                <td data-label="Stratum URL">
+                                    <code style="font-size: ${isMobile() ? '11px' : '12px'}; background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; cursor: pointer; word-break: break-all;" title="Click to copy">
+                                        ${sslUrl}
+                                    </code>
+                                </td>
+                                <td data-label="Ports & Difficulty">
+                                    <small>SSL Ports: ${sslPorts.join(', ')}</small>
+                                </td>
+                                <td data-label="SSL Available">
+                                    <span class="text-success"><i class="fas fa-shield-alt"></i> Encrypted</span>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            });
+        }
+    });
+    
+    $("#stratumServersList").html(serversList);
+    
+    // Add copy to clipboard functionality
+    addCopyToClipboardHandlers();
+}
+
+// Add copy to clipboard functionality for stratum URLs
+function addCopyToClipboardHandlers() {
+    // Add click handlers to code elements (stratum URLs)
+    $(document).off('click', '#stratumServersList code').on('click', '#stratumServersList code', function(e) {
+        e.preventDefault();
+        var text = $(this).text().trim();
+        
+        // Try to copy to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+                showNotification("Stratum URL copied to clipboard!", "success");
+                // Temporarily highlight the clicked element
+                var element = $(e.target);
+                var originalBg = element.css('background-color');
+                element.css('background-color', 'var(--accent-primary)').css('color', 'white');
+                setTimeout(function() {
+                    element.css('background-color', originalBg).css('color', '');
+                }, 500);
+            }).catch(function() {
+                // Fallback for browsers that don't support clipboard API
+                fallbackCopyToClipboard(text);
             });
         } else {
-            replaceMinerConfigVariables(pool, defaultPort);
+            // Fallback for older browsers
+            fallbackCopyToClipboard(text);
         }
     });
 }
 
-// Replace variables in miner config
-function replaceMinerConfigVariables(pool, defaultPort) {
-    var coinName = pool.coin.canonicalName || pool.coin.name || pool.coin.type;
-    var config = $("#miner-config").html()
-        .replace(/{{ stratumAddress }}/g, stratumAddress + ":" + defaultPort)
-        .replace(/{{ coinName }}/g, coinName)
-        .replace(/{{ algorithm }}/g, pool.coin.algorithm.toLowerCase())
-        .replace(/{{ poolAddress }}/g, pool.address);
+// Fallback copy to clipboard for older browsers
+function fallbackCopyToClipboard(text) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
     
-    $("#miner-config").html(config);
+    try {
+        var successful = document.execCommand('copy');
+        if (successful) {
+            showNotification("Stratum URL copied to clipboard!", "success");
+        } else {
+            showNotification("Could not copy to clipboard. Please copy manually.", "warning");
+        }
+    } catch (err) {
+        showNotification("Could not copy to clipboard. Please copy manually.", "warning");
+    }
+    
+    document.body.removeChild(textArea);
 }
 
 // Utility Functions
+
+// Extract coin symbol from coin type (removes trailing numbers)
+function getCoinSymbol(coinType) {
+    if (!coinType) return '';
+    // Remove trailing numbers and return uppercase symbol
+    const symbol = coinType.replace(/\d+$/, '').toUpperCase();
+    
+    // Debug logging if enabled
+    if (window.debugMode || window.location.search.includes('debug=true')) {
+        console.log(`getCoinSymbol: ${coinType} -> ${symbol}`);
+    }
+    
+    return symbol;
+}
 
 // Format numbers with units
 function _formatter(value, decimal, unit) {
@@ -1604,7 +2710,6 @@ var servers = [
     { name: "Europe (France)", host: "eu1.1miner.net", region: "france", location: "France" },
     { name: "Europe (UK)", host: "eu2.1miner.net", region: "uk", location: "United Kingdom" }
 ];
-
 
 var serverPingResults = {};
 var bestServer = null;
@@ -1913,9 +3018,44 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
+// Update chart theme when theme changes
+window.updateChartTheme = function() {
+    Object.values(window.chartInstances).forEach(chart => {
+        if (chart) {
+            const colors = getThemeColors();
+            
+            // Update scale colors
+            if (chart.options.scales) {
+                Object.values(chart.options.scales).forEach(scale => {
+                    scale.ticks.color = colors.textSecondary;
+                    scale.grid.color = colors.gridColor;
+                });
+            }
+            
+            // Update tooltip colors
+            if (chart.options.plugins && chart.options.plugins.tooltip) {
+                chart.options.plugins.tooltip.backgroundColor = colors.tooltipBg;
+                chart.options.plugins.tooltip.titleColor = colors.textPrimary;
+                chart.options.plugins.tooltip.bodyColor = colors.textSecondary;
+                chart.options.plugins.tooltip.borderColor = colors.borderColor;
+            }
+            
+            chart.update('none');
+        }
+    });
+};
+
 // Auto-initialize on index page
 $(document).ready(function() {
     console.log('Document ready - loading page');
+    
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded!');
+        showNotification('Chart library failed to load. Please refresh the page.', 'danger');
+    } else {
+        console.log('Chart.js version:', Chart.version);
+    }
     
     // Load initial page
     loadIndex();
@@ -1929,12 +3069,20 @@ $(document).ready(function() {
     // Add orientation change handler
     window.addEventListener('orientationchange', function() {
         // Reload charts on orientation change
-        if (currentPage === 'stats') {
-            setTimeout(loadStatsChart, 500);
-        } else if (currentPage === 'dashboard') {
-            setTimeout(() => loadDashboardChart($("#walletAddress").val()), 500);
-        }
+        setTimeout(() => {
+            Object.values(window.chartInstances).forEach(chart => {
+                if (chart) {
+                    chart.resize();
+                }
+            });
+        }, 500);
     });
+    
+    // Add debug mode for development
+    if (window.location.search.includes('debug=true')) {
+        window.debugMode = true;
+        console.log('Debug mode enabled');
+    }
 });
 
 // Handle hash changes
@@ -1960,6 +3108,48 @@ window.miningCore = {
     loadWallet,
     showNotification,
     _formatter,
+    getCoinSymbol,
+    loadAllCoinPrices,
+    updatePoolCardsWithPrices,
     isMobile,
-    isTouchDevice
+    isTouchDevice,
+    updateDashboardTimeframe,
+    updateStatsTimeframe,
+    updateDailyPaymentTimeframe,
+    createTestChart,
+    testAPIStructure,
+    loadStatsChart,
+    loadDashboardChart,
+    updateDailyPaymentChart,
+    debugCharts: function() {
+        console.log('=== Chart Debug Info ===');
+        console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+        if (typeof Chart !== 'undefined') {
+            console.log('Chart.js version:', Chart.version);
+        }
+        console.log('Chart instances:', Object.keys(window.chartInstances));
+        console.log('Canvas elements found:');
+        ['chartStatsHashRatePool', 'chartDashboardHashRate', 'chartDailyPayments'].forEach(id => {
+            const el = document.getElementById(id);
+            console.log(`- ${id}:`, el ? 'Found' : 'Not found');
+            if (el) {
+                console.log(`  - Width: ${el.width}, Height: ${el.height}`);
+                console.log(`  - Parent: ${el.parentElement.className}`);
+            }
+        });
+        console.log('Current page:', currentPage);
+        console.log('Current pool:', currentPool);
+        console.log('API URL:', API);
+        console.log('Theme colors:', getThemeColors());
+        console.log('======================');
+    },
+    debugPrices: function() {
+        console.log('=== Price Debug Info ===');
+        $('.pool-card').each(function(index) {
+            const cardTitle = $(this).find('.pool-card-title').text();
+            const totalPaid = $(this).find('.pool-card-stat-label:contains("Total Paid")').next('.pool-card-stat-value').text();
+            console.log(`Pool: ${cardTitle} - Total Paid: ${totalPaid}`);
+        });
+        console.log('========================');
+    }
 };
